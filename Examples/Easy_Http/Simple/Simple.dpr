@@ -27,8 +27,10 @@ begin
     curl.setOpt(CURLOPT_FOLLOWLOCATION, true);
     curl.setOpt(CURLOPT_MAXFILESIZE, MaxFileSize);
 
-    // Perform the request, res will get the return code
+    // Perform the request
     curl.Perform;
+
+    // Check for some info
     code := curl.GetInfo(CURLINFO_RESPONSE_CODE);
     ul := curl.GetInfo(CURLINFO_SIZE_UPLOAD);
     dl := curl.GetInfo(CURLINFO_SIZE_DOWNLOAD);

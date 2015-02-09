@@ -8,6 +8,17 @@ uses
 // In C enum’s are int’s, so let’s set enum size to 4.
 {$MINENUMSIZE 4}
 
+const
+  CurlBindingVersionMajor = 7;
+  CurlBindingVersionMinor = 40;
+  CurlBindingVersionPatch = 0;
+  CurlBindingVersionHex =
+        CurlBindingVersionMajor shl 16 +
+        CurlBindingVersionMinor shl 8 +
+        CurlBindingVersionPatch;
+  CurlBindingVersionString = '7.40.0';
+
+
 type
   // Primitive cUrl types
   TCurlSocket = NativeUInt;

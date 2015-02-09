@@ -37,67 +37,14 @@ type
 
   ECurlInternal = class (Exception) end;
 
-  ECurlError = class (ECurl)
-  private
-    fCode : TCurlCode;
-  public
-    constructor Create(aObject : IEasyCurl; aCode : TCurlCode);
-    property Code : TCurlCode read fCode;
-  end;
-
-  /// Converts a cURL error code into localized string.
-  /// It does not rely on any localization engine and string storage technology,
-  ///   whether it is Windows resource, text file or XML.
-  /// The default version (CurlDefaultLocalize.ErrorMsg) just takes strings from
-  ///   cURL DLL.
-  EvCurlLocalizeError = function (
-        aObject : IEasyCurl; aCode : TCurlCode) : string of object;
-
-  CurlDefaultLocalize = class
-  public
-    class function ErrorMsg(
-        aObject : IEasyCurl; aCode : TCurlCode) : string;
-  end;
-
-var
-  CurlLocalizeError : EvCurlLocalizeError = CurlDefaultLocalize.ErrorMsg;
-
-function GetCurl : IEasyCurl;
-
-implementation
-
-///// Errors and error localization ////////////////////////////////////////////
-
-class function CurlDefaultLocalize.ErrorMsg(
-    aObject : IEasyCurl; aCode : TCurlCode) : string;
-begin
-  Result := string(curl_easy_strerror(aCode));
-end;
-
-
-///// ECurl and descendents ////////////////////////////////////////////////////
-
-constructor ECurlError.Create(aObject : IEasyCurl; aCode : TCurlCode);
-begin
-  inherited Create(CurlLocalizeError(aObject, aCode));
-  fCode := aCode;
-end;
-
-
-///// TEasyCurl ////////////////////////////////////////////////////////////////
-
-type
-  TEasyCurl = class (TInterfacedObject, IEasyCurl)
+  TEasyCurlImpl = class (TInterfacedObject, IEasyCurl)
   private
     fHandle : TCurlHandle;
 
-    ///  WARNING!
-    ///  There should be references by interface, otherwise the object will die!
-    ///  That’s why TEasyCurl is in implementation.
     procedure RaiseIf(aCode : TCurlCode);  inline;
   public
     constructor Create;  overload;
-    constructor Create(aSource : TEasyCurl);  overload;
+    constructor Create(aSource : TEasyCurlImpl);  overload;
     destructor Destroy;  override;
     function GetHandle : TCurlHandle;
 
@@ -118,105 +65,154 @@ type
     function Clone : IEasyCurl;
   end;
 
-constructor TEasyCurl.Create;
+  ECurlError = class (ECurl)
+  private
+    fCode : TCurlCode;
+  public
+    constructor Create(aObject : TEasyCurlImpl; aCode : TCurlCode);
+    property Code : TCurlCode read fCode;
+  end;
+
+  /// Converts a cURL error code into localized string.
+  /// It does not rely on any localization engine and string storage technology,
+  ///   whether it is Windows resource, text file or XML.
+  /// The default version (CurlDefaultLocalize.ErrorMsg) just takes strings from
+  ///   cURL DLL.
+  EvCurlLocalizeError = function (
+        aObject : TEasyCurlImpl; aCode : TCurlCode) : string of object;
+
+  CurlDefaultLocalize = class
+  public
+    class function ErrorMsg(
+        aObject : TEasyCurlImpl; aCode : TCurlCode) : string;
+  end;
+
+var
+  CurlLocalizeError : EvCurlLocalizeError = CurlDefaultLocalize.ErrorMsg;
+
+function GetCurl : IEasyCurl;
+
+implementation
+
+///// Errors and error localization ////////////////////////////////////////////
+
+class function CurlDefaultLocalize.ErrorMsg(
+    aObject : TEasyCurlImpl; aCode : TCurlCode) : string;
+begin
+  Result := string(curl_easy_strerror(aCode));
+end;
+
+
+///// ECurl and descendents ////////////////////////////////////////////////////
+
+constructor ECurlError.Create(aObject : TEasyCurlImpl; aCode : TCurlCode);
+begin
+  inherited Create(CurlLocalizeError(aObject, aCode));
+  fCode := aCode;
+end;
+
+
+///// TEasyCurlImpl ////////////////////////////////////////////////////////////
+
+constructor TEasyCurlImpl.Create;
 begin
   inherited;
   fHandle := curl_easy_init;
   if fHandle = nil then
-    raise ECurlInternal.Create('[TEasyCurl.Create] Cannot create cURL object.');
+    raise ECurlInternal.Create('[TEasyCurlImpl.Create] Cannot create cURL object.');
 end;
 
-constructor TEasyCurl.Create(aSource : TEasyCurl);
+constructor TEasyCurlImpl.Create(aSource : TEasyCurlImpl);
 begin
   inherited Create;
   fHandle := curl_easy_duphandle(aSource.fHandle);
   if fHandle = nil then
-    raise ECurlInternal.Create('[TEasyCurl.Create(TEasyCurl)] Cannot clone cURL object.');
+    raise ECurlInternal.Create('[TEasyCurlImpl.Create(TEasyCurlImpl)] Cannot clone cURL object.');
 end;
 
-destructor TEasyCurl.Destroy;
+destructor TEasyCurlImpl.Destroy;
 begin
   curl_easy_cleanup(fHandle);
   inherited;
 end;
 
-procedure TEasyCurl.RaiseIf(aCode : TCurlCode);
+procedure TEasyCurlImpl.RaiseIf(aCode : TCurlCode);
 begin
   if aCode <> CURLE_OK then
     raise ECurlError.Create(Self, aCode);
 end;
 
 
-function TEasyCurl.GetHandle : TCurlHandle;
+function TEasyCurlImpl.GetHandle : TCurlHandle;
 begin
   Result := fHandle;
 end;
 
-procedure TEasyCurl.Perform;
+procedure TEasyCurlImpl.Perform;
 begin
   RaiseIf(curl_easy_perform(fHandle));
 end;
 
-function TEasyCurl.PerformNe : TCurlCode;
+function TEasyCurlImpl.PerformNe : TCurlCode;
 begin
   Result := curl_easy_perform(fHandle);
 end;
 
-function TEasyCurl.GetInfo(aInfo : TCurlLongInfo) : longint;
+function TEasyCurlImpl.GetInfo(aInfo : TCurlLongInfo) : longint;
 begin
   RaiseIf(curl_easy_getinfo(fHandle, aInfo, Result));
 end;
 
-function TEasyCurl.GetInfo(aInfo : TCurlStringInfo) : PAnsiChar;
+function TEasyCurlImpl.GetInfo(aInfo : TCurlStringInfo) : PAnsiChar;
 begin
   RaiseIf(curl_easy_getinfo(fHandle, aInfo, Result));
 end;
 
-function TEasyCurl.GetInfo(aInfo : TCurlDoubleInfo) : double;
+function TEasyCurlImpl.GetInfo(aInfo : TCurlDoubleInfo) : double;
 begin
   RaiseIf(curl_easy_getinfo(fHandle, aInfo, Result));
 end;
 
-function TEasyCurl.GetInfo(aInfo : TCurlSListInfo) : PCurlSList;
+function TEasyCurlImpl.GetInfo(aInfo : TCurlSListInfo) : PCurlSList;
 begin
   RaiseIf(curl_easy_getinfo(fHandle, aInfo, Result));
 end;
 
-procedure TEasyCurl.SetOpt(aOption : TCurlOffOption; aData : TCurlOff);
+procedure TEasyCurlImpl.SetOpt(aOption : TCurlOffOption; aData : TCurlOff);
 begin
   RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
 end;
 
-procedure TEasyCurl.SetOpt(aOption : TCurlOption; aData : PAnsiChar);
+procedure TEasyCurlImpl.SetOpt(aOption : TCurlOption; aData : PAnsiChar);
 begin
   RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
 end;
 
-procedure TEasyCurl.SetOpt(aOption : TCurlOption; aData : pointer);
+procedure TEasyCurlImpl.SetOpt(aOption : TCurlOption; aData : pointer);
 begin
   RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
 end;
 
-procedure TEasyCurl.SetOpt(aOption : TCurlIntOption; aData : NativeUInt);
+procedure TEasyCurlImpl.SetOpt(aOption : TCurlIntOption; aData : NativeUInt);
 begin
   RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
 end;
 
-procedure TEasyCurl.SetOpt(aOption : TCurlIntOption; aData : boolean);
+procedure TEasyCurlImpl.SetOpt(aOption : TCurlIntOption; aData : boolean);
 begin
   RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
 end;
 
-function TEasyCurl.Clone : IEasyCurl;
+function TEasyCurlImpl.Clone : IEasyCurl;
 begin
-  Result := TEasyCurl.Create(Self);
+  Result := TEasyCurlImpl.Create(Self);
 end;
 
 ///// Standalone functions /////////////////////////////////////////////////////
 
 function GetCurl : IEasyCurl;
 begin
-  Result := TEasyCurl.Create;
+  Result := TEasyCurlImpl.Create;
 end;
 
 initialization
