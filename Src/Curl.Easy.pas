@@ -1,10 +1,12 @@
-unit EasyCurl;
+unit Curl.Easy;
 
 interface
 
 uses
+  // System
   System.SysUtils,
-  LibCurl;
+  // cUrl
+  Curl.Lib;
 
 type
   IEasyCurl = interface

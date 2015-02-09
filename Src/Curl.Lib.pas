@@ -1,4 +1,4 @@
-unit LibCurl;
+unit Curl.Lib;
 
 interface
 

@@ -6,7 +6,7 @@ program Https;
 
 uses
   System.SysUtils,
-  LibCurl in '..\..\..\Src\LibCurl.pas';
+  Curl.Lib in '..\..\..\Src\Curl.Lib.pas';
 
 {$DEFINE SKIP_PEER_VERIFICATION}
 {.$DEFINE SKIP_HOSTNAME_VERIFICATION}
@@ -47,7 +47,7 @@ begin
     res := curl_easy_perform(curl);
     // Check for errors
     if (res = CURLE_OK) then begin
-      curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, @code);
+      curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, code);
       Writeln(Format('HTTP response code: %d', [ code ] ));
     end else begin
       Writeln(Format('curl_easy_perform() failed: %s',

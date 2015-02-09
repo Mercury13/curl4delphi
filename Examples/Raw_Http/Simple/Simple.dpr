@@ -6,7 +6,7 @@ program Simple;
 
 uses
   System.SysUtils,
-  LibCurl in '..\..\..\Src\LibCurl.pas';
+  Curl.Lib in '..\..\..\Src\Curl.Lib.pas';
 
 const
   // I won’t use example.com, as someone removed redirection from example.com

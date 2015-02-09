@@ -6,8 +6,8 @@ program Simple;
 
 uses
   System.SysUtils,
-  EasyCurl in '..\..\..\Src\EasyCurl.pas',
-  LibCurl in '..\..\..\Src\LibCurl.pas';
+  Curl.Easy in '..\..\..\Src\Curl.Easy.pas',
+  Curl.Lib in '..\..\..\Src\Curl.Lib.pas';
 
 const
   // I won’t use example.com, as someone removed redirection from example.com

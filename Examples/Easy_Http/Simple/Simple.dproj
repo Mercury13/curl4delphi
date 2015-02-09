@@ -79,8 +79,8 @@
 			<DelphiCompile Include="$(MainSource)">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
-			<DCCReference Include="..\..\..\Src\EasyCurl.pas"/>
-			<DCCReference Include="..\..\..\Src\LibCurl.pas"/>
+			<DCCReference Include="..\..\..\Src\Curl.Easy.pas"/>
+			<DCCReference Include="..\..\..\Src\Curl.Lib.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
