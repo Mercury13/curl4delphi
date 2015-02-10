@@ -22,6 +22,7 @@ type
     ///  Sets a URL. Equivalent to SetOpt(CURLOPT_URL, aData).
     procedure SetUrl(aData : PAnsiChar);  overload;
     procedure SetUrl(aData : RawByteString);  overload;
+    procedure SetUrl(aData : UnicodeString);  overload;
 
     ///  Sets a receiver stream. Equivalent to twin SetOpt,
     ///  WRITE_FUNCTION and WRITE_DATA.
@@ -77,6 +78,7 @@ type
 
     procedure SetUrl(aData : PAnsiChar);  overload;
     procedure SetUrl(aData : RawByteString);  overload;
+    procedure SetUrl(aData : UnicodeString);  overload;
 
     procedure SetRecvStream(aData : TStream);
     procedure SetSendStream(aData : TStream);
@@ -252,6 +254,11 @@ end;
 procedure TEasyCurlImpl.SetUrl(aData : RawByteString);
 begin
   SetOpt(CURLOPT_URL, PAnsiChar(aData));
+end;
+
+procedure TEasyCurlImpl.SetUrl(aData : UnicodeString);
+begin
+  SetUrl(UTF8Encode(aData));
 end;
 
 class function TEasyCurlImpl.StreamWrite(
