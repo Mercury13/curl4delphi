@@ -32,7 +32,6 @@ type
     ///  READ_FUNCTION and READ_DATA.
     ///  Does not destroy the stream, you should dispose of it manually!
     procedure SetSendStream(aData : TStream);
-    procedure SetRequestBody(aData : RawByteString);
 
     procedure Perform;
 
@@ -62,7 +61,6 @@ type
   TEasyCurlImpl = class (TInterfacedObject, IEasyCurl)
   private
     fHandle : TCurlHandle;
-    fStringSender : TStream;
   public
     constructor Create;  overload;
     constructor Create(aSource : TEasyCurlImpl);  overload;
@@ -82,7 +80,6 @@ type
 
     procedure SetRecvStream(aData : TStream);
     procedure SetSendStream(aData : TStream);
-    procedure SetRequestBody(aData : RawByteString);
 
     procedure Perform;
     function PerformNe : TCurlCode;
@@ -133,9 +130,6 @@ function GetCurl : IEasyCurl;
 
 implementation
 
-uses
-  Curl.RawByteStream;
-
 ///// Errors and error localization ////////////////////////////////////////////
 
 class function CurlDefaultLocalize.ErrorMsg(
@@ -160,7 +154,6 @@ constructor TEasyCurlImpl.Create;
 begin
   inherited;
   fHandle := curl_easy_init;
-  fStringSender := nil;
   if fHandle = nil then
     raise ECurlInternal.Create('[TEasyCurlImpl.Create] Cannot create cURL object.');
 end;
@@ -176,7 +169,6 @@ end;
 destructor TEasyCurlImpl.Destroy;
 begin
   curl_easy_cleanup(fHandle);
-  fStringSender.Free;
   inherited;
 end;
 
@@ -289,13 +281,6 @@ procedure TEasyCurlImpl.SetSendStream(aData : TStream);
 begin
   SetOpt(CURLOPT_READDATA, aData);
   SetOpt(CURLOPT_READFUNCTION, @StreamRead);
-end;
-
-procedure TEasyCurlImpl.SetRequestBody(aData : RawByteString);
-begin
-  if fStringSender = nil
-    then fStringSender := TRawByteStream.Create;
-  TRawByteStream(fStringSender).Data := aData;
 end;
 
 ///// Standalone functions /////////////////////////////////////////////////////

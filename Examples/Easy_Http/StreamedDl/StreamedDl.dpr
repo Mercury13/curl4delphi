@@ -37,6 +37,7 @@ begin
     end;
 
     // Perform once again, to RawByteStream.
+    // And write the first 1000
     rbs := TRawByteStream.Create;
     curl.SetRecvStream(rbs);
     try

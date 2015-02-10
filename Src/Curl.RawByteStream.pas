@@ -16,6 +16,8 @@ type
     procedure SetSize(const NewSize: Int64);  override;
     function Remainder : NativeInt;
   public
+    constructor Create;  overload;
+    constructor Create(aData : RawByteString);  overload;
     function Read(var Buffer; Count: Longint): Longint; override;
     function Write(const Buffer; Count: Longint): Longint; override;
     function Seek(const Offset: Int64; Origin: TSeekOrigin): Int64; override;
@@ -30,6 +32,16 @@ uses
 
 const
   StringOrigin = 1;
+
+constructor TRawByteStream.Create;
+begin
+  Clear;
+end;
+
+constructor TRawByteStream.Create(aData : RawByteString);
+begin
+  Data := aData;
+end;
 
 procedure TRawByteStream.SetData(x : RawByteString);
 begin
