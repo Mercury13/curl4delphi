@@ -272,12 +272,13 @@ type
   // This is the CURLOPT_XFERINFOFUNCTION callback proto. It was introduced in
   // 7.32.0, it avoids floating point and provides more detailed information.
   EvCurlXferInfo = function (
-              ClientP : pointer;
-              DlTotal, DlNow, UlTotal, UlNow : TCurlOff) : integer;  cdecl;
+          ClientP : pointer;
+          DlTotal, DlNow, UlTotal, UlNow : TCurlOff) : integer;  cdecl;
 
-  EvCurlWrite = function (Buffer : PAnsiChar;
-              Size, NItems : NativeUInt;
-              OutStream : pointer) : NativeUInt;  cdecl;
+  EvCurlWrite = function (
+          var Buffer;
+          Size, NItems : NativeUInt;
+          OutStream : pointer) : NativeUInt;  cdecl;
 
 
 const

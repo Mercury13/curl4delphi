@@ -1,9 +1,9 @@
 ﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 		<PropertyGroup>
-			<ProjectGuid>{443E31A6-FC60-47CE-91B3-F1534AD03619}</ProjectGuid>
+			<ProjectGuid>{A6A38472-3822-4B29-ABD2-6973CF126FD8}</ProjectGuid>
 			<ProjectVersion>13.4</ProjectVersion>
 			<FrameworkType>None</FrameworkType>
-			<MainSource>Simple.dpr</MainSource>
+			<MainSource>StreamedDl.dpr</MainSource>
 			<Base>True</Base>
 			<Config Condition="'$(Config)'==''">Debug</Config>
 			<Platform Condition="'$(Platform)'==''">Win32</Platform>
@@ -127,7 +127,7 @@
 						<VersionInfoKeys Name="Comments"/>
 					</VersionInfoKeys>
 					<Source>
-						<Source Name="MainSource">Simple.dpr</Source>
+						<Source Name="MainSource">StreamedDl.dpr</Source>
 					</Source>
 				</Delphi.Personality>
 				<Deployment/>

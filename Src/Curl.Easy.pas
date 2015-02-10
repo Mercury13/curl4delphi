@@ -4,7 +4,7 @@ interface
 
 uses
   // System
-  System.SysUtils,
+  System.Classes, System.SysUtils,
   // cUrl
   Curl.Lib;
 
@@ -19,11 +19,33 @@ type
     procedure SetOpt(aOption : TCurlIntOption; aData : NativeUInt);  overload;
     procedure SetOpt(aOption : TCurlIntOption; aData : boolean);  overload;
 
+    ///  Sets a URL. Equivalent to SetOpt(CURLOPT_URL, aData).
+    procedure SetUrl(aData : PAnsiChar);  overload;
+    procedure SetUrl(aData : RawByteString);  overload;
+
+    ///  Sets a receiver stream. Equivalent to twin SetOpt,
+    ///  WRITE_FUNCTION and WRITE_DATA.
+    ///  Does not destroy the stream, you should dispose of it manually!
+    procedure SetRecvStream(aData : TStream);
+
+    ///  Sets a sender stream. Equivalent to twin SetOpt,
+    ///  READ_FUNCTION and READ_DATA.
+    ///  Does not destroy the stream, you should dispose of it manually!
+    procedure SetSendStream(aData : TStream);
+    procedure SetRequestBody(aData : RawByteString);
+
     procedure Perform;
 
     ///  Performs the action w/o throwing an error.
     ///  The user should process error codes for himself.
     function PerformNe : TCurlCode;
+
+    ///  Does nothing if aCode is OK; otherwise localizes the error message
+    ///  and throws an exception.
+    ///  Sometimes you’d like to process some errors in place w/o bulky
+    ///  try/except. Then you run PerformNe, manually process some errors,
+    ///  and do RaiseIf for everything else.
+    procedure RaiseIf(aCode : TCurlCode);
 
     function GetInfo(aCode : TCurlLongInfo) : longint;  overload;
     function GetInfo(aInfo : TCurlStringInfo) : PAnsiChar;  overload;
@@ -40,19 +62,27 @@ type
   TEasyCurlImpl = class (TInterfacedObject, IEasyCurl)
   private
     fHandle : TCurlHandle;
-
-    procedure RaiseIf(aCode : TCurlCode);  inline;
+    fStringSender : TStream;
   public
     constructor Create;  overload;
     constructor Create(aSource : TEasyCurlImpl);  overload;
     destructor Destroy;  override;
     function GetHandle : TCurlHandle;
 
+    procedure RaiseIf(aCode : TCurlCode);  inline;
+
     procedure SetOpt(aOption : TCurlOffOption; aData : TCurlOff);  overload;
     procedure SetOpt(aOption : TCurlOption; aData : PAnsiChar);  overload;
     procedure SetOpt(aOption : TCurlOption; aData : pointer);  overload;
     procedure SetOpt(aOption : TCurlIntOption; aData : NativeUInt);  overload;
     procedure SetOpt(aOption : TCurlIntOption; aData : boolean);  overload;
+
+    procedure SetUrl(aData : PAnsiChar);  overload;
+    procedure SetUrl(aData : RawByteString);  overload;
+
+    procedure SetRecvStream(aData : TStream);
+    procedure SetSendStream(aData : TStream);
+    procedure SetRequestBody(aData : RawByteString);
 
     procedure Perform;
     function PerformNe : TCurlCode;
@@ -63,6 +93,15 @@ type
     function GetInfo(aInfo : TCurlSListInfo) : PCurlSList;  overload;
 
     function Clone : IEasyCurl;
+
+    class function StreamWrite(
+            var Buffer;
+            Size, NItems : NativeUInt;
+            OutStream : pointer) : NativeUInt;  cdecl;  static;
+    class function StreamRead(
+            var Buffer;
+            Size, NItems : NativeUInt;
+            OutStream : pointer) : NativeUInt;  cdecl;  static;
   end;
 
   ECurlError = class (ECurl)
@@ -94,6 +133,9 @@ function GetCurl : IEasyCurl;
 
 implementation
 
+uses
+  Curl.RawByteStream;
+
 ///// Errors and error localization ////////////////////////////////////////////
 
 class function CurlDefaultLocalize.ErrorMsg(
@@ -118,6 +160,7 @@ constructor TEasyCurlImpl.Create;
 begin
   inherited;
   fHandle := curl_easy_init;
+  fStringSender := nil;
   if fHandle = nil then
     raise ECurlInternal.Create('[TEasyCurlImpl.Create] Cannot create cURL object.');
 end;
@@ -133,6 +176,7 @@ end;
 destructor TEasyCurlImpl.Destroy;
 begin
   curl_easy_cleanup(fHandle);
+  fStringSender.Free;
   inherited;
 end;
 
@@ -206,6 +250,52 @@ end;
 function TEasyCurlImpl.Clone : IEasyCurl;
 begin
   Result := TEasyCurlImpl.Create(Self);
+end;
+
+procedure TEasyCurlImpl.SetUrl(aData : PAnsiChar);
+begin
+  SetOpt(CURLOPT_URL, PAnsiChar(aData));
+end;
+
+procedure TEasyCurlImpl.SetUrl(aData : RawByteString);
+begin
+  SetOpt(CURLOPT_URL, PAnsiChar(aData));
+end;
+
+class function TEasyCurlImpl.StreamWrite(
+        var Buffer;
+        Size, NItems : NativeUInt;
+        OutStream : pointer) : NativeUInt;  cdecl;
+begin
+  Result := TStream(OutStream).Write(Buffer, Size * NItems);
+end;
+
+
+class function TEasyCurlImpl.StreamRead(
+        var Buffer;
+        Size, NItems : NativeUInt;
+        OutStream : pointer) : NativeUInt;  cdecl;
+begin
+  Result := TStream(OutStream).Read(Buffer, Size * NItems);
+end;
+
+procedure TEasyCurlImpl.SetRecvStream(aData : TStream);
+begin
+  SetOpt(CURLOPT_WRITEDATA, aData);
+  SetOpt(CURLOPT_WRITEFUNCTION, @StreamWrite);
+end;
+
+procedure TEasyCurlImpl.SetSendStream(aData : TStream);
+begin
+  SetOpt(CURLOPT_READDATA, aData);
+  SetOpt(CURLOPT_READFUNCTION, @StreamRead);
+end;
+
+procedure TEasyCurlImpl.SetRequestBody(aData : RawByteString);
+begin
+  if fStringSender = nil
+    then fStringSender := TRawByteStream.Create;
+  TRawByteStream(fStringSender).Data := aData;
 end;
 
 ///// Standalone functions /////////////////////////////////////////////////////
