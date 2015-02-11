@@ -988,7 +988,7 @@ type
     CURLOPT_MAX_RECV_SPEED_LARGE = CURLOPTTYPE_OFF_T + 146
   );
 
-  TCURLoption = (
+  TCurlOption = (
     // This is the FILE * or void * the regular output should be written to.
     CURLOPT_WRITEDATA = CURLOPTTYPE_OBJECTPOINT + 1,
 
@@ -2060,12 +2060,12 @@ function curl_easy_setopt(
 
 function curl_easy_setopt(
         curl : TCurlHandle;
-        option : TCURLoption;
+        option : TCurlOption;
         data : PAnsiChar) : TCurlCode;  overload;  inline;
 
 function curl_easy_setopt(
         curl : TCurlHandle;
-        option : TCURLoption;
+        option : TCurlOption;
         data : pointer) : TCurlCode;  overload;  inline;
 
 function curl_easy_setopt(
@@ -2188,7 +2188,7 @@ implementation
 
 function curl_easy_setopt(
         curl : TCurlHandle;
-        option : TCURLoption;
+        option : TCurlOption;
         data : PAnsiChar) : TCurlCode;
 begin
   Result := curl_easy_setopt_imported(curl, ord(option), NativeUInt(data));
@@ -2196,7 +2196,7 @@ end;
 
 function curl_easy_setopt(
         curl : TCurlHandle;
-        option : TCURLoption;
+        option : TCurlOption;
         data : pointer) : TCurlCode;
 begin
   Result := curl_easy_setopt_imported(curl, ord(option), NativeUInt(data));

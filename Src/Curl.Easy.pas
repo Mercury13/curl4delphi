@@ -27,11 +27,13 @@ type
     ///  Sets a receiver stream. Equivalent to twin SetOpt,
     ///  WRITE_FUNCTION and WRITE_DATA.
     ///  Does not destroy the stream, you should dispose of it manually!
+    ///  If aData = nil: removes all custom receivers.
     procedure SetRecvStream(aData : TStream);
 
     ///  Sets a sender stream. Equivalent to twin SetOpt,
     ///  READ_FUNCTION and READ_DATA.
     ///  Does not destroy the stream, you should dispose of it manually!
+    ///  If aData = nil: removes all custom receivers.
     procedure SetSendStream(aData : TStream);
 
     procedure Perform;
@@ -51,6 +53,9 @@ type
     function GetInfo(aInfo : TCurlStringInfo) : PAnsiChar;  overload;
     function GetInfo(aInfo : TCurlDoubleInfo) : double;  overload;
     function GetInfo(aInfo : TCurlSListInfo) : PCurlSList;  overload;
+
+    ///  Returns response code. Equivalent to GetInfo(CURLINFO_RESPONSE_CODE).
+    function ResponseCode : longint;
 
     function Clone : IEasyCurl;
   end;
@@ -90,6 +95,8 @@ type
     function GetInfo(aInfo : TCurlStringInfo) : PAnsiChar;  overload;
     function GetInfo(aInfo : TCurlDoubleInfo) : double;  overload;
     function GetInfo(aInfo : TCurlSListInfo) : PCurlSList;  overload;
+
+    function ResponseCode : longint;
 
     function Clone : IEasyCurl;
 
@@ -281,13 +288,22 @@ end;
 procedure TEasyCurlImpl.SetRecvStream(aData : TStream);
 begin
   SetOpt(CURLOPT_WRITEDATA, aData);
-  SetOpt(CURLOPT_WRITEFUNCTION, @StreamWrite);
+  if aData = nil
+    then SetOpt(CURLOPT_WRITEFUNCTION, nil)
+    else SetOpt(CURLOPT_WRITEFUNCTION, @StreamWrite);
 end;
 
 procedure TEasyCurlImpl.SetSendStream(aData : TStream);
 begin
   SetOpt(CURLOPT_READDATA, aData);
-  SetOpt(CURLOPT_READFUNCTION, @StreamRead);
+  if aData = nil
+    then SetOpt(CURLOPT_READFUNCTION, nil)
+    else SetOpt(CURLOPT_READFUNCTION, @StreamRead);
+end;
+
+function TEasyCurlImpl.ResponseCode : longint;
+begin
+  Result := GetInfo(CURLINFO_RESPONSE_CODE);
 end;
 
 ///// Standalone functions /////////////////////////////////////////////////////
