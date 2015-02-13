@@ -37,7 +37,7 @@ type
     procedure SetSendStream(aData : TStream);
 
     procedure RemoveCustomHeaders;
-    procedure SetCustomHeaders(x : array of RawByteString);
+    procedure SetCustomHeaders(const x : array of RawByteString);
 
     procedure Perform;
 
@@ -101,7 +101,7 @@ type
     procedure SetSendStream(aData : TStream);
 
     procedure RemoveCustomHeaders;
-    procedure SetCustomHeaders(x : array of RawByteString);
+    procedure SetCustomHeaders(const x : array of RawByteString);
 
     procedure Perform;
     function PerformNe : TCurlCode;
@@ -342,7 +342,7 @@ begin
   SetOpt(CURLOPT_HTTPHEADER, nil);
 end;
 
-procedure TEasyCurlImpl.SetCustomHeaders(x : array of RawByteString);
+procedure TEasyCurlImpl.SetCustomHeaders(const x : array of RawByteString);
 var
   i, n : integer;
 begin
