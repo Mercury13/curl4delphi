@@ -36,6 +36,9 @@ type
     ///  If aData = nil: removes all custom receivers.
     procedure SetSendStream(aData : TStream);
 
+    procedure RemoveCustomHeaders;
+    procedure SetCustomHeaders(x : array of RawByteString);
+
     procedure Perform;
 
     ///  Performs the action w/o throwing an error.
@@ -66,7 +69,16 @@ type
 
   TEasyCurlImpl = class (TInterfacedObject, IEasyCurl)
   private
+    type
+      TSListEntry = record
+        str : RawByteString;
+        entry : TCurlSList;
+      end;
+      OaSListEntry = array of TSListEntry;
+  private
     fHandle : TCurlHandle;
+    fCustomHeaders : OaSListEntry;
+    class procedure LinkList(var x : OaSListEntry);  static;
   public
     constructor Create;  overload;
     constructor Create(aSource : TEasyCurlImpl);  overload;
@@ -87,6 +99,9 @@ type
 
     procedure SetRecvStream(aData : TStream);
     procedure SetSendStream(aData : TStream);
+
+    procedure RemoveCustomHeaders;
+    procedure SetCustomHeaders(x : array of RawByteString);
 
     procedure Perform;
     function PerformNe : TCurlCode;
@@ -304,6 +319,43 @@ end;
 function TEasyCurlImpl.ResponseCode : longint;
 begin
   Result := GetInfo(CURLINFO_RESPONSE_CODE);
+end;
+
+class procedure TEasyCurlImpl.LinkList(var x : OaSListEntry);
+var
+  i : integer;
+  curr : ^TSListEntry;
+  prev : PCurlSList;
+begin
+  prev := nil;
+  for i := High(x) downto Low(x) do begin
+    curr := @x[i];
+    curr^.entry.Data := PAnsiChar(curr^.str);
+    curr^.entry.Next := prev;
+    prev := @curr^.entry;
+  end;
+end;
+
+procedure TEasyCurlImpl.RemoveCustomHeaders;
+begin
+  SetLength(fCustomHeaders, 0);
+  SetOpt(CURLOPT_HTTPHEADER, nil);
+end;
+
+procedure TEasyCurlImpl.SetCustomHeaders(x : array of RawByteString);
+var
+  i, n : integer;
+begin
+  n := Length(x);
+  if n = 0 then begin
+    RemoveCustomHeaders;
+  end else begin
+    SetLength(fCustomHeaders, Length(x));
+    for i := 0 to n - 1 do
+      fCustomHeaders[i].str := x[i];
+    LinkList(fCustomHeaders);
+    SetOpt(CURLOPT_HTTPHEADER, @fCustomHeaders[0].entry);
+  end;
 end;
 
 ///// Standalone functions /////////////////////////////////////////////////////
