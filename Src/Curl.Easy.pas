@@ -36,7 +36,10 @@ type
     ///  If aData = nil: removes all custom receivers.
     procedure SetSendStream(aData : TStream);
 
+    ///  Removes custom HTTP headers
     procedure RemoveCustomHeaders;
+
+    ///  Sets custom HTTP headers
     procedure SetCustomHeaders(const x : array of RawByteString);
 
     procedure Perform;
