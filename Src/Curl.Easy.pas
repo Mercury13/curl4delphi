@@ -24,6 +24,14 @@ type
     procedure SetUrl(aData : RawByteString);  overload;
     procedure SetUrl(aData : UnicodeString);  overload;
 
+    ///  Sets a CA file for SSL
+    procedure SetCaFile(aData : PAnsiChar);      overload;
+    procedure SetCaFile(aData : RawByteString);  overload;
+    procedure SetCaFile(aData : UnicodeString);  overload;
+
+    ///  Sets an SSL version
+    procedure SetSslVersion(aData : TCurlSslVersion);
+
     ///  Sets a receiver stream. Equivalent to twin SetOpt,
     ///  WRITE_FUNCTION and WRITE_DATA.
     ///  Does not destroy the stream, you should dispose of it manually!
@@ -95,10 +103,18 @@ type
     procedure SetOpt(aOption : TCurlOption; aData : pointer);  overload;
     procedure SetOpt(aOption : TCurlIntOption; aData : NativeUInt);  overload;
     procedure SetOpt(aOption : TCurlIntOption; aData : boolean);  overload;
+    procedure SetOpt(aOption : TCurlOption; aData : RawByteString);  overload;
+    procedure SetOpt(aOption : TCurlOption; aData : UnicodeString);  overload;
 
-    procedure SetUrl(aData : PAnsiChar);  overload;
-    procedure SetUrl(aData : RawByteString);  overload;
-    procedure SetUrl(aData : UnicodeString);  overload;
+    procedure SetUrl(aData : PAnsiChar);      overload;   inline;
+    procedure SetUrl(aData : RawByteString);  overload;   inline;
+    procedure SetUrl(aData : UnicodeString);  overload;   inline;
+
+    procedure SetCaFile(aData : PAnsiChar);      overload;   inline;
+    procedure SetCaFile(aData : RawByteString);  overload;   inline;
+    procedure SetCaFile(aData : UnicodeString);  overload;   inline;
+
+    procedure SetSslVersion(aData : TCurlSslVersion);  inline;
 
     procedure SetRecvStream(aData : TStream);
     procedure SetSendStream(aData : TStream);
@@ -266,6 +282,16 @@ begin
   RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
 end;
 
+procedure TEasyCurlImpl.SetOpt(aOption : TCurlOption; aData : RawByteString);
+begin
+  RaiseIf(curl_easy_setopt(fHandle, aOption, PAnsiChar(aData)));
+end;
+
+procedure TEasyCurlImpl.SetOpt(aOption : TCurlOption; aData : UnicodeString);
+begin
+  RaiseIf(curl_easy_setopt(fHandle, aOption, PAnsiChar(UTF8Encode(aData))));
+end;
+
 function TEasyCurlImpl.Clone : IEasyCurl;
 begin
   Result := TEasyCurlImpl.Create(Self);
@@ -273,17 +299,37 @@ end;
 
 procedure TEasyCurlImpl.SetUrl(aData : PAnsiChar);
 begin
-  SetOpt(CURLOPT_URL, PAnsiChar(aData));
+  SetOpt(CURLOPT_URL, aData);
 end;
 
 procedure TEasyCurlImpl.SetUrl(aData : RawByteString);
 begin
-  SetOpt(CURLOPT_URL, PAnsiChar(aData));
+  SetOpt(CURLOPT_URL, aData);
 end;
 
 procedure TEasyCurlImpl.SetUrl(aData : UnicodeString);
 begin
-  SetUrl(UTF8Encode(aData));
+  SetOpt(CURLOPT_URL, aData);
+end;
+
+procedure TEasyCurlImpl.SetCaFile(aData : PAnsiChar);
+begin
+  SetOpt(CURLOPT_CAINFO, aData);
+end;
+
+procedure TEasyCurlImpl.SetCaFile(aData : RawByteString);
+begin
+  SetOpt(CURLOPT_CAINFO, aData);
+end;
+
+procedure TEasyCurlImpl.SetCaFile(aData : UnicodeString);
+begin
+  SetOpt(CURLOPT_CAINFO, aData);
+end;
+
+procedure TEasyCurlImpl.SetSslVersion(aData : TCurlSslVersion);
+begin
+  SetOpt(CURLOPT_SSLVERSION, ord(aData));
 end;
 
 class function TEasyCurlImpl.StreamWrite(
