@@ -50,6 +50,8 @@ type
     ///  Sets custom HTTP headers
     procedure SetCustomHeaders(const x : array of RawByteString);
 
+    ///  Performs the action.
+    ///  Actually does RaiseIf(PerformNe).
     procedure Perform;
 
     ///  Performs the action w/o throwing an error.
