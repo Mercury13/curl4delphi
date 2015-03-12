@@ -9,10 +9,16 @@ uses
   Curl.Lib;
 
 type
+  TCurlVerifyHost = (
+      CURL_VERIFYHOST_NONE,
+      CURL_VERIFYHOST_EXISTENCE,
+      CURL_VERIFYHOST_MATCH );
+
   IEasyCurl = interface
     function GetHandle : TCurlHandle;
     property Handle : TCurlHandle read GetHandle;
 
+    ///  Sets on option.
     procedure SetOpt(aOption : TCurlOffOption; aData : TCurlOff);  overload;
     procedure SetOpt(aOption : TCurlOption; aData : PAnsiChar);  overload;
     procedure SetOpt(aOption : TCurlOption; aData : pointer);  overload;
@@ -32,6 +38,10 @@ type
     ///  Sets an SSL version
     procedure SetSslVersion(aData : TCurlSslVersion);
 
+    ///  Set verify option
+    procedure SetSslVerifyHost(aData : TCurlVerifyHost);
+    procedure SetSslVerifyPeer(aData : boolean);
+
     ///  Sets a receiver stream. Equivalent to twin SetOpt,
     ///  WRITE_FUNCTION and WRITE_DATA.
     ///  Does not destroy the stream, you should dispose of it manually!
@@ -41,7 +51,7 @@ type
     ///  Sets a sender stream. Equivalent to twin SetOpt,
     ///  READ_FUNCTION and READ_DATA.
     ///  Does not destroy the stream, you should dispose of it manually!
-    ///  If aData = nil: removes all custom receivers.
+    ///  If aData = nil: removes all custom senders.
     procedure SetSendStream(aData : TStream);
 
     ///  Removes custom HTTP headers
@@ -65,6 +75,7 @@ type
     ///  and do RaiseIf for everything else.
     procedure RaiseIf(aCode : TCurlCode);
 
+    ///  Gets info, with Delphi’s type checking
     function GetInfo(aCode : TCurlLongInfo) : longint;  overload;
     function GetInfo(aInfo : TCurlStringInfo) : PAnsiChar;  overload;
     function GetInfo(aInfo : TCurlDoubleInfo) : double;  overload;
@@ -117,6 +128,9 @@ type
     procedure SetCaFile(aData : UnicodeString);  overload;   inline;
 
     procedure SetSslVersion(aData : TCurlSslVersion);  inline;
+
+    procedure SetSslVerifyHost(aData : TCurlVerifyHost);
+    procedure SetSslVerifyPeer(aData : boolean);
 
     procedure SetRecvStream(aData : TStream);
     procedure SetSendStream(aData : TStream);
@@ -407,6 +421,16 @@ begin
     LinkList(fCustomHeaders);
     SetOpt(CURLOPT_HTTPHEADER, @fCustomHeaders[0].entry);
   end;
+end;
+
+procedure TEasyCurlImpl.SetSslVerifyHost(aData : TCurlVerifyHost);
+begin
+  SetOpt(CURLOPT_SSL_VERIFYHOST, ord(aData));
+end;
+
+procedure TEasyCurlImpl.SetSslVerifyPeer(aData : boolean);
+begin
+  SetOpt(CURLOPT_SSL_VERIFYPEER, aData);
 end;
 
 ///// Standalone functions /////////////////////////////////////////////////////
