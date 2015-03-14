@@ -23,9 +23,8 @@ var
 begin
   try
     curl := GetCurl;
-    curl.setUrl(Url);
-    curl.setOpt(CURLOPT_FOLLOWLOCATION, true);
-    curl.setOpt(CURLOPT_MAXFILESIZE, MaxFileSize);
+    curl.SetUrl(Url);
+    curl.SetFollowLocation(true);
 
     // Perform the request
     curl.Perform;
