@@ -1515,10 +1515,9 @@ type
   //
   // Returns:
   // CURL_FORMADD_OK             on success
-  // CURL_FORMADD_MEMORY         if the FormInfo allocation fails
+  // CURL_FORMADD_MEMORY         if the allocation of a FormInfo struct failed
   // CURL_FORMADD_OPTION_TWICE   if one option is given twice for one Form
   // CURL_FORMADD_NULL           if a null pointer was given for a char
-  // CURL_FORMADD_MEMORY         if the allocation of a FormInfo struct failed
   // CURL_FORMADD_UNKNOWN_OPTION if an unknown option was used
   // CURL_FORMADD_INCOMPLETE     if the some FormInfo is not complete (or error)
   // CURL_FORMADD_MEMORY         if a curl_httppost struct cannot be allocated
@@ -1546,9 +1545,116 @@ type
 // adds one part that together construct a full post. Then use
 // CURLOPT_HTTPPOST to send it off to libcurl.
 //
-//CURL_EXTERN CURLFORMcode curl_formadd(struct curl_httppost **httppost,
-//                                      struct curl_httppost **last_post,
-//                                      ...);
+// Note for Delphi users: we’re limited to 10 arguments, just because
+// I’m lazy to write more overloads :)
+// IMHO, this is more than enough, an if it’s not enough —
+// either write more, or use CURLFORM_ARRAY.
+//
+function curl_formadd(
+        var httppost, last_post : PCurlHttpPost;
+        option1 : TCurlFormOption; data1 : pointer;
+        optend : TCurlFormOption) : TCurlFormCode;  overload;
+          cdecl;  external 'libcurl.dll';
+
+function curl_formadd(
+        var httppost, last_post : PCurlHttpPost;
+        option1 : TCurlFormOption; data1 : pointer;
+        option2 : TCurlFormOption; data2 : pointer;
+        optend : TCurlFormOption) : TCurlFormCode;  overload;
+          cdecl;  external 'libcurl.dll';
+
+function curl_formadd(
+        var httppost, last_post : PCurlHttpPost;
+        option1 : TCurlFormOption; data1 : pointer;
+        option2 : TCurlFormOption; data2 : pointer;
+        option3 : TCurlFormOption; data3 : pointer;
+        optend : TCurlFormOption) : TCurlFormCode;  overload;
+          cdecl;  external 'libcurl.dll';
+
+function curl_formadd(
+        var httppost, last_post : PCurlHttpPost;
+        option1 : TCurlFormOption; data1 : pointer;
+        option2 : TCurlFormOption; data2 : pointer;
+        option3 : TCurlFormOption; data3 : pointer;
+        option4 : TCurlFormOption; data4 : pointer;
+        optend : TCurlFormOption) : TCurlFormCode;  overload;
+          cdecl;  external 'libcurl.dll';
+
+function curl_formadd(
+        var httppost, last_post : PCurlHttpPost;
+        option1 : TCurlFormOption; data1 : pointer;
+        option2 : TCurlFormOption; data2 : pointer;
+        option3 : TCurlFormOption; data3 : pointer;
+        option4 : TCurlFormOption; data4 : pointer;
+        option5 : TCurlFormOption; data5 : pointer;
+        optend : TCurlFormOption) : TCurlFormCode;  overload;
+          cdecl;  external 'libcurl.dll';
+
+function curl_formadd(
+        var httppost, last_post : PCurlHttpPost;
+        option1 : TCurlFormOption; data1 : pointer;
+        option2 : TCurlFormOption; data2 : pointer;
+        option3 : TCurlFormOption; data3 : pointer;
+        option4 : TCurlFormOption; data4 : pointer;
+        option5 : TCurlFormOption; data5 : pointer;
+        option6 : TCurlFormOption; data6 : pointer;
+        optend : TCurlFormOption) : TCurlFormCode;  overload;
+          cdecl;  external 'libcurl.dll';
+
+function curl_formadd(
+        var httppost, last_post : PCurlHttpPost;
+        option1 : TCurlFormOption; data1 : pointer;
+        option2 : TCurlFormOption; data2 : pointer;
+        option3 : TCurlFormOption; data3 : pointer;
+        option4 : TCurlFormOption; data4 : pointer;
+        option5 : TCurlFormOption; data5 : pointer;
+        option6 : TCurlFormOption; data6 : pointer;
+        option7 : TCurlFormOption; data7 : pointer;
+        optend : TCurlFormOption) : TCurlFormCode;  overload;
+          cdecl;  external 'libcurl.dll';
+
+function curl_formadd(
+        var httppost, last_post : PCurlHttpPost;
+        option1 : TCurlFormOption; data1 : pointer;
+        option2 : TCurlFormOption; data2 : pointer;
+        option3 : TCurlFormOption; data3 : pointer;
+        option4 : TCurlFormOption; data4 : pointer;
+        option5 : TCurlFormOption; data5 : pointer;
+        option6 : TCurlFormOption; data6 : pointer;
+        option7 : TCurlFormOption; data7 : pointer;
+        option8 : TCurlFormOption; data8 : pointer;
+        optend : TCurlFormOption) : TCurlFormCode;  overload;
+          cdecl;  external 'libcurl.dll';
+
+function curl_formadd(
+        var httppost, last_post : PCurlHttpPost;
+        option1 : TCurlFormOption; data1 : pointer;
+        option2 : TCurlFormOption; data2 : pointer;
+        option3 : TCurlFormOption; data3 : pointer;
+        option4 : TCurlFormOption; data4 : pointer;
+        option5 : TCurlFormOption; data5 : pointer;
+        option6 : TCurlFormOption; data6 : pointer;
+        option7 : TCurlFormOption; data7 : pointer;
+        option8 : TCurlFormOption; data8 : pointer;
+        option9 : TCurlFormOption; data9 : pointer;
+        optend : TCurlFormOption) : TCurlFormCode;  overload;
+          cdecl;  external 'libcurl.dll';
+
+function curl_formadd(
+        var httppost, last_post : PCurlHttpPost;
+        option1 : TCurlFormOption; data1 : pointer;
+        option2 : TCurlFormOption; data2 : pointer;
+        option3 : TCurlFormOption; data3 : pointer;
+        option4 : TCurlFormOption; data4 : pointer;
+        option5 : TCurlFormOption; data5 : pointer;
+        option6 : TCurlFormOption; data6 : pointer;
+        option7 : TCurlFormOption; data7 : pointer;
+        option8 : TCurlFormOption; data8 : pointer;
+        option9 : TCurlFormOption; data9 : pointer;
+        option10 : TCurlFormOption; data10 : pointer;
+        optend : TCurlFormOption) : TCurlFormCode;  overload;
+          cdecl;  external 'libcurl.dll';
+
 
 //
 // callback function for curl_formget()
