@@ -80,6 +80,7 @@ type
     ///  Returns response code. Equivalent to GetInfo(CURLINFO_RESPONSE_CODE).
     function GetResponseCode : longint;
 
+    ///  Makes an exact copy, e.g. for multithreading.
     function Clone : IEasyCurl;
   end;
 
@@ -143,6 +144,8 @@ type
 
     function GetResponseCode : longint;
 
+    ///  This is implementation of IEasyCurl.Clone. If you dislike
+    ///  reference-counting, use TEasyCurlImpl.Create(someCurl).
     function Clone : IEasyCurl;
 
     class function StreamWrite(
