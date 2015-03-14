@@ -18,7 +18,7 @@ var
   code : integer;
   ul, dl : double;
   effurl : PAnsiChar;
-  cookies : PCurlSList;
+  engines : PCurlSList;
 begin
   try
     curl := GetCurl;
@@ -33,15 +33,15 @@ begin
     ul := curl.GetInfo(CURLINFO_SIZE_UPLOAD);
     dl := curl.GetInfo(CURLINFO_SIZE_DOWNLOAD);
     effurl := curl.GetInfo(CURLINFO_EFFECTIVE_URL);
-    cookies := curl.GetInfo(CURLINFO_SSL_ENGINES);
+    engines := curl.GetInfo(CURLINFO_SSL_ENGINES);
     Writeln(Format('HTTP response code: %d', [ code ] ));
     Writeln(Format('Uploaded: %d', [ round(ul) ] ));
     Writeln(Format('Downloaded: %d', [ round(dl) ] ));
     Writeln(Format('Effective URL: %s', [ effurl ] ));
     Writeln('SSL engines:');
-    while cookies <> nil do begin
-      Writeln ('- ', cookies^.Data);
-      cookies := cookies^.Next;
+    while engines <> nil do begin
+      Writeln ('- ', engines^.Data);
+      engines := engines^.Next;
     end;
   except
     on e : Exception do

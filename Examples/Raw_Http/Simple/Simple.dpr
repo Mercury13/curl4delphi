@@ -18,7 +18,7 @@ var
   code : longint;
   ul, dl : double;
   effurl : PAnsiChar;
-  cookies : PCurlSList;
+  engines : PCurlSList;
 begin
   curl := curl_easy_init;
   if curl <> nil then begin
@@ -33,15 +33,15 @@ begin
       curl_easy_getinfo(curl, CURLINFO_SIZE_UPLOAD, ul);
       curl_easy_getinfo(curl, CURLINFO_SIZE_DOWNLOAD, dl);
       curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, effurl);
-      curl_easy_getinfo(curl, CURLINFO_SSL_ENGINES, cookies);
+      curl_easy_getinfo(curl, CURLINFO_SSL_ENGINES, engines);
       Writeln(Format('HTTP response code: %d', [ code ] ));
       Writeln(Format('Uploaded: %d', [ round(ul) ] ));
       Writeln(Format('Downloaded: %d', [ round(dl) ] ));
       Writeln(Format('Effective URL: %s', [ effurl ] ));
       Writeln('SSL engines:');
-      while cookies <> nil do begin
-        Writeln ('- ', cookies^.Data);
-        cookies := cookies^.Next;
+      while engines <> nil do begin
+        Writeln ('- ', engines^.Data);
+        engines := engines^.Next;
       end;
     end else begin
       Writeln(Format('curl_easy_perform() failed: %s',
