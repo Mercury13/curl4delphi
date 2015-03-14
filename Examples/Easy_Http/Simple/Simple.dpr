@@ -13,7 +13,6 @@ const
   // I won’t use example.com, as someone removed redirection from example.com
   // AFAIK, ithappens.ru redirects to ithappens.me
   Url = 'http://ithappens.ru/';
-  MaxFileSize = 180;
 var
   curl : IEasyCurl;
   code : integer;
