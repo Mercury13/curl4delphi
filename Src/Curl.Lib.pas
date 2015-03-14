@@ -2046,12 +2046,6 @@ const
 function curl_easy_init : TCurlHandle;
           cdecl;  external 'libcurl.dll';
 
-function curl_easy_setopt_imported(
-        curl : TCurlHandle;
-        option : integer;
-        data : NativeUInt) : TCurlCode;
-          cdecl;  external 'libcurl.dll'  name 'curl_easy_setopt';
-
 function curl_easy_setopt(
         curl : TCurlHandle;
         option : TCurlOffOption;
@@ -2061,17 +2055,20 @@ function curl_easy_setopt(
 function curl_easy_setopt(
         curl : TCurlHandle;
         option : TCurlOption;
-        data : PAnsiChar) : TCurlCode;  overload;  inline;
+        data : PAnsiChar) : TCurlCode;  overload;
+          cdecl;  external 'libcurl.dll'  name 'curl_easy_setopt';
 
 function curl_easy_setopt(
         curl : TCurlHandle;
         option : TCurlOption;
-        data : pointer) : TCurlCode;  overload;  inline;
+        data : pointer) : TCurlCode;  overload;
+          cdecl;  external 'libcurl.dll'  name 'curl_easy_setopt';
 
 function curl_easy_setopt(
         curl : TCurlHandle;
         option : TCurlIntOption;
-        data : NativeUInt) : TCurlCode;  overload;  inline;
+        data : NativeUInt) : TCurlCode;  overload;
+          cdecl;  external 'libcurl.dll'  name 'curl_easy_setopt';
 
 function curl_easy_setopt(
         curl : TCurlHandle;
@@ -2180,7 +2177,6 @@ function curl_easy_send(
         out n : NativeUInt) : TCurlCode;
           cdecl;  external 'libcurl.dll';
 
-//#define curl_easy_getinfo(handle,info,arg) curl_easy_getinfo(handle,info,arg)
 //#define curl_share_setopt(share,opt,param) curl_share_setopt(share,opt,param)
 //#define curl_multi_setopt(handle,opt,param) curl_multi_setopt(handle,opt,param)
 
@@ -2188,34 +2184,10 @@ implementation
 
 function curl_easy_setopt(
         curl : TCurlHandle;
-        option : TCurlOption;
-        data : PAnsiChar) : TCurlCode;
-begin
-  Result := curl_easy_setopt_imported(curl, ord(option), NativeUInt(data));
-end;
-
-function curl_easy_setopt(
-        curl : TCurlHandle;
-        option : TCurlOption;
-        data : pointer) : TCurlCode;
-begin
-  Result := curl_easy_setopt_imported(curl, ord(option), NativeUInt(data));
-end;
-
-function curl_easy_setopt(
-        curl : TCurlHandle;
-        option : TCurlIntOption;
-        data : NativeUInt) : TCurlCode;
-begin
-  Result := curl_easy_setopt_imported(curl, ord(option), data);
-end;
-
-function curl_easy_setopt(
-        curl : TCurlHandle;
         option : TCurlIntOption;
         data : boolean) : TCurlCode;
 begin
-  Result := curl_easy_setopt_imported(curl, ord(option), Ord(data));
+  Result := curl_easy_setopt(curl, option, NativeUInt(data));
 end;
 
 end.
