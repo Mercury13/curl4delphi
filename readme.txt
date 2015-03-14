@@ -17,7 +17,7 @@ RawHttp\Simple, EasyHttp\Simple
 	Redirection, basic HTTP GET, GetInfo
 
 RawHttp\Https, EasyHttp\Https
-	Redirection, basic HTTPS support, CA files.
+	Redirection, basic HTTPS support, CA files, Unicode in file names.
 	WARNING: download a CA file such as cacert.pem.
 
 EasyHttp\StreamedDl

@@ -1,4 +1,4 @@
-program Https;
+﻿program Https;
 
 {$APPTYPE CONSOLE}
 
@@ -20,6 +20,8 @@ begin
     curl_easy_setopt(curl, CURLOPT_URL, 'https://ukr.net/');
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, true);
     curl_easy_setopt(curl, CURLOPT_CAINFO, 'cacert.pem');
+    // Unicode is also supported!
+    //curl_easy_setopt(curl, CURLOPT_CAINFO, PChar(UTF8Encode('α×β.pem')));
 
     // Perform the request, res will get the return code
     res := curl_easy_perform(curl);

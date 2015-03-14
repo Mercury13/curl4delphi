@@ -1,4 +1,4 @@
-program Https;
+﻿program Https;
 
 {$APPTYPE CONSOLE}
 
@@ -19,6 +19,8 @@ begin
     curl.SetUrl('https://ukr.net');
     curl.SetFollowLocation(true);
     curl.SetCaFile('cacert.pem');
+    // Unicode is also supported!
+    //curl.SetCaFile('α×β.pem');
 
     // Perform the request, res will get the return code
     curl.Perform;
