@@ -14,7 +14,7 @@ uses
 const
   // I won’t use example.com, as someone removed redirection from example.com
   // AFAIK, ithappens.ru redirects to ithappens.me
-  Url = 'http://ithappens.me/';
+  Url = 'http://ithappens.ru/';
 var
   curl : IEasyCurl;
   code : integer;
@@ -48,7 +48,7 @@ begin
     end;
 
     // Check for some info
-    code := curl.GetInfo(CURLINFO_RESPONSE_CODE);
+    code := curl.GetResponseCode;
     Writeln(Format('HTTP response code: %d', [ code ] ));
   except
     on e : Exception do

@@ -31,7 +31,7 @@ begin
     curl.Perform;
 
     // Check for some info
-    code := curl.GetInfo(CURLINFO_RESPONSE_CODE);
+    code := curl.GetResponseCode;
     ul := curl.GetInfo(CURLINFO_SIZE_UPLOAD);
     dl := curl.GetInfo(CURLINFO_SIZE_DOWNLOAD);
     effurl := curl.GetInfo(CURLINFO_EFFECTIVE_URL);
