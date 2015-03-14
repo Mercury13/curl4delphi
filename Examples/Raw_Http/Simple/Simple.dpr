@@ -11,8 +11,7 @@ uses
 const
   // I won’t use example.com, as someone removed redirection from example.com
   // AFAIK, ithappens.ru redirects to ithappens.me
-  Url = 'http://ithappens.me/';
-  MaxFileSize = 2000;
+  Url = 'http://ithappens.ru/';
 var
   curl : TCurlHandle;
   res : TCurlCode;
@@ -25,7 +24,6 @@ begin
   if curl <> nil then begin
     curl_easy_setopt(curl, CURLOPT_URL, Url);
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, true);
-    curl_easy_setopt(curl, CURLOPT_MAXFILESIZE, MaxFileSize);
 
     // Perform the request, res will get the return code
     res := curl_easy_perform(curl);
