@@ -631,6 +631,11 @@ type
     // sizes to handle larger files.  See below for INFILESIZE_LARGE.
     CURLOPT_INFILESIZE = CURLOPTTYPE_LONG + 14,
 
+    // If the download receives less than "low speed limit" bytes/second
+    // during "low speed time" seconds, the operations is aborted.
+    // You could i.e if you have a pretty high speed connection, abort if
+    // it is less than 2000 bytes/sec during 20 seconds.
+
     // Set the "low speed limit"
     CURLOPT_LOW_SPEED_LIMIT = CURLOPTTYPE_LONG + 19,
 
@@ -922,6 +927,9 @@ type
     // Turn on wildcard matching
     CURLOPT_WILDCARDMATCH = CURLOPTTYPE_LONG + 197,
 
+    // Set authentication type for authenticated TLS
+    CURLOPT_TLSAUTH_TYPE = CURLOPTTYPE_OBJECTPOINT + 206,
+
     // Set to 1 to enable the "TE:" header in HTTP requests to ask for
     // compressed transfer-encoded responses. Set to 0 to disable the use of TE:
     // in outgoing requests. The current default is 0, but it might change in a
@@ -988,15 +996,13 @@ type
     CURLOPT_MAX_RECV_SPEED_LARGE = CURLOPTTYPE_OFF_T + 146
   );
 
-  TCurlOption = (
-    // This is the FILE * or void * the regular output should be written to.
-    CURLOPT_WRITEDATA = CURLOPTTYPE_OBJECTPOINT + 1,
-
+  TCurlStringOption = (
     // The full URL to get/put
     CURLOPT_URL = CURLOPTTYPE_OBJECTPOINT + 2,
 
     // Name of proxy to use.
     CURLOPT_PROXY = CURLOPTTYPE_OBJECTPOINT + 4,
+
 
     // "user:password;options" to use when fetching.
     CURLOPT_USERPWD = CURLOPTTYPE_OBJECTPOINT + 5,
@@ -1006,23 +1012,6 @@ type
 
     // Range to get, specified as an ASCII string.
     CURLOPT_RANGE = CURLOPTTYPE_OBJECTPOINT + 7,
-
-    // not used
-
-    // Specified file stream to upload from (use as input):
-    CURLOPT_READDATA = CURLOPTTYPE_OBJECTPOINT + 9,
-
-    // Buffer to receive error messages in, must be at least CURL_ERROR_SIZE
-    // bytes big. If this is not used, error messages go to stderr instead:
-    CURLOPT_ERRORBUFFER = CURLOPTTYPE_OBJECTPOINT + 10,
-
-    // Function that will be called to store the output (instead of fwrite). The
-    // parameters will use fwrite() syntax, make sure to follow them.
-    CURLOPT_WRITEFUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 11,
-
-    // Function that will be called to read the input (instead of fread). The
-    // parameters will use fread() syntax, make sure to follow them.
-    CURLOPT_READFUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 12,
 
     // POST static input fields.
     CURLOPT_POSTFIELDS = CURLOPTTYPE_OBJECTPOINT + 15,
@@ -1037,67 +1026,23 @@ type
     // Set the User-Agent string (examined by some CGIs)
     CURLOPT_USERAGENT = CURLOPTTYPE_OBJECTPOINT + 18,
 
-    // If the download receives less than "low speed limit" bytes/second
-    // during "low speed time" seconds, the operations is aborted.
-    // You could i.e if you have a pretty high speed connection, abort if
-    // it is less than 2000 bytes/sec during 20 seconds.
-
     // Set cookie in request:
     CURLOPT_COOKIE = CURLOPTTYPE_OBJECTPOINT + 22,
 
-    // This points to a linked list of headers, struct curl_slist kind. This
-    // list is also used for RTSP (in spite of its name)
-    CURLOPT_HTTPHEADER = CURLOPTTYPE_OBJECTPOINT + 23,
-
-    // This points to a linked list of post entries, struct curl_httppost
-    CURLOPT_HTTPPOST = CURLOPTTYPE_OBJECTPOINT + 24,
-
     // name of the file keeping your private SSL-certificate
     CURLOPT_SSLCERT = CURLOPTTYPE_OBJECTPOINT + 25,
-
-    // password for the SSL or SSH private key
-    CURLOPT_KEYPASSWD = CURLOPTTYPE_OBJECTPOINT + 26,
-
-    // send linked-list of QUOTE commands
-    CURLOPT_QUOTE = CURLOPTTYPE_OBJECTPOINT + 28,
-
-    // send FILE * or void * to store headers to, if you use a callback it
-    // is simply passed to the callback unmodified
-    CURLOPT_HEADERDATA = CURLOPTTYPE_OBJECTPOINT + 29,
 
     // point to a file to read the initial cookies from, also enables
     // "cookie awareness"
     CURLOPT_COOKIEFILE = CURLOPTTYPE_OBJECTPOINT + 31,
 
-    // 35 = OBSOLETE
+    // password for the SSL or SSH private key
+    CURLOPT_KEYPASSWD = CURLOPTTYPE_OBJECTPOINT + 26,
 
     // Custom request, for customizing the get command like
     // HTTP: DELETE, TRACE and others
     // FTP: to use a different list command
     CURLOPT_CUSTOMREQUEST = CURLOPTTYPE_OBJECTPOINT + 36,
-
-    // HTTP request, for odd commands like DELETE, TRACE and others
-    CURLOPT_STDERR = CURLOPTTYPE_OBJECTPOINT + 37,
-
-    // 38 is not used
-
-    // send linked-list of post-transfer QUOTE commands
-    CURLOPT_POSTQUOTE = CURLOPTTYPE_OBJECTPOINT + 39,
-
-    CURLOPT_OBSOLETE40 = CURLOPTTYPE_OBJECTPOINT + 40,   // OBSOLETE, do not use!
-
-    // 55 = OBSOLETE
-
-    // DEPRECATED
-    // Function that will be called instead of the internal progress display
-    // function. This function should be defined as the curl_progress_callback
-    // prototype defines.
-    // CURLOPT_PROGRESSFUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 56,
-
-    // Data passed to the CURLOPT_PROGRESSFUNCTION and CURLOPT_XFERINFOFUNCTION
-    // callbacks
-    CURLOPT_PROGRESSDATA = CURLOPTTYPE_OBJECTPOINT + 57,
-    CURLOPT_XFERINFODATA = CURLOPT_PROGRESSDATA,
 
     // Set the interface string to use as outgoing network interface
     CURLOPT_INTERFACE = CURLOPTTYPE_OBJECTPOINT + 62,
@@ -1111,24 +1056,9 @@ type
     // this option is used only if SSL_VERIFYPEER is true
     CURLOPT_CAINFO = CURLOPTTYPE_OBJECTPOINT + 65,
 
-    // 66 = OBSOLETE
-    // 67 = OBSOLETE
-
-    // This points to a linked list of telnet options
-    CURLOPT_TELNETOPTIONS = CURLOPTTYPE_OBJECTPOINT + 70,
-
-    // 73 = OBSOLETE
-
     // Set to a file name that contains random data for libcurl to use to
     // seed the random engine when doing SSL connects.
     CURLOPT_RANDOM_FILE = CURLOPTTYPE_OBJECTPOINT + 76,
-
-    // Set to the Entropy Gathering Daemon socket pathname
-    CURLOPT_EGDSOCKET = CURLOPTTYPE_OBJECTPOINT + 77,
-
-    // Function that will be called to store headers (instead of fwrite). The
-    // parameters will use fwrite() syntax, make sure to follow them.
-    CURLOPT_HEADERFUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 79,
 
     // Specify which file name to write all known cookies in after completed
     // operation. Set file name to "-" (dash) to make it go to stdout.
@@ -1149,62 +1079,24 @@ type
     // crypto engine for the SSL-sub system
     CURLOPT_SSLENGINE = CURLOPTTYPE_OBJECTPOINT + 89,
 
-    // send linked-list of pre-transfer QUOTE commands
-    CURLOPT_PREQUOTE = CURLOPTTYPE_OBJECTPOINT + 93,
-
-    // set the debug function
-    CURLOPT_DEBUGFUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 94,
-
-    // set the data for the debug function
-    CURLOPT_DEBUGDATA = CURLOPTTYPE_OBJECTPOINT + 95,
+    // Set to the Entropy Gathering Daemon socket pathname
+    CURLOPT_EGDSOCKET = CURLOPTTYPE_OBJECTPOINT + 77,
 
     // The CApath directory used to validate the peer certificate
     // this option is used only if SSL_VERIFYPEER is true
     // Does not work on Windows, so stop!
     //CURLOPT_CAPATH = CURLOPTTYPE_OBJECTPOINT + 97,
 
-    // Provide a CURLShare for mutexing non-ts data
-    CURLOPT_SHARE = CURLOPTTYPE_OBJECTPOINT + 100,
-
     // Set the Accept-Encoding string. Use this to tell a server you would like
     // the response to be compressed. Before 7.21.6, this was known as
     // CURLOPT_ENCODING
     CURLOPT_ACCEPT_ENCODING = CURLOPTTYPE_OBJECTPOINT + 102,
-
-    // Set pointer to private data
-    CURLOPT_PRIVATE = CURLOPTTYPE_OBJECTPOINT + 103,
-
-    // Set aliases for HTTP 200 in the HTTP Response header
-    CURLOPT_HTTP200ALIASES = CURLOPTTYPE_OBJECTPOINT + 104,
-
-    // Set the ssl context callback function, currently only for OpenSSL ssl_ctx
-    // in second argument. The function must be matching the
-    // curl_ssl_ctx_callback proto.
-    CURLOPT_SSL_CTX_FUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 108,
-
-    // Set the userdata for the ssl context callback function's third
-    // argument
-    CURLOPT_SSL_CTX_DATA = CURLOPTTYPE_OBJECTPOINT + 109,
 
     // Set this option to the file name of your .netrc file you want libcurl
     // to parse (using the CURLOPT_NETRC option). If not set, libcurl will do
     // a poor attempt to find the user's home directory and check for a .netrc
     // file in there.
     CURLOPT_NETRC_FILE = CURLOPTTYPE_OBJECTPOINT + 118,
-
-    // 122 OBSOLETE, used in 7.12.3. Gone in 7.13.0
-    // 123 OBSOLETE. Gone in 7.16.0
-    // 124 OBSOLETE, used in 7.12.3. Gone in 7.13.0
-    // 125 OBSOLETE, used in 7.12.3. Gone in 7.13.0
-    // 126 OBSOLETE, used in 7.12.3. Gone in 7.13.0
-    // 127 OBSOLETE. Gone in 7.16.0
-    // 128 OBSOLETE. Gone in 7.16.0
-
-    CURLOPT_IOCTLFUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 130,
-    CURLOPT_IOCTLDATA = CURLOPTTYPE_OBJECTPOINT + 131,
-
-    // 132 OBSOLETE. Gone in 7.16.0
-    // 133 OBSOLETE. Gone in 7.16.0
 
     // zero terminated string for pass on to the FTP server when asked for
     // "account" info
@@ -1213,25 +1105,8 @@ type
     // feed cookies into cookie engine
     CURLOPT_COOKIELIST = CURLOPTTYPE_OBJECTPOINT + 135,
 
-    // Function that will be called to convert from the
-    // network encoding (instead of using the iconv calls in libcurl)
-    CURLOPT_CONV_FROM_NETWORK_FUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 142,
-
-    // Function that will be called to convert to the
-    // network encoding (instead of using the iconv calls in libcurl)
-    CURLOPT_CONV_TO_NETWORK_FUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 143,
-
-    // Function that will be called to convert from UTF8
-    // (instead of using the iconv calls in libcurl)
-    // Note that this is used only for SSL certificate processing
-    CURLOPT_CONV_FROM_UTF8_FUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 144,
-
     // Pointer to command string to send if USER/PASS fails.
     CURLOPT_FTP_ALTERNATIVE_TO_USER = CURLOPTTYPE_OBJECTPOINT + 147,
-
-    // callback function for setting socket options
-    CURLOPT_SOCKOPTFUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 148,
-    CURLOPT_SOCKOPTDATA = CURLOPTTYPE_OBJECTPOINT + 149,
 
     // Used by scp/sftp to do public/private key authentication
     CURLOPT_SSH_PUBLIC_KEYFILE = CURLOPTTYPE_OBJECTPOINT + 152,
@@ -1240,19 +1115,8 @@ type
     // used by scp/sftp to verify the host's public key
     CURLOPT_SSH_HOST_PUBLIC_KEY_MD5 = CURLOPTTYPE_OBJECTPOINT + 162,
 
-    // Callback function for opening socket (instead of socket(2)). Optionally,
-    // callback is able change the address or refuse to connect returning
-    // CURL_SOCKET_BAD.  The callback should have type
-    // curl_opensocket_callback
-    CURLOPT_OPENSOCKETFUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 163,
-    CURLOPT_OPENSOCKETDATA = CURLOPTTYPE_OBJECTPOINT + 164,
-
     // POST volatile input fields.
     CURLOPT_COPYPOSTFIELDS = CURLOPTTYPE_OBJECTPOINT + 165,
-
-    // Callback function for seeking in the input stream
-    CURLOPT_SEEKFUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 167,
-    CURLOPT_SEEKDATA = CURLOPTTYPE_OBJECTPOINT + 168,
 
     // CRL file
     CURLOPT_CRLFILE = CURLOPTTYPE_OBJECTPOINT + 169,
@@ -1283,18 +1147,8 @@ type
     // set the SSH knownhost file name to use
     CURLOPT_SSH_KNOWNHOSTS = CURLOPTTYPE_OBJECTPOINT + 183,
 
-    // set the SSH host key callback, must point to a curl_sshkeycallback
-    // function
-    CURLOPT_SSH_KEYFUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 184,
-
-    // set the SSH host key callback custom pointer
-    CURLOPT_SSH_KEYDATA = CURLOPTTYPE_OBJECTPOINT + 185,
-
     // set the SMTP mail originator
     CURLOPT_MAIL_FROM = CURLOPTTYPE_OBJECTPOINT + 186,
-
-    // set the SMTP mail receiver(s)
-    CURLOPT_MAIL_RCPT = CURLOPTTYPE_OBJECTPOINT + 187,
 
     // The RTSP session identifier
     CURLOPT_RTSP_SESSION_ID = CURLOPTTYPE_OBJECTPOINT + 190,
@@ -1304,6 +1158,206 @@ type
 
     // The Transport: header to use in RTSP requests
     CURLOPT_RTSP_TRANSPORT = CURLOPTTYPE_OBJECTPOINT + 192,
+
+    // Set a username for authenticated TLS
+    CURLOPT_TLSAUTH_USERNAME = CURLOPTTYPE_OBJECTPOINT + 204,
+
+    // Set a password for authenticated TLS
+    CURLOPT_TLSAUTH_PASSWORD = CURLOPTTYPE_OBJECTPOINT + 205,
+
+    // Set the name servers to use for DNS resolution
+    CURLOPT_DNS_SERVERS = CURLOPTTYPE_OBJECTPOINT + 211,
+
+    // Set the SMTP auth originator
+    CURLOPT_MAIL_AUTH = CURLOPTTYPE_OBJECTPOINT + 217,
+
+    // The XOAUTH2 bearer token
+    CURLOPT_XOAUTH2_BEARER = CURLOPTTYPE_OBJECTPOINT + 220,
+
+    // Set the interface string to use as outgoing network
+    // interface for DNS requests.
+    // Only supported by the c-ares DNS backend
+    CURLOPT_DNS_INTERFACE = CURLOPTTYPE_OBJECTPOINT + 221,
+
+    // Set the local IPv4 address to use for outgoing DNS requests.
+    // Only supported by the c-ares DNS backend
+    CURLOPT_DNS_LOCAL_IP4 = CURLOPTTYPE_OBJECTPOINT + 222,
+
+    // Set the local IPv4 address to use for outgoing DNS requests.
+    // Only supported by the c-ares DNS backend
+    CURLOPT_DNS_LOCAL_IP6 = CURLOPTTYPE_OBJECTPOINT + 223,
+
+    // Set authentication options directly
+    CURLOPT_LOGIN_OPTIONS = CURLOPTTYPE_OBJECTPOINT + 224,
+
+    // The public key in DER form used to validate the peer public key
+    // this option is used only if SSL_VERIFYPEER is true
+    CURLOPT_PINNEDPUBLICKEY = CURLOPTTYPE_OBJECTPOINT + 230,
+
+    // Path to Unix domain socket
+    CURLOPT_UNIX_SOCKET_PATH = CURLOPTTYPE_OBJECTPOINT + 231
+  );
+
+  TCurlSlistOption = (
+    // This points to a linked list of headers, struct curl_slist kind. This
+    // list is also used for RTSP (in spite of its name)
+    CURLOPT_HTTPHEADER = CURLOPTTYPE_OBJECTPOINT + 23,
+
+    // send linked-list of post-transfer QUOTE commands
+    CURLOPT_POSTQUOTE = CURLOPTTYPE_OBJECTPOINT + 39,
+
+    // This points to a linked list of telnet options
+    CURLOPT_TELNETOPTIONS = CURLOPTTYPE_OBJECTPOINT + 70,
+
+    // send linked-list of pre-transfer QUOTE commands
+    CURLOPT_PREQUOTE = CURLOPTTYPE_OBJECTPOINT + 93,
+
+    // Set aliases for HTTP 200 in the HTTP Response header
+    CURLOPT_HTTP200ALIASES = CURLOPTTYPE_OBJECTPOINT + 104,
+
+    // set the SMTP mail receiver(s)
+    CURLOPT_MAIL_RCPT = CURLOPTTYPE_OBJECTPOINT + 187,
+
+    // send linked-list of name:port:address sets
+    CURLOPT_RESOLVE = CURLOPTTYPE_OBJECTPOINT + 203,
+
+    // This points to a linked list of headers used for proxy requests only,
+    // struct curl_slist kind
+    CURLOPT_PROXYHEADER = CURLOPTTYPE_OBJECTPOINT + 228
+  );
+
+  TCurlPostOption = (
+    // This points to a linked list of post entries, struct curl_httppost
+    CURLOPT_HTTPPOST = CURLOPTTYPE_OBJECTPOINT + 24
+  );
+
+  TCurlOption = (
+    // This is the FILE * or void * the regular output should be written to.
+    CURLOPT_WRITEDATA = CURLOPTTYPE_OBJECTPOINT + 1,
+
+    // Specified file stream to upload from (use as input):
+    CURLOPT_READDATA = CURLOPTTYPE_OBJECTPOINT + 9,
+
+    // Buffer to receive error messages in, must be at least CURL_ERROR_SIZE
+    // bytes big. If this is not used, error messages go to stderr instead:
+    CURLOPT_ERRORBUFFER = CURLOPTTYPE_OBJECTPOINT + 10,
+
+    // Function that will be called to store the output (instead of fwrite). The
+    // parameters will use fwrite() syntax, make sure to follow them.
+    CURLOPT_WRITEFUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 11,
+
+    // Function that will be called to read the input (instead of fread). The
+    // parameters will use fread() syntax, make sure to follow them.
+    CURLOPT_READFUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 12,
+
+    // send linked-list of QUOTE commands
+    CURLOPT_QUOTE = CURLOPTTYPE_OBJECTPOINT + 28,
+
+    // send FILE * or void * to store headers to, if you use a callback it
+    // is simply passed to the callback unmodified
+    CURLOPT_HEADERDATA = CURLOPTTYPE_OBJECTPOINT + 29,
+
+    // 35 = OBSOLETE
+
+    // Pass a FILE * as parameter. Tell libcurl to use this stream instead
+    // of stderr when showing the progress meter and displaying
+    // CURLOPT_VERBOSE data.
+    CURLOPT_STDERR = CURLOPTTYPE_OBJECTPOINT + 37,
+
+    // 38 is not used
+
+    CURLOPT_OBSOLETE40 = CURLOPTTYPE_OBJECTPOINT + 40,   // OBSOLETE, do not use!
+
+    // 55 = OBSOLETE
+
+    // DEPRECATED
+    // Function that will be called instead of the internal progress display
+    // function. This function should be defined as the curl_progress_callback
+    // prototype defines.
+    // CURLOPT_PROGRESSFUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 56,
+
+    // Data passed to the CURLOPT_PROGRESSFUNCTION and CURLOPT_XFERINFOFUNCTION
+    // callbacks
+    CURLOPT_PROGRESSDATA = CURLOPTTYPE_OBJECTPOINT + 57,
+    CURLOPT_XFERINFODATA = CURLOPT_PROGRESSDATA,
+
+    // 66 = OBSOLETE
+    // 67 = OBSOLETE
+    // 73 = OBSOLETE
+
+    // Function that will be called to store headers (instead of fwrite). The
+    // parameters will use fwrite() syntax, make sure to follow them.
+    CURLOPT_HEADERFUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 79,
+
+    // set the debug function
+    CURLOPT_DEBUGFUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 94,
+
+    // set the data for the debug function
+    CURLOPT_DEBUGDATA = CURLOPTTYPE_OBJECTPOINT + 95,
+
+    // Provide a CURLShare for mutexing non-ts data
+    CURLOPT_SHARE = CURLOPTTYPE_OBJECTPOINT + 100,
+
+    // Set pointer to private data
+    CURLOPT_PRIVATE = CURLOPTTYPE_OBJECTPOINT + 103,
+
+    // Set the ssl context callback function, currently only for OpenSSL ssl_ctx
+    // in second argument. The function must be matching the
+    // curl_ssl_ctx_callback proto.
+    CURLOPT_SSL_CTX_FUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 108,
+
+    // Set the userdata for the ssl context callback function's third
+    // argument
+    CURLOPT_SSL_CTX_DATA = CURLOPTTYPE_OBJECTPOINT + 109,
+
+    // 122 OBSOLETE, used in 7.12.3. Gone in 7.13.0
+    // 123 OBSOLETE. Gone in 7.16.0
+    // 124 OBSOLETE, used in 7.12.3. Gone in 7.13.0
+    // 125 OBSOLETE, used in 7.12.3. Gone in 7.13.0
+    // 126 OBSOLETE, used in 7.12.3. Gone in 7.13.0
+    // 127 OBSOLETE. Gone in 7.16.0
+    // 128 OBSOLETE. Gone in 7.16.0
+
+    CURLOPT_IOCTLFUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 130,
+    CURLOPT_IOCTLDATA = CURLOPTTYPE_OBJECTPOINT + 131,
+
+    // 132 OBSOLETE. Gone in 7.16.0
+    // 133 OBSOLETE. Gone in 7.16.0
+
+    // Function that will be called to convert from the
+    // network encoding (instead of using the iconv calls in libcurl)
+    CURLOPT_CONV_FROM_NETWORK_FUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 142,
+
+    // Function that will be called to convert to the
+    // network encoding (instead of using the iconv calls in libcurl)
+    CURLOPT_CONV_TO_NETWORK_FUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 143,
+
+    // Function that will be called to convert from UTF8
+    // (instead of using the iconv calls in libcurl)
+    // Note that this is used only for SSL certificate processing
+    CURLOPT_CONV_FROM_UTF8_FUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 144,
+
+    // callback function for setting socket options
+    CURLOPT_SOCKOPTFUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 148,
+    CURLOPT_SOCKOPTDATA = CURLOPTTYPE_OBJECTPOINT + 149,
+
+    // Callback function for opening socket (instead of socket(2)). Optionally,
+    // callback is able change the address or refuse to connect returning
+    // CURL_SOCKET_BAD.  The callback should have type
+    // curl_opensocket_callback
+    CURLOPT_OPENSOCKETFUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 163,
+    CURLOPT_OPENSOCKETDATA = CURLOPTTYPE_OBJECTPOINT + 164,
+
+    // Callback function for seeking in the input stream
+    CURLOPT_SEEKFUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 167,
+    CURLOPT_SEEKDATA = CURLOPTTYPE_OBJECTPOINT + 168,
+
+    // set the SSH host key callback, must point to a curl_sshkeycallback
+    // function
+    CURLOPT_SSH_KEYFUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 184,
+
+    // set the SSH host key callback custom pointer
+    CURLOPT_SSH_KEYDATA = CURLOPTTYPE_OBJECTPOINT + 185,
 
     // The stream to pass to INTERLEAVEFUNCTION.
     CURLOPT_INTERLEAVEDATA = CURLOPTTYPE_OBJECTPOINT + 195,
@@ -1328,63 +1382,15 @@ type
     // FNMATCH_FUNCTION user pointer
     CURLOPT_FNMATCH_DATA = CURLOPTTYPE_OBJECTPOINT + 202,
 
-    // send linked-list of name:port:address sets
-    CURLOPT_RESOLVE = CURLOPTTYPE_OBJECTPOINT + 203,
-
-    // Set a username for authenticated TLS
-    CURLOPT_TLSAUTH_USERNAME = CURLOPTTYPE_OBJECTPOINT + 204,
-
-    // Set a password for authenticated TLS
-    CURLOPT_TLSAUTH_PASSWORD = CURLOPTTYPE_OBJECTPOINT + 205,
-
-    // Set authentication type for authenticated TLS
-    CURLOPT_TLSAUTH_TYPE = CURLOPTTYPE_OBJECTPOINT + 206,
-
     // Callback function for closing socket (instead of close(2)). The callback
     // should have type curl_closesocket_callback
     CURLOPT_CLOSESOCKETFUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 208,
     CURLOPT_CLOSESOCKETDATA = CURLOPTTYPE_OBJECTPOINT + 209,
 
-    // Set the name servers to use for DNS resolution
-    CURLOPT_DNS_SERVERS = CURLOPTTYPE_OBJECTPOINT + 211,
-
-    // Set the SMTP auth originator
-    CURLOPT_MAIL_AUTH = CURLOPTTYPE_OBJECTPOINT + 217,
-
     // Function that will be called instead of the internal progress display
     // function. This function should be defined as the curl_xferinfo_callback
     // prototype defines. (Deprecates CURLOPT_PROGRESSFUNCTION)
-    CURLOPT_XFERINFOFUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 219,
-
-    // The XOAUTH2 bearer token
-    CURLOPT_XOAUTH2_BEARER = CURLOPTTYPE_OBJECTPOINT + 220,
-
-    // Set the interface string to use as outgoing network
-    // interface for DNS requests.
-    // Only supported by the c-ares DNS backend
-    CURLOPT_DNS_INTERFACE = CURLOPTTYPE_OBJECTPOINT + 221,
-
-    // Set the local IPv4 address to use for outgoing DNS requests.
-    // Only supported by the c-ares DNS backend
-    CURLOPT_DNS_LOCAL_IP4 = CURLOPTTYPE_OBJECTPOINT + 222,
-
-    // Set the local IPv4 address to use for outgoing DNS requests.
-    // Only supported by the c-ares DNS backend
-    CURLOPT_DNS_LOCAL_IP6 = CURLOPTTYPE_OBJECTPOINT + 223,
-
-    // Set authentication options directly
-    CURLOPT_LOGIN_OPTIONS = CURLOPTTYPE_OBJECTPOINT + 224,
-
-    // This points to a linked list of headers used for proxy requests only,
-    // struct curl_slist kind
-    CURLOPT_PROXYHEADER = CURLOPTTYPE_OBJECTPOINT + 228,
-
-    // The public key in DER form used to validate the peer public key
-    // this option is used only if SSL_VERIFYPEER is true
-    CURLOPT_PINNEDPUBLICKEY = CURLOPTTYPE_OBJECTPOINT + 230,
-
-    // Path to Unix domain socket
-    CURLOPT_UNIX_SOCKET_PATH = CURLOPTTYPE_OBJECTPOINT + 231
+    CURLOPT_XFERINFOFUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 219
   );
 
 
@@ -2161,7 +2167,7 @@ function curl_easy_setopt(
 
 function curl_easy_setopt(
         curl : TCurlHandle;
-        option : TCurlOption;
+        option : TCurlStringOption;
         data : PAnsiChar) : TCurlCode;  overload;
           cdecl;  external 'libcurl.dll'  name 'curl_easy_setopt';
 
@@ -2181,6 +2187,18 @@ function curl_easy_setopt(
         curl : TCurlHandle;
         option : TCurlIntOption;
         data : boolean) : TCurlCode;  overload;  inline;
+
+function curl_easy_setopt(
+        curl : TCurlHandle;
+        option : TCurlSlistOption;
+        data : PCurlSList) : TCurlCode;  overload;
+          cdecl;  external 'libcurl.dll'  name 'curl_easy_setopt';
+
+function curl_easy_setopt(
+        curl : TCurlHandle;
+        option : TCurlPostOption;
+        data : PCurlHttpPost) : TCurlCode;  overload;
+          cdecl;  external 'libcurl.dll'  name 'curl_easy_setopt';
 
 function curl_easy_perform(curl : TCurlHandle) : TCurlCode;
           cdecl;  external 'libcurl.dll';

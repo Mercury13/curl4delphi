@@ -16,10 +16,14 @@ type
     ///  Sets a cURL option.
     ///  SetXXX functions are simply wrappers for SetOpt.
     procedure SetOpt(aOption : TCurlOffOption; aData : TCurlOff);  overload;
-    procedure SetOpt(aOption : TCurlOption; aData : PAnsiChar);  overload;
     procedure SetOpt(aOption : TCurlOption; aData : pointer);  overload;
     procedure SetOpt(aOption : TCurlIntOption; aData : NativeUInt);  overload;
     procedure SetOpt(aOption : TCurlIntOption; aData : boolean);  overload;
+    procedure SetOpt(aOption : TCurlStringOption; aData : PAnsiChar);  overload;
+    procedure SetOpt(aOption : TCurlStringOption; aData : RawByteString);  overload;
+    procedure SetOpt(aOption : TCurlStringOption; aData : UnicodeString);  overload;
+    procedure SetOpt(aOption : TCurlSlistOption; aData : PCurlSList);  overload;
+    procedure SetOpt(aOption : TCurlPostOption; aData : PCurlHttpPost);  overload;
 
     ///  Sets a URL. Equivalent to SetOpt(CURLOPT_URL, aData).
     procedure SetUrl(aData : PAnsiChar);  overload;
@@ -115,12 +119,14 @@ type
     procedure RaiseIf(aCode : TCurlCode);  inline;
 
     procedure SetOpt(aOption : TCurlOffOption; aData : TCurlOff);  overload;
-    procedure SetOpt(aOption : TCurlOption; aData : PAnsiChar);  overload;
     procedure SetOpt(aOption : TCurlOption; aData : pointer);  overload;
     procedure SetOpt(aOption : TCurlIntOption; aData : NativeUInt);  overload;
     procedure SetOpt(aOption : TCurlIntOption; aData : boolean);  overload;
-    procedure SetOpt(aOption : TCurlOption; aData : RawByteString);  overload;
-    procedure SetOpt(aOption : TCurlOption; aData : UnicodeString);  overload;
+    procedure SetOpt(aOption : TCurlStringOption; aData : PAnsiChar);  overload;
+    procedure SetOpt(aOption : TCurlStringOption; aData : RawByteString);  overload;
+    procedure SetOpt(aOption : TCurlStringOption; aData : UnicodeString);  overload;
+    procedure SetOpt(aOption : TCurlSlistOption; aData : PCurlSList);  overload;
+    procedure SetOpt(aOption : TCurlPostOption; aData : PCurlHttpPost);  overload;
 
     procedure SetUrl(aData : PAnsiChar);      overload;   inline;
     procedure SetUrl(aData : RawByteString);  overload;   inline;
@@ -283,7 +289,7 @@ begin
   RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
 end;
 
-procedure TEasyCurlImpl.SetOpt(aOption : TCurlOption; aData : PAnsiChar);
+procedure TEasyCurlImpl.SetOpt(aOption : TCurlStringOption; aData : PAnsiChar);
 begin
   RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
 end;
@@ -303,15 +309,26 @@ begin
   RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
 end;
 
-procedure TEasyCurlImpl.SetOpt(aOption : TCurlOption; aData : RawByteString);
+procedure TEasyCurlImpl.SetOpt(aOption : TCurlStringOption; aData : RawByteString);
 begin
   RaiseIf(curl_easy_setopt(fHandle, aOption, PAnsiChar(aData)));
 end;
 
-procedure TEasyCurlImpl.SetOpt(aOption : TCurlOption; aData : UnicodeString);
+procedure TEasyCurlImpl.SetOpt(aOption : TCurlStringOption; aData : UnicodeString);
 begin
   RaiseIf(curl_easy_setopt(fHandle, aOption, PAnsiChar(UTF8Encode(aData))));
 end;
+
+procedure TEasyCurlImpl.SetOpt(aOption : TCurlSlistOption; aData : PCurlSList);
+begin
+  RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
+end;
+
+procedure TEasyCurlImpl.SetOpt(aOption : TCurlPostOption; aData : PCurlHttpPost);
+begin
+  RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
+end;
+
 
 function TEasyCurlImpl.Clone : IEasyCurl;
 begin

@@ -178,7 +178,6 @@ var
   slf : TMyThread;
   raw : RawByteString;
   s : string;
-  p, p1 : integer;
 begin
   Result := Size * NItems;
   slf := TMyThread(OutStream);
@@ -191,6 +190,8 @@ begin
       // Last line of header?
       slf.SelectFileIfOk;
     end else if Copy(s, 1, Length(HeaderStart)) = HeaderStart then begin
+      // WARNING: Such header parser is quick and dirty,
+      //    and it is not recommended for true production code.
       s := ParseContentDisposition(s);
       if s <> '' then begin
         slf.wantedFileName := s;
@@ -279,7 +280,7 @@ end;
 
 procedure TfmMain.WmProgress(var aMsg : TMessage);
 begin
-  if aMsg.WParam < 0
+  if NativeInt(aMsg.WParam) < 0
     then progress.Style := pbstMarquee
     else SetProgressPos(aMsg.WParam);
 end;
