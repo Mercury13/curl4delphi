@@ -1160,7 +1160,8 @@ type
 
     // The CApath directory used to validate the peer certificate
     // this option is used only if SSL_VERIFYPEER is true
-    CURLOPT_CAPATH = CURLOPTTYPE_OBJECTPOINT + 97,
+    // Does not work on Windows, so stop!
+    //CURLOPT_CAPATH = CURLOPTTYPE_OBJECTPOINT + 97,
 
     // Provide a CURLShare for mutexing non-ts data
     CURLOPT_SHARE = CURLOPTTYPE_OBJECTPOINT + 100,

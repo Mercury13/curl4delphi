@@ -22,3 +22,7 @@ RawHttp\Https, EasyHttp\Https
 
 EasyHttp\StreamedDl
 	Downloading to Delphi TStream’s.
+
+EasyHttp\ProgressBar
+	A simple GUI file downloader.
+	Inter-thread communication, transfer function, quick-and-dirty header parsing.

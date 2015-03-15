@@ -35,16 +35,22 @@ type
     procedure SetSslVersion(aData : TCurlSslVersion);
 
     ///  Sets a receiver stream. Equivalent to twin SetOpt,
-    ///  WRITE_FUNCTION and WRITE_DATA.
+    ///  WRITEFUNCTION and WRITEDATA.
     ///  Does not destroy the stream, you should dispose of it manually!
     ///  If aData = nil: removes all custom receivers.
     procedure SetRecvStream(aData : TStream);
 
     ///  Sets a sender stream. Equivalent to twin SetOpt,
-    ///  READ_FUNCTION and READ_DATA.
+    ///  READFUNCTION and READDATA.
     ///  Does not destroy the stream, you should dispose of it manually!
     ///  If aData = nil: removes all custom senders.
     procedure SetSendStream(aData : TStream);
+
+    ///  Sets a receiver stream. Equivalent to twin SetOpt,
+    ///  HEADERFUNCTION and HEADERDATA.
+    ///  Does not destroy the stream, you should dispose of it manually!
+    ///  If aData = nil: removes all custom receivers.
+    procedure SetHeaderStream(aData : TStream);
 
     ///  Sets whether cURL will follow redirections.
     procedure SetFollowLocation(aData : boolean);
@@ -128,6 +134,7 @@ type
 
     procedure SetRecvStream(aData : TStream);
     procedure SetSendStream(aData : TStream);
+    procedure SetHeaderStream(aData : TStream);
 
     procedure SetFollowLocation(aData : boolean);
 
@@ -377,6 +384,14 @@ begin
   if aData = nil
     then SetOpt(CURLOPT_READFUNCTION, nil)
     else SetOpt(CURLOPT_READFUNCTION, @StreamRead);
+end;
+
+procedure TEasyCurlImpl.SetHeaderStream(aData : TStream);
+begin
+  SetOpt(CURLOPT_HEADERDATA, aData);
+  if aData = nil
+    then SetOpt(CURLOPT_HEADERFUNCTION, nil)
+    else SetOpt(CURLOPT_HEADERFUNCTION, @StreamWrite);
 end;
 
 function TEasyCurlImpl.GetResponseCode : longint;
