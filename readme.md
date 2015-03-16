@@ -10,26 +10,26 @@ My initial version will support “easy” interface only.
 Examples
 ========
 
-Misc\Version
--------------
- Shows version
+### Misc\Version
 
-RawHttp\Simple, EasyHttp\Simple
--------------------------------
+Shows version
+
+### RawHttp\Simple, EasyHttp\Simple
+
 Redirection, basic HTTP GET, GetInfo
 
-RawHttp\Https, EasyHttp\Https
-------------------------------
+### RawHttp\Https, EasyHttp\Https
+
 Redirection, basic HTTPS support, CA files, Unicode in file names.
 
-*Warning:* download a CA file such as cacert.pem.
+**Warning:** download a CA file such as cacert.pem.
 
-EasyHttp\StreamedDl
--------------------
+### EasyHttp\StreamedDl
+
 Downloading to Delphi TStream’s.
 
-EasyHttp\ProgressBar
---------------------
+### EasyHttp\ProgressBar
+
 A simple GUI file downloader.
 
 Inter-thread communication, transfer function, quick-and-dirty header parsing.
