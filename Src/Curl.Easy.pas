@@ -18,12 +18,17 @@ type
     function GetHandle : TCurlHandle;
     property Handle : TCurlHandle read GetHandle;
 
-    ///  Sets on option.
+    ///  Sets a cURL option.
+    ///  SetXXX functions are simply wrappers for SetOpt.
     procedure SetOpt(aOption : TCurlOffOption; aData : TCurlOff);  overload;
-    procedure SetOpt(aOption : TCurlOption; aData : PAnsiChar);  overload;
     procedure SetOpt(aOption : TCurlOption; aData : pointer);  overload;
     procedure SetOpt(aOption : TCurlIntOption; aData : NativeUInt);  overload;
     procedure SetOpt(aOption : TCurlIntOption; aData : boolean);  overload;
+    procedure SetOpt(aOption : TCurlStringOption; aData : PAnsiChar);  overload;
+    procedure SetOpt(aOption : TCurlStringOption; aData : RawByteString);  overload;
+    procedure SetOpt(aOption : TCurlStringOption; aData : UnicodeString);  overload;
+    procedure SetOpt(aOption : TCurlSlistOption; aData : PCurlSList);  overload;
+    procedure SetOpt(aOption : TCurlPostOption; aData : PCurlHttpPost);  overload;
 
     ///  Sets a URL. Equivalent to SetOpt(CURLOPT_URL, aData).
     procedure SetUrl(aData : PAnsiChar);  overload;
@@ -43,16 +48,25 @@ type
     procedure SetSslVerifyPeer(aData : boolean);
 
     ///  Sets a receiver stream. Equivalent to twin SetOpt,
-    ///  WRITE_FUNCTION and WRITE_DATA.
+    ///  WRITEFUNCTION and WRITEDATA.
     ///  Does not destroy the stream, you should dispose of it manually!
     ///  If aData = nil: removes all custom receivers.
     procedure SetRecvStream(aData : TStream);
 
     ///  Sets a sender stream. Equivalent to twin SetOpt,
-    ///  READ_FUNCTION and READ_DATA.
+    ///  READFUNCTION and READDATA.
     ///  Does not destroy the stream, you should dispose of it manually!
     ///  If aData = nil: removes all custom senders.
     procedure SetSendStream(aData : TStream);
+
+    ///  Sets a receiver stream. Equivalent to twin SetOpt,
+    ///  HEADERFUNCTION and HEADERDATA.
+    ///  Does not destroy the stream, you should dispose of it manually!
+    ///  If aData = nil: removes all custom receivers.
+    procedure SetHeaderStream(aData : TStream);
+
+    ///  Sets whether cURL will follow redirections.
+    procedure SetFollowLocation(aData : boolean);
 
     ///  Removes custom HTTP headers
     procedure RemoveCustomHeaders;
@@ -75,15 +89,17 @@ type
     ///  and do RaiseIf for everything else.
     procedure RaiseIf(aCode : TCurlCode);
 
-    ///  Gets info, with Delphi’s type checking
+    ///  Returns some information.
+    ///  GetXXX functions are wrappers for GetInfo.
     function GetInfo(aCode : TCurlLongInfo) : longint;  overload;
     function GetInfo(aInfo : TCurlStringInfo) : PAnsiChar;  overload;
     function GetInfo(aInfo : TCurlDoubleInfo) : double;  overload;
     function GetInfo(aInfo : TCurlSListInfo) : PCurlSList;  overload;
 
     ///  Returns response code. Equivalent to GetInfo(CURLINFO_RESPONSE_CODE).
-    function ResponseCode : longint;
+    function GetResponseCode : longint;
 
+    ///  Makes an exact copy, e.g. for multithreading.
     function Clone : IEasyCurl;
   end;
 
@@ -112,12 +128,14 @@ type
     procedure RaiseIf(aCode : TCurlCode);  inline;
 
     procedure SetOpt(aOption : TCurlOffOption; aData : TCurlOff);  overload;
-    procedure SetOpt(aOption : TCurlOption; aData : PAnsiChar);  overload;
     procedure SetOpt(aOption : TCurlOption; aData : pointer);  overload;
     procedure SetOpt(aOption : TCurlIntOption; aData : NativeUInt);  overload;
     procedure SetOpt(aOption : TCurlIntOption; aData : boolean);  overload;
-    procedure SetOpt(aOption : TCurlOption; aData : RawByteString);  overload;
-    procedure SetOpt(aOption : TCurlOption; aData : UnicodeString);  overload;
+    procedure SetOpt(aOption : TCurlStringOption; aData : PAnsiChar);  overload;
+    procedure SetOpt(aOption : TCurlStringOption; aData : RawByteString);  overload;
+    procedure SetOpt(aOption : TCurlStringOption; aData : UnicodeString);  overload;
+    procedure SetOpt(aOption : TCurlSlistOption; aData : PCurlSList);  overload;
+    procedure SetOpt(aOption : TCurlPostOption; aData : PCurlHttpPost);  overload;
 
     procedure SetUrl(aData : PAnsiChar);      overload;   inline;
     procedure SetUrl(aData : RawByteString);  overload;   inline;
@@ -134,6 +152,9 @@ type
 
     procedure SetRecvStream(aData : TStream);
     procedure SetSendStream(aData : TStream);
+    procedure SetHeaderStream(aData : TStream);
+
+    procedure SetFollowLocation(aData : boolean);
 
     procedure RemoveCustomHeaders;
     procedure SetCustomHeaders(const x : array of RawByteString);
@@ -146,8 +167,10 @@ type
     function GetInfo(aInfo : TCurlDoubleInfo) : double;  overload;
     function GetInfo(aInfo : TCurlSListInfo) : PCurlSList;  overload;
 
-    function ResponseCode : longint;
+    function GetResponseCode : longint;
 
+    ///  This is implementation of IEasyCurl.Clone. If you dislike
+    ///  reference-counting, use TEasyCurlImpl.Create(someCurl).
     function Clone : IEasyCurl;
 
     class function StreamWrite(
@@ -278,7 +301,7 @@ begin
   RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
 end;
 
-procedure TEasyCurlImpl.SetOpt(aOption : TCurlOption; aData : PAnsiChar);
+procedure TEasyCurlImpl.SetOpt(aOption : TCurlStringOption; aData : PAnsiChar);
 begin
   RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
 end;
@@ -298,15 +321,26 @@ begin
   RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
 end;
 
-procedure TEasyCurlImpl.SetOpt(aOption : TCurlOption; aData : RawByteString);
+procedure TEasyCurlImpl.SetOpt(aOption : TCurlStringOption; aData : RawByteString);
 begin
   RaiseIf(curl_easy_setopt(fHandle, aOption, PAnsiChar(aData)));
 end;
 
-procedure TEasyCurlImpl.SetOpt(aOption : TCurlOption; aData : UnicodeString);
+procedure TEasyCurlImpl.SetOpt(aOption : TCurlStringOption; aData : UnicodeString);
 begin
   RaiseIf(curl_easy_setopt(fHandle, aOption, PAnsiChar(UTF8Encode(aData))));
 end;
+
+procedure TEasyCurlImpl.SetOpt(aOption : TCurlSlistOption; aData : PCurlSList);
+begin
+  RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
+end;
+
+procedure TEasyCurlImpl.SetOpt(aOption : TCurlPostOption; aData : PCurlHttpPost);
+begin
+  RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
+end;
+
 
 function TEasyCurlImpl.Clone : IEasyCurl;
 begin
@@ -381,7 +415,15 @@ begin
     else SetOpt(CURLOPT_READFUNCTION, @StreamRead);
 end;
 
-function TEasyCurlImpl.ResponseCode : longint;
+procedure TEasyCurlImpl.SetHeaderStream(aData : TStream);
+begin
+  SetOpt(CURLOPT_HEADERDATA, aData);
+  if aData = nil
+    then SetOpt(CURLOPT_HEADERFUNCTION, nil)
+    else SetOpt(CURLOPT_HEADERFUNCTION, @StreamWrite);
+end;
+
+function TEasyCurlImpl.GetResponseCode : longint;
 begin
   Result := GetInfo(CURLINFO_RESPONSE_CODE);
 end;
@@ -423,10 +465,15 @@ begin
   end;
 end;
 
+procedure TEasyCurlImpl.SetFollowLocation(aData : boolean);
+begin
+  SetOpt(CURLOPT_FOLLOWLOCATION, aData);
+end;
 procedure TEasyCurlImpl.SetSslVerifyHost(aData : TCurlVerifyHost);
 begin
   SetOpt(CURLOPT_SSL_VERIFYHOST, ord(aData));
 end;
+
 
 procedure TEasyCurlImpl.SetSslVerifyPeer(aData : boolean);
 begin

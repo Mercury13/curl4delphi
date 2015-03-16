@@ -1,4 +1,4 @@
-program Https;
+﻿program Https;
 
 {$APPTYPE CONSOLE}
 
@@ -7,9 +7,6 @@ program Https;
 uses
   System.SysUtils,
   Curl.Lib in '..\..\..\Src\Curl.Lib.pas';
-
-{$DEFINE SKIP_PEER_VERIFICATION}
-{.$DEFINE SKIP_HOSTNAME_VERIFICATION}
 
 var
   curl : TCurlHandle;
@@ -22,26 +19,9 @@ begin
   if curl <> nil then begin
     curl_easy_setopt(curl, CURLOPT_URL, 'https://ukr.net/');
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, true);
-
-{$IFDEF SKIP_PEER_VERIFICATION}
-    // If you want to connect to a site who isn't using a certificate that is
-    // signed by one of the certs in the CA bundle you have, you can skip the
-    // verification of the server's certificate. This makes the connection
-    // A LOT LESS SECURE.
-    //
-    // If you have a CA cert for the server stored someplace else than in the
-    // default bundle, then the CURLOPT_CAPATH option might come handy for
-    // you.
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
-{$ENDIF}
-
-{$IFDEF SKIP_HOSTNAME_VERIFICATION}
-    // If the site you're connecting to uses a different host name that what
-    // they have mentioned in their server certificate's commonName (or
-    // subjectAltName) fields, libcurl will refuse to connect. You can skip
-    // this check, but this will make the connection less secure.
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0);
-{$ENDIF}
+    curl_easy_setopt(curl, CURLOPT_CAINFO, 'cacert.pem');
+    // Unicode is also supported!
+    //curl_easy_setopt(curl, CURLOPT_CAINFO, PChar(UTF8Encode('α×β.pem')));
 
     // Perform the request, res will get the return code
     res := curl_easy_perform(curl);
