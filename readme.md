@@ -1,4 +1,7 @@
-﻿curl4delphi is a simple Delphi XE2+ binding for cURL.
+﻿About curl4delphi
+=================
+
+curl4delphi is a simple Delphi XE2+ binding for libcURL.
 
 © 2015 Mikhail Merkuryev
 
