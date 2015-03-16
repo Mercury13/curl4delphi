@@ -11,8 +11,6 @@ uses
 
 var
   curl : IEasyCurl;
-  res : TCurlCode;
-  code : longint;
 begin
   try
     curl := GetCurl;
