@@ -33,6 +33,6 @@ Downloading to Delphi TStream’s.
 
 ### EasyHttp\ProgressBar
 
-A GUI file downloader. This example is rather complex because of multithreading and `Content-Disposition`.
+A GUI file downloader. This example is rather complex because of multithreading and `Content-Disposition`. We do as most browsers do: request headers, then start writing to temporary file and simultaneously ask where to save it on HDD.
 
 Inter-thread communication, transfer function, quick-and-dirty header parsing.
