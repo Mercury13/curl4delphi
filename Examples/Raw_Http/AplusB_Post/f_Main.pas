@@ -49,7 +49,6 @@ var
   post, last : PCurlHttpPost;
   code : TCurlCode;
   stream : TRawByteStream;
-  sA, sB : RawByteString;
 begin
   post := nil;
   last := nil;
@@ -58,7 +57,6 @@ begin
   try
     curl_easy_setopt(curl, CURLOPT_URL, UTF8Encode(edUrl.Text));
     curl_easy_setopt(curl, CURLOPT_POST, true);
-    sA := UTF8Encode(edA.Text);
 
     curl_formadd(post, last,
             CURLFORM_COPYNAME, 'a',

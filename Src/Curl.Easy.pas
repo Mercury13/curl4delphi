@@ -6,7 +6,7 @@ uses
   // System
   System.Classes, System.SysUtils,
   // cUrl
-  Curl.Lib;
+  Curl.Lib, Curl.Form;
 
 type
   TCurlVerifyHost = (
@@ -68,6 +68,10 @@ type
     ///  Sets whether cURL will follow redirections.
     procedure SetFollowLocation(aData : boolean);
 
+    ///  Gets/sets form data
+    procedure SetForm(aForm : ICurlForm);
+    function GetForm : ICurlForm;
+
     ///  Removes custom HTTP headers
     procedure RemoveCustomHeaders;
 
@@ -101,6 +105,8 @@ type
 
     ///  Makes an exact copy, e.g. for multithreading.
     function Clone : IEasyCurl;
+
+    property Form : ICurlForm read GetForm write SetForm;
   end;
 
   ECurl = class (Exception) end;
@@ -118,6 +124,7 @@ type
   private
     fHandle : TCurlHandle;
     fCustomHeaders : OaSListEntry;
+    fForm : ICurlForm;
     class procedure LinkList(var x : OaSListEntry);  static;
   public
     constructor Create;  overload;
@@ -156,6 +163,9 @@ type
 
     procedure SetFollowLocation(aData : boolean);
 
+    procedure SetForm(aForm : ICurlForm);
+    function GetForm : ICurlForm;
+
     procedure RemoveCustomHeaders;
     procedure SetCustomHeaders(const x : array of RawByteString);
 
@@ -181,6 +191,8 @@ type
             var Buffer;
             Size, NItems : NativeUInt;
             OutStream : pointer) : NativeUInt;  cdecl;  static;
+
+    property Form : ICurlForm read GetForm write SetForm;
   end;
 
   ECurlError = class (ECurl)
@@ -478,6 +490,19 @@ end;
 procedure TEasyCurlImpl.SetSslVerifyPeer(aData : boolean);
 begin
   SetOpt(CURLOPT_SSL_VERIFYPEER, aData);
+end;
+
+procedure TEasyCurlImpl.SetForm(aForm : ICurlForm);
+begin
+  if aForm <> nil
+    then SetOpt(CURLOPT_HTTPPOST, aForm.RawValue)
+    else SetOpt(CURLOPT_HTTPPOST, nil);
+  fForm := aForm;
+end;
+
+function TEasyCurlImpl.GetForm : ICurlForm;
+begin
+  Result := fForm;
 end;
 
 ///// Standalone functions /////////////////////////////////////////////////////
