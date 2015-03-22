@@ -22,9 +22,14 @@ var
   stream : TStream;
 
 curl := CurlGet;
-curl.SetUrl('http://example.com');
-curl.SetRecvStream(stream);
-curl.Perform;
+stream := TFileStream.Create('curl.out', fmCreate);
+try
+  curl.SetUrl('http://example.com');
+  curl.SetRecvStream(stream);
+  curl.Perform;
+finally
+  stream.Free;
+end;
 ```
 
 Examples
