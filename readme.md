@@ -37,6 +37,6 @@ A GUI file downloader. This example is rather complex because of multithreading 
 
 Inter-thread communication, transfer function, quick-and-dirty header parsing.
 
-### RawHttp\AplusB_Post
+### RawHttp\AplusB_Post, EasyHttp\AplusB_Post
 
 A simple form demo. Please copy php_curl directory to a PHP-capable web server.
