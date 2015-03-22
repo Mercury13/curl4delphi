@@ -2,11 +2,11 @@ program AplusB_Post;
 
 uses
   Vcl.Forms,
-  f_Main in 'f_Main.pas' {fmMain},
   Curl.Lib in '..\..\..\Src\Curl.Lib.pas',
   Curl.RawByteStream in '..\..\..\Src\Curl.RawByteStream.pas',
   Curl.Easy in '..\..\..\Src\Curl.Easy.pas',
-  Curl.Form in '..\..\..\Src\Curl.Form.pas';
+  Curl.Form in '..\..\..\Src\Curl.Form.pas',
+  f_Main in 'f_Main.pas' {fmMain};
 
 {$R *.res}
 

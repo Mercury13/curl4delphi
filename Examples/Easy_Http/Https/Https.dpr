@@ -7,7 +7,8 @@
 uses
   System.SysUtils,
   Curl.Lib in '..\..\..\Src\Curl.Lib.pas',
-  Curl.Easy in '..\..\..\Src\Curl.Easy.pas';
+  Curl.Easy in '..\..\..\Src\Curl.Easy.pas',
+  Curl.Form in '..\..\..\Src\Curl.Form.pas';
 
 var
   curl : IEasyCurl;
