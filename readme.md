@@ -16,15 +16,16 @@ Quick start
 1. Add to project files `Curl.Lib`, `Curl.Easy`, `Curl.Interfaces`.
 1. Write such a piece of code.
 
-  var
-    curl : ICurl;
-	stream : TStream;
+```
+var
+  curl : ICurl;
+  stream : TStream;
 
-  curl := CurlGet;
-  curl.SetUrl('http://example.com');
-  curl.SetRecvStream(stream);
-  curl.Perform;
-
+curl := CurlGet;
+curl.SetUrl('http://example.com');
+curl.SetRecvStream(stream);
+curl.Perform;
+```
 
 Examples
 ========
