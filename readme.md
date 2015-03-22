@@ -62,3 +62,5 @@ Inter-thread communication, transfer function, quick-and-dirty header parsing.
 ### RawHttp\AplusB_Post, EasyHttp\AplusB_Post
 
 A simple form demo. Please copy `php_curl` directory to a PHP-capable web server.
+
+Forms (one field is set in a simple way, the other in more complex one).
