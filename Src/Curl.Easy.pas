@@ -6,7 +6,7 @@ uses
   // System
   System.Classes, System.SysUtils,
   // cUrl
-  Curl.Lib, Curl.Form;
+  Curl.Lib, Curl.Interfaces;
 
 type
   TCurlVerifyHost = (
@@ -14,7 +14,7 @@ type
       CURL_VERIFYHOST_EXISTENCE,
       CURL_VERIFYHOST_MATCH );
 
-  IEasyCurl = interface
+  ICurl = interface
     function GetHandle : TCurlHandle;
     property Handle : TCurlHandle read GetHandle;
 
@@ -104,7 +104,7 @@ type
     function GetResponseCode : longint;
 
     ///  Makes an exact copy, e.g. for multithreading.
-    function Clone : IEasyCurl;
+    function Clone : ICurl;
 
     property Form : ICurlForm read GetForm write SetForm;
   end;
@@ -113,7 +113,7 @@ type
 
   ECurlInternal = class (Exception) end;
 
-  TEasyCurlImpl = class (TInterfacedObject, IEasyCurl)
+  TEasyCurlImpl = class (TInterfacedObject, ICurl)
   private
     type
       TSListEntry = record
@@ -179,9 +179,9 @@ type
 
     function GetResponseCode : longint;
 
-    ///  This is implementation of IEasyCurl.Clone. If you dislike
+    ///  This is implementation of ICurl.Clone. If you dislike
     ///  reference-counting, use TEasyCurlImpl.Create(someCurl).
-    function Clone : IEasyCurl;
+    function Clone : ICurl;
 
     class function StreamWrite(
             var Buffer;
@@ -220,7 +220,7 @@ type
 var
   CurlLocalizeError : EvCurlLocalizeError = CurlDefaultLocalize.ErrorMsg;
 
-function GetCurl : IEasyCurl;
+function CurlGet : ICurl;
 
 implementation
 
@@ -354,7 +354,7 @@ begin
 end;
 
 
-function TEasyCurlImpl.Clone : IEasyCurl;
+function TEasyCurlImpl.Clone : ICurl;
 begin
   Result := TEasyCurlImpl.Create(Self);
 end;
@@ -507,7 +507,7 @@ end;
 
 ///// Standalone functions /////////////////////////////////////////////////////
 
-function GetCurl : IEasyCurl;
+function CurlGet : ICurl;
 begin
   Result := TEasyCurlImpl.Create;
 end;

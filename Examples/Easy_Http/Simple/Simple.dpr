@@ -8,21 +8,22 @@ uses
   System.SysUtils,
   Curl.Easy in '..\..\..\Src\Curl.Easy.pas',
   Curl.Lib in '..\..\..\Src\Curl.Lib.pas',
-  Curl.Form in '..\..\..\Src\Curl.Form.pas';
+  Curl.Form in '..\..\..\Src\Curl.Form.pas',
+  Curl.Interfaces in '..\..\..\Src\Curl.Interfaces.pas';
 
 const
   // I won’t use example.com, as someone removed redirection from example.com
   // AFAIK, ithappens.ru redirects to ithappens.me
   Url = 'http://ithappens.ru/';
 var
-  curl : IEasyCurl;
+  curl : ICurl;
   code : integer;
   ul, dl : double;
   effurl : PAnsiChar;
   engines : PCurlSList;
 begin
   try
-    curl := GetCurl;
+    curl := CurlGet;
     curl.SetUrl(Url);
     curl.SetFollowLocation(true);
 

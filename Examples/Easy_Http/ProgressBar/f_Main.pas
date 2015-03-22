@@ -18,7 +18,7 @@ const
 type
   TMyThread = class (TThread)
   private
-    curl : IEasyCurl;
+    curl : ICurl;
     progress : integer;
     fs : TFileStream;
     wantSelectFile : boolean;
@@ -207,7 +207,7 @@ begin
   wantSelectFile := true;
   wantedFileName := '';
   fs := TFileStream.Create(aTempName, fmCreate);
-  curl := GetCurl;
+  curl := CurlGet;
   curl.SetUrl(aUrl);
   curl.SetRecvStream(fs);
   curl.SetFollowLocation(true);

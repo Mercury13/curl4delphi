@@ -10,22 +10,22 @@ uses
   Curl.Easy in '..\..\..\Src\Curl.Easy.pas',
   Curl.Lib in '..\..\..\Src\Curl.Lib.pas',
   Curl.RawByteStream in '..\..\..\Src\Curl.RawByteStream.pas',
-  Curl.Form in '..\..\..\Src\Curl.Form.pas';
+  Curl.Interfaces in '..\..\..\Src\Curl.Interfaces.pas';
 
 const
   // I won’t use example.com, as someone removed redirection from example.com
   // AFAIK, ithappens.ru redirects to ithappens.me
   Url = 'http://ithappens.ru/';
 var
-  curl : IEasyCurl;
+  curl : ICurl;
   code : integer;
   fs : TFileStream;
   rbs : TRawByteStream;
 begin
   try
-    curl := GetCurl;
+    curl := CurlGet;
     curl.setUrl(Url);
-    curl.setOpt(CURLOPT_FOLLOWLOCATION, true);
+    curl.SetFollowLocation(true);
 
     fs := TFileStream.Create('index.html', fmCreate);
     curl.SetRecvStream(fs);

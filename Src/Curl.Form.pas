@@ -3,24 +3,21 @@ unit Curl.Form;
 interface
 
 uses
-  // System
-  System.Classes,
   // cURL
-  Curl.Lib;
+  Curl.Lib, Curl.Interfaces;
+
+function CurlGetForm : ICurlForm;
+//function CurlGetField : ICurlField;
+
+implementation
+
+uses
+  // System
+  System.Classes;
+
+///// TCurlForm ////////////////////////////////////////////////////////////////
 
 type
-  ICurlForm = interface
-    procedure Add(aName, aValue : RawByteString);  overload;
-    procedure Add(aName, aValue : string);  overload;
-    ///  @warning
-    ///  This is a rawmost version of Add. Please have CURLFORM_END
-    ///     in the end.
-    procedure Add(aArray : array of TCurlPostOption);  overload;
-
-    function DoesUseStreams : boolean;
-    function RawValue : PCurlHttpPost;
-  end;
-
   TCurlForm = class (TInterfacedObject, ICurlForm)
   private
     fStart, fEnd : PCurlHttpPost;
@@ -33,13 +30,8 @@ type
     procedure Add(aName, aValue : string);  overload;
     procedure Add(aArray : array of TCurlPostOption);  overload;
 
-    function DoesUseStreams : boolean;
     function RawValue : PCurlHttpPost;
   end;
-
-function GetCurlForm : ICurlForm;
-
-implementation
 
 constructor TCurlForm.Create;
 begin
@@ -85,17 +77,27 @@ begin
           CURLFORM_END);
 end;
 
-function TCurlForm.DoesUseStreams : boolean;
-begin
-  Result := false;
-end;
-
 function TCurlForm.RawValue : PCurlHttpPost;
 begin
   Result := fStart;
 end;
 
-function GetCurlForm : ICurlForm;
+
+///// TCurlField ///////////////////////////////////////////////////////////////
+
+const
+  ZeroField : PAnsiChar = #0;
+
+function ToPtr(length : integer; const data) : PAnsiChar;
+begin
+  if length = 0
+    then Result := ZeroField
+    else Result := PAnsiChar(@data);
+end;
+
+///// Misc. functions //////////////////////////////////////////////////////////
+
+function CurlGetForm : ICurlForm;
 begin
   Result := TCurlForm.Create;
 end;

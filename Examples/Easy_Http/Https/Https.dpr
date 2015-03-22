@@ -8,13 +8,13 @@ uses
   System.SysUtils,
   Curl.Lib in '..\..\..\Src\Curl.Lib.pas',
   Curl.Easy in '..\..\..\Src\Curl.Easy.pas',
-  Curl.Form in '..\..\..\Src\Curl.Form.pas';
+  Curl.Interfaces in '..\..\..\Src\Curl.Interfaces.pas';
 
 var
-  curl : IEasyCurl;
+  curl : ICurl;
 begin
   try
-    curl := GetCurl;
+    curl := CurlGet;
     curl.SetUrl('https://ukr.net');
     curl.SetFollowLocation(true);
     curl.SetCaFile('cacert.pem');

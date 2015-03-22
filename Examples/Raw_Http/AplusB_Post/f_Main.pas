@@ -30,7 +30,8 @@ implementation
 
 uses
   Curl.Lib,
-  Curl.RawByteStream;
+  Curl.RawByteStream,
+  Curl.Slist;
 
 {$R *.dfm}
 
@@ -49,18 +50,26 @@ var
   post, last : PCurlHttpPost;
   code : TCurlCode;
   stream : TRawByteStream;
+  list : ICurlSList;
 begin
   post := nil;
   last := nil;
   curl := curl_easy_init;
   stream := TRawByteStream.Create;
+  list := CurlGetSlist;
+  list.Add('Alpha: Bravo');
+  list.Add('Charlie: Delta');
   try
     curl_easy_setopt(curl, CURLOPT_URL, UTF8Encode(edUrl.Text));
     curl_easy_setopt(curl, CURLOPT_POST, true);
+    // Some free hostings may require a browser-like user-agent.
+    curl_easy_setopt(curl, CURLOPT_USERAGENT,
+        'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:36.0) Gecko/20100101 Firefox/36.0');
 
     curl_formadd(post, last,
             CURLFORM_COPYNAME, 'a',
             CURLFORM_COPYCONTENTS, PAnsiChar(UTF8Encode(edA.Text)),
+            CURLFORM_CONTENTHEADER, PAnsiChar(list.RawValue),
             CURLFORM_END);
 
     curl_formadd(post, last,
