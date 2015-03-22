@@ -40,6 +40,11 @@ type
     procedure SetCaFile(aData : RawByteString);  overload;
     procedure SetCaFile(aData : UnicodeString);  overload;
 
+    ///  Sets a user-agent
+    procedure SetUserAgent(aData : PAnsiChar);      overload;
+    procedure SetUserAgent(aData : RawByteString);  overload;
+    procedure SetUserAgent(aData : UnicodeString);  overload;
+
     ///  Sets an SSL version
     procedure SetSslVersion(aData : TCurlSslVersion);
 
@@ -124,7 +129,7 @@ type
   private
     fHandle : TCurlHandle;
     fCustomHeaders : OaSListEntry;
-    fForm : ICurlForm;
+    fForm :  ICurlForm;
     class procedure LinkList(var x : OaSListEntry);  static;
   public
     constructor Create;  overload;
@@ -151,6 +156,10 @@ type
     procedure SetCaFile(aData : PAnsiChar);      overload;   inline;
     procedure SetCaFile(aData : RawByteString);  overload;   inline;
     procedure SetCaFile(aData : UnicodeString);  overload;   inline;
+
+    procedure SetUserAgent(aData : PAnsiChar);      overload;
+    procedure SetUserAgent(aData : RawByteString);  overload;
+    procedure SetUserAgent(aData : UnicodeString);  overload;
 
     procedure SetSslVersion(aData : TCurlSslVersion);  inline;
 
@@ -394,6 +403,21 @@ begin
   SetOpt(CURLOPT_SSLVERSION, ord(aData));
 end;
 
+procedure TEasyCurlImpl.SetUserAgent(aData : PAnsiChar);
+begin
+  SetOpt(CURLOPT_USERAGENT, aData);
+end;
+
+procedure TEasyCurlImpl.SetUserAgent(aData : RawByteString);
+begin
+  SetOpt(CURLOPT_USERAGENT, PAnsiChar(aData));
+end;
+
+procedure TEasyCurlImpl.SetUserAgent(aData : UnicodeString);
+begin
+  SetOpt(CURLOPT_USERAGENT, PAnsiChar(UTF8Encode(aData)));
+end;
+
 class function TEasyCurlImpl.StreamWrite(
         var Buffer;
         Size, NItems : NativeUInt;
@@ -411,6 +435,7 @@ begin
   Result := TStream(OutStream).Read(Buffer, Size * NItems);
 end;
 
+
 procedure TEasyCurlImpl.SetRecvStream(aData : TStream);
 begin
   SetOpt(CURLOPT_WRITEDATA, aData);
@@ -418,6 +443,7 @@ begin
     then SetOpt(CURLOPT_WRITEFUNCTION, nil)
     else SetOpt(CURLOPT_WRITEFUNCTION, @StreamWrite);
 end;
+
 
 procedure TEasyCurlImpl.SetSendStream(aData : TStream);
 begin

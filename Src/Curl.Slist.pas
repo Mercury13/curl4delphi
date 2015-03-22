@@ -9,7 +9,7 @@ unit Curl.Slist;
 interface
 
 uses
-  Curl.Lib;
+  Curl.Lib, Curl.Interfaces;
 
 function CurlGetSList : ICurlSList;
 
@@ -38,8 +38,8 @@ type
     constructor Create;
     destructor Destroy;  override;
 
-    procedure Add(s : RawByteString);  overload;
-    procedure Add(s : string);  overload;
+    function AddRaw(s : RawByteString) : ICurlSList;
+    function Add(s : string) : ICurlSList;
 
     function RawValue : PCurlSList;
   end;
@@ -69,7 +69,7 @@ begin
   Result := @fStart.v.Raw;
 end;
 
-procedure TCurlList.Add(s : RawByteString);
+function TCurlList.AddRaw(s : RawByteString) : ICurlSList;
 var
   p : PEntry;
 begin
@@ -84,11 +84,12 @@ begin
     fEnd^.v.Next := p;
     fEnd := p;
   end;
+  Result := Self;
 end;
 
-procedure TCurlList.Add(s : string);
+function TCurlList.Add(s : string) : ICurlSList;
 begin
-  Add(UTF8Encode(s));
+  Result := AddRaw(UTF8Encode(s));
 end;
 
 function CurlGetSlist : ICurlSList;

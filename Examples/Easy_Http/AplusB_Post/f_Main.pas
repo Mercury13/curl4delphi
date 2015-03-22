@@ -29,11 +29,15 @@ var
 implementation
 
 uses
-  Curl.Interfaces, Curl.Easy, Curl.Form, Curl.Lib, Curl.RawByteStream;
+  Curl.Interfaces, Curl.Easy, Curl.Form, Curl.Lib, Curl.RawByteStream,
+  Curl.Slist;
 
 {$R *.dfm}
 
 procedure TfmMain.btAddClick(Sender: TObject);
+const
+  UserAgent : PAnsiChar =
+      'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:36.0) Gecko/20100101 Firefox/36.0';
 var
   curl : ICurl;
   form : ICurlForm;
@@ -46,9 +50,17 @@ begin
     curl.SetUrl(edUrl.Text);
     curl.SetOpt(CURLOPT_POST, true);
     // I tested it on my free hosting — it has a bot protection.
-    curl.SetOpt(CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:36.0) Gecko/20100101 Firefox/36.0');
+    curl.SetUserAgent(UserAgent);
 
-    form.Add('a', edA.Text);
+    // Complex version
+    form.Add(CurlGetField
+               .Name('a')
+               .Content(edA.Text)
+               .CustomHeaders(CurlGetSlist
+                                .AddRaw('Alpha: Bravo')
+                                .AddRaw('Charlie: Delta')));
+
+    // Simple
     form.Add('b', edB.Text);
 
     curl.Form := form;

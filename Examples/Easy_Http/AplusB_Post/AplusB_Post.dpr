@@ -7,7 +7,8 @@ uses
   Curl.Easy in '..\..\..\Src\Curl.Easy.pas',
   Curl.Form in '..\..\..\Src\Curl.Form.pas',
   f_Main in 'f_Main.pas' {fmMain},
-  Curl.Interfaces in '..\..\..\Src\Curl.Interfaces.pas';
+  Curl.Interfaces in '..\..\..\Src\Curl.Interfaces.pas',
+  Curl.Slist in '..\..\..\Src\Curl.Slist.pas';
 
 {$R *.res}
 

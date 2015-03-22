@@ -31,7 +31,7 @@ implementation
 uses
   Curl.Lib,
   Curl.RawByteStream,
-  Curl.Slist;
+  Curl.Interfaces, Curl.Slist;
 
 {$R *.dfm}
 
@@ -57,8 +57,8 @@ begin
   curl := curl_easy_init;
   stream := TRawByteStream.Create;
   list := CurlGetSlist;
-  list.Add('Alpha: Bravo');
-  list.Add('Charlie: Delta');
+  list.AddRaw('Alpha: Bravo');
+  list.AddRaw('Charlie: Delta');
   try
     curl_easy_setopt(curl, CURLOPT_URL, UTF8Encode(edUrl.Text));
     curl_easy_setopt(curl, CURLOPT_POST, true);

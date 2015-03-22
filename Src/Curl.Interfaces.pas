@@ -3,22 +3,22 @@ unit Curl.Interfaces;
 interface
 
 uses
-  Curl.Lib;
+  Curl.Lib, System.Classes;
 
 type
   ICurlSList = interface
-    procedure Add(s : RawByteString);  overload;
-    procedure Add(s : string);  overload;
+    function AddRaw(s : RawByteString) : ICurlSList;
+    function Add(s : string) : ICurlSList;
 
     function RawValue : PCurlSList;
   end;
 
   ICurlField = interface
-    function Name(x : RawByteString) : ICurlField;  overload;
-    function Name(x : string) : ICurlField;  overload;
+    function Name(x : RawByteString) : ICurlField;
     function PtrName(x : RawByteString) : ICurlField;
 
-    function Content(x : RawByteString) : ICurlField;  overload;
+    function ContentRaw(x : RawByteString) : ICurlField;
+    function Content(x : string) : ICurlField;  overload;
     function Content(length : integer; const data) : ICurlField;  overload;
 
     function PtrContent(x : RawByteString) : ICurlField;  overload;
@@ -28,9 +28,17 @@ type
 
     function UploadFile(x : string) : ICurlField;
 
-    function CustomHeaders(x : PCurlSlist) : ICurlField;
+    // Custom file uploading
+    function FileName(x : RawByteString) : ICurlField;
+    function FileBuffer(x : RawByteString) : ICurlField;  overload;
+    function FileBuffer(length : integer; const data) : ICurlField;  overload;
+    ///  @warning
+    ///  When you assign FileStream, you SHOULD use Delphi streams for all
+    ///     other reading operations of ICurl concerned!
+    ///  E.g. use SetSendStream, not SetOpt(CURLOPT_READFUNCTION).
+    function FileStream(x : TStream) : ICurlField;
 
-    function DoesUseStreams : boolean;
+    function CustomHeaders(x : ICurlSlist) : ICurlField;
 
     ///  Some CurlField’s store some data.
     ///  @return  a reference-counted object we should store until
@@ -49,6 +57,7 @@ type
     ///  This is a rawmost version of Add. Please have CURLFORM_END
     ///     in the end.
     procedure Add(aArray : array of TCurlPostOption);  overload;
+    procedure Add(aField : ICurlField);  overload;
 
     ///  Builds a complex field using fluid ICurlFormBuilder interface
     ///  @warning  it’ll always return the same builder, so
