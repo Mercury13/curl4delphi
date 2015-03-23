@@ -203,7 +203,7 @@ begin
   inherited;
   fStrings := TList<RawByteString>.Create;
   fSize := 0;
-  Reserve(1);
+  Reserve(10);
 end;
 
 
