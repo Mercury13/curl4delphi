@@ -77,11 +77,8 @@ type
     procedure SetForm(aForm : ICurlForm);
     function GetForm : ICurlForm;
 
-    ///  Removes custom HTTP headers
-    procedure RemoveCustomHeaders;
-
     ///  Sets custom HTTP headers
-    procedure SetCustomHeaders(const x : array of RawByteString);
+    procedure SetCustomHeaders(v : ICurlSList);
 
     ///  Performs the action.
     ///  Actually does RaiseIf(PerformNe).
@@ -128,9 +125,13 @@ type
       OaSListEntry = array of TSListEntry;
   private
     fHandle : TCurlHandle;
-    fCustomHeaders : OaSListEntry;
+    fCustomHeaders : ICurlSList;
     fForm :  ICurlForm;
-    class procedure LinkList(var x : OaSListEntry);  static;
+
+    procedure SetSList(
+            aOpt : TCurlSlistOption;
+            var aOldValue : ICurlSList;
+            aNewValue : ICurlSList);
   public
     constructor Create;  overload;
     constructor Create(aSource : TEasyCurlImpl);  overload;
@@ -175,8 +176,7 @@ type
     procedure SetForm(aForm : ICurlForm);
     function GetForm : ICurlForm;
 
-    procedure RemoveCustomHeaders;
-    procedure SetCustomHeaders(const x : array of RawByteString);
+    procedure SetCustomHeaders(v : ICurlSList);
 
     procedure Perform;
     function PerformNe : TCurlCode;
@@ -466,41 +466,27 @@ begin
   Result := GetInfo(CURLINFO_RESPONSE_CODE);
 end;
 
-class procedure TEasyCurlImpl.LinkList(var x : OaSListEntry);
+procedure TEasyCurlImpl.SetSList(
+        aOpt : TCurlSlistOption;
+        var aOldValue : ICurlSList;
+        aNewValue : ICurlSList);
 var
-  i : integer;
-  curr : ^TSListEntry;
-  prev : PCurlSList;
+  rawVal : PCurlSList;
 begin
-  prev := nil;
-  for i := High(x) downto Low(x) do begin
-    curr := @x[i];
-    curr^.entry.Data := PAnsiChar(curr^.str);
-    curr^.entry.Next := prev;
-    prev := @curr^.entry;
-  end;
+  if aNewValue = nil
+    then rawVal := nil
+    else rawVal := aNewValue.RawValue;
+
+  if rawVal = nil
+    then aOldValue := nil
+    else aOldValue := aNewValue;
+
+  SetOpt(aOpt, rawVal);
 end;
 
-procedure TEasyCurlImpl.RemoveCustomHeaders;
+procedure TEasyCurlImpl.SetCustomHeaders(v : ICurlSList);
 begin
-  SetLength(fCustomHeaders, 0);
-  SetOpt(CURLOPT_HTTPHEADER, nil);
-end;
-
-procedure TEasyCurlImpl.SetCustomHeaders(const x : array of RawByteString);
-var
-  i, n : integer;
-begin
-  n := Length(x);
-  if n = 0 then begin
-    RemoveCustomHeaders;
-  end else begin
-    SetLength(fCustomHeaders, Length(x));
-    for i := 0 to n - 1 do
-      fCustomHeaders[i].str := x[i];
-    LinkList(fCustomHeaders);
-    SetOpt(CURLOPT_HTTPHEADER, @fCustomHeaders[0].entry);
-  end;
+  SetSList(CURLOPT_HTTPHEADER, fCustomHeaders, v);
 end;
 
 procedure TEasyCurlImpl.SetFollowLocation(aData : boolean);
