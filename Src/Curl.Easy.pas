@@ -111,10 +111,6 @@ type
     property Form : ICurlForm read GetForm write SetForm;
   end;
 
-  ECurl = class (Exception) end;
-
-  ECurlInternal = class (Exception) end;
-
   TEasyCurlImpl = class (TInterfacedObject, ICurl)
   private
     type
@@ -448,9 +444,8 @@ end;
 procedure TEasyCurlImpl.SetSendStream(aData : TStream);
 begin
   SetOpt(CURLOPT_READDATA, aData);
-  if aData = nil
-    then SetOpt(CURLOPT_READFUNCTION, nil)
-    else SetOpt(CURLOPT_READFUNCTION, @StreamRead);
+  // Don’t set NULL to read function, as the function may be needed by form
+  SetOpt(CURLOPT_READFUNCTION, @StreamRead);
 end;
 
 procedure TEasyCurlImpl.SetHeaderStream(aData : TStream);
@@ -506,9 +501,13 @@ end;
 
 procedure TEasyCurlImpl.SetForm(aForm : ICurlForm);
 begin
-  if aForm <> nil
-    then SetOpt(CURLOPT_HTTPPOST, aForm.RawValue)
-    else SetOpt(CURLOPT_HTTPPOST, nil);
+  if aForm <> nil then begin
+    SetOpt(CURLOPT_HTTPPOST, aForm.RawValue);
+    if aForm.DoesUseStream
+      then SetOpt(CURLOPT_READFUNCTION, @StreamRead);
+  end else begin
+    SetOpt(CURLOPT_HTTPPOST, nil);
+  end;
   fForm := aForm;
 end;
 

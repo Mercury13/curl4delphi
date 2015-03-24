@@ -69,17 +69,24 @@ type
   TCurlForm = class (TCurlStorage, ICurlForm)
   private
     fStart, fEnd : PCurlHttpPost;
+    fDoesUseStream : boolean;
   public
     constructor Create;
     destructor Destroy;  override;
 
-    procedure Add(aName, aValue : PAnsiChar);  overload;
-    procedure Add(aName, aValue : RawByteString);  overload;  inline;
-    procedure Add(aName, aValue : string);  overload;
-    procedure Add(aField : ICurlField);  overload;
-    procedure Add(aArray : array of TCurlPostOption);  overload;
+    function Add(aName, aValue : PAnsiChar) : ICurlForm;  overload;
+    function Add(aName, aValue : RawByteString) : ICurlForm;  overload;  inline;
+    function Add(aName, aValue : string) : ICurlForm;  overload;
+    function Add(aField : ICurlField) : ICurlForm;  overload;
+    function Add(aArray : array of TCurlPostOption) : ICurlForm;  overload;
+
+    function AddDiskFile(
+              aFieldName : RawByteString;
+              aFileName : string;
+              aContentType : RawByteString) : ICurlForm;
 
     function RawValue : PCurlHttpPost;
+    function DoesUseStream : boolean;
   end;
 
 constructor TCurlForm.Create;
@@ -87,6 +94,7 @@ begin
   inherited;
   fStart := nil;
   fEnd := nil;
+  fDoesUseStream := false;
 end;
 
 
@@ -96,15 +104,16 @@ begin
 end;
 
 
-procedure TCurlForm.Add(aName, aValue : PAnsiChar);
+function TCurlForm.Add(aName, aValue : PAnsiChar) : ICurlForm;
 begin
   curl_formadd(fStart, fEnd,
           CURLFORM_COPYNAME, aName,
           CURLFORM_COPYCONTENTS, aValue,
           CURLFORM_END);
+  Result := Self;
 end;
 
-procedure TCurlForm.Add(aName, aValue : RawByteString);
+function TCurlForm.Add(aName, aValue : RawByteString) : ICurlForm;
 begin
   curl_formadd(fStart, fEnd,
           CURLFORM_COPYNAME, PAnsiChar(aName),
@@ -112,32 +121,58 @@ begin
           CURLFORM_COPYCONTENTS, PAnsiChar(aValue),
           CURLFORM_CONTENTSLENGTH, PAnsiChar(length(aValue)),
           CURLFORM_END);
+  Result := Self;
 end;
 
-procedure TCurlForm.Add(aName, aValue : string);
+function TCurlForm.Add(aName, aValue : string) : ICurlForm;
 begin
-  Add(UTF8Encode(aName), UTF8Encode(aValue));
+  Result := Add(UTF8Encode(aName), UTF8Encode(aValue));
 end;
 
-procedure TCurlForm.Add(aArray : array of TCurlPostOption);
+function TCurlForm.Add(aArray : array of TCurlPostOption) : ICurlForm;
 begin
   curl_formadd(fStart, fEnd,
           CURLFORM_ARRAY, PAnsiChar(@aArray[0]),
           CURLFORM_END);
+  Result := Self;
 end;
 
-procedure TCurlForm.Add(aField : ICurlField);
+function TCurlForm.Add(aField : ICurlField) : ICurlForm;
 begin
   Store(aField.Storage);
   curl_formadd(fStart, fEnd,
           CURLFORM_ARRAY, PAnsiChar(aField.Build),
           CURLFORM_END);
+  if aField.DoesUseStream
+    then fDoesUseStream := true;
+
+  Result := Self;
+end;
+
+function TCurlForm.AddDiskFile(
+          aFieldName : RawByteString;
+          aFileName : string;
+          aContentType : RawByteString) : ICurlForm;
+begin
+  curl_formadd(fStart, fEnd,
+          CURLFORM_COPYNAME, PAnsiChar(aFieldName),
+          CURLFORM_NAMELENGTH, PAnsiChar(length(aFieldName)),
+          CURLFORM_FILE, PAnsiChar(UTF8Encode(aFileName)),
+          CURLFORM_CONTENTTYPE, PAnsiChar(aContentType),
+          CURLFORM_END);
+  Result := Self;
 end;
 
 function TCurlForm.RawValue : PCurlHttpPost;
 begin
   Result := fStart;
 end;
+
+function TCurlForm.DoesUseStream : boolean;
+begin
+  Result := fDoesUseStream;
+end;
+
 
 
 ///// TCurlField ///////////////////////////////////////////////////////////////
@@ -170,25 +205,28 @@ type
     constructor Create;
     destructor Destroy;  override;
 
-    function Name(x : RawByteString) : ICurlField;
-    function PtrName(x : RawByteString) : ICurlField;
+    function Name(const x : RawByteString) : ICurlField;
+    function PtrName(const x : RawByteString) : ICurlField;
 
-    function ContentRaw(x : RawByteString) : ICurlField;  overload;
-    function Content(x : string) : ICurlField;  overload;
+    function ContentRaw(const x : RawByteString) : ICurlField;  overload;
+    function Content(const x : string) : ICurlField;  overload;
     function Content(length : integer; const data) : ICurlField;  overload;
 
-    function PtrContent(x : RawByteString) : ICurlField;  overload;
+    function PtrContent(const x : RawByteString) : ICurlField;  overload;
     function PtrContent(length : integer; const data) : ICurlField;  overload;
 
-    function FileContent(x : string) : ICurlField;
+    function FileContent(const x : string) : ICurlField;
 
-    function UploadFile(x : string) : ICurlField;
-    function ContentType(x : RawByteString) : ICurlField;
+    function UploadFile(const aFname : string) : ICurlField;
+    function ContentType(const x : RawByteString) : ICurlField;
 
     // Custom file uploading
-    function FileName(x : RawByteString) : ICurlField;
-    function FileBuffer(x : RawByteString) : ICurlField;  overload;
-    function FileBuffer(length : integer; const data) : ICurlField;  overload;
+    function FileName(const x : RawByteString) : ICurlField;
+    function FileBuffer(
+            const aFname, aData : RawByteString) : ICurlField;  overload;
+    function FileBuffer(
+            const aFname : RawByteString;
+            length : integer; const data) : ICurlField;  overload;
     function FileStream(x : TStream) : ICurlField;
 
     function CustomHeaders(x : ICurlSlist) : ICurlField;
@@ -243,20 +281,20 @@ begin
   fStrings.Add(x);
 end;
 
-function TCurlField.Name(x : RawByteString) : ICurlField;
+function TCurlField.Name(const x : RawByteString) : ICurlField;
 begin
   Store(x);
   Add(CURLFORM_COPYNAME, PAnsiChar(x));
   Result := Self;
 end;
 
-function TCurlField.PtrName(x : RawByteString) : ICurlField;
+function TCurlField.PtrName(const x : RawByteString) : ICurlField;
 begin
   Add(CURLFORM_PTRNAME, PAnsiChar(x));
   Result := Self;
 end;
 
-function TCurlField.ContentRaw(x : RawByteString) : ICurlField;
+function TCurlField.ContentRaw(const x : RawByteString) : ICurlField;
 begin
   Store(x);
   Add(CURLFORM_CONTENTSLENGTH, PAnsiChar(Length(x)));
@@ -264,7 +302,7 @@ begin
   Result := Self;
 end;
 
-function TCurlField.Content(x : string) : ICurlField;
+function TCurlField.Content(const x : string) : ICurlField;
 begin
   Result := ContentRaw(UTF8Encode(x));
 end;
@@ -276,7 +314,7 @@ begin
   Result := Self;
 end;
 
-function TCurlField.PtrContent(x : RawByteString) : ICurlField;
+function TCurlField.PtrContent(const x : RawByteString) : ICurlField;
 begin
   Add(CURLFORM_CONTENTSLENGTH, PAnsiChar(length(x)));
   Add(CURLFORM_PTRCONTENTS, PAnsiChar(x));
@@ -290,7 +328,7 @@ begin
   Result := Self;
 end;
 
-function TCurlField.FileContent(x : string) : ICurlField;
+function TCurlField.FileContent(const x : string) : ICurlField;
 var
   utf : RawByteString;
 begin
@@ -300,41 +338,49 @@ begin
   Result := Self;
 end;
 
-function TCurlField.UploadFile(x : string) : ICurlField;
+function TCurlField.UploadFile(const aFname : string) : ICurlField;
 var
   utf : RawByteString;
 begin
-  utf := UTF8Encode(x);
+  utf := UTF8Encode(aFname);
   Store(utf);
   Add(CURLFORM_FILE, PAnsiChar(utf));
   Result := Self;
 end;
 
-function TCurlField.FileName(x : RawByteString) : ICurlField;
+function TCurlField.FileName(const x : RawByteString) : ICurlField;
 begin
   Store(x);
   Add(CURLFORM_FILENAME, PAnsiChar(x));
   Result := Self;
 end;
 
-function TCurlField.FileBuffer(x : RawByteString) : ICurlField;
+function TCurlField.FileBuffer(const aFname, aData : RawByteString) : ICurlField;
 begin
-  Store(x);
-  Add(CURLFORM_BUFFER, PAnsiChar(Length(x)));
-  Add(CURLFORM_BUFFERPTR, PAnsiChar(x));
+  Store(aFname);
+  Store(aData);
+  Add(CURLFORM_BUFFER, PAnsiChar(aFname));
+  Add(CURLFORM_BUFFERPTR, PAnsiChar(aData));
+  Add(CURLFORM_BUFFERLENGTH, PAnsiChar(Length(aData)));
   Result := Self;
 end;
 
-function TCurlField.FileBuffer(length : integer; const data) : ICurlField;
+function TCurlField.FileBuffer(
+        const aFname : RawByteString;
+        length : integer; const data) : ICurlField;
 begin
-  Add(CURLFORM_BUFFER, PAnsiChar(length));
+  Store(aFname);
+  Add(CURLFORM_BUFFER, PAnsiChar(aFname));
   Add(CURLFORM_BUFFERPTR, PAnsiChar(@data));
+  Add(CURLFORM_BUFFERLENGTH, PAnsiChar(length));
   Result := Self;
 end;
 
 function TCurlField.FileStream(x : TStream) : ICurlField;
 begin
-  raise ENotSupportedException.Create('[TCurlField.FileStream] Not implemented');
+  fDoesUseStream := true;
+  Add(CURLFORM_CONTENTSLENGTH, PAnsiChar(x.Size));
+  Add(CURLFORM_STREAM, PAnsiChar(x));
   Result := Self;
 end;
 
@@ -345,10 +391,10 @@ begin
   Result := Self;
 end;
 
-function TCurlField.ContentType(x : RawByteString) : ICurlField;
+function TCurlField.ContentType(const x : RawByteString) : ICurlField;
 begin
   Store(x);
-  Add(CURLFORM_CONTENTTYPE, PAnsiChar(Length(x)));
+  Add(CURLFORM_CONTENTTYPE, PAnsiChar(x));
   Result := Self;
 end;
 
