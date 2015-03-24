@@ -64,3 +64,7 @@ Inter-thread communication, transfer function, quick-and-dirty header parsing.
 A simple form demo. Please copy `php_curl` directory to a PHP-capable web server.
 
 Forms (one field is set in a simple way, the other in more complex one).
+
+### EasyHttp\PhotoInfo
+
+File uploading: disk file (2 ways), memory buffer, stream
