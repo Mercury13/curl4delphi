@@ -28,7 +28,9 @@ type
     procedure SetOpt(aOption : TCurlStringOption; aData : RawByteString);  overload;
     procedure SetOpt(aOption : TCurlStringOption; aData : UnicodeString);  overload;
     procedure SetOpt(aOption : TCurlSlistOption; aData : PCurlSList);  overload;
+              deprecated 'Use SetXXX instead: SetCustomHeaders, SetResolveList, etc.';
     procedure SetOpt(aOption : TCurlPostOption; aData : PCurlHttpPost);  overload;
+              deprecated 'Use SetForm or property Form instead.';
 
     ///  Sets a URL. Equivalent to SetOpt(CURLOPT_URL, aData).
     procedure SetUrl(aData : PAnsiChar);  overload;
@@ -77,8 +79,30 @@ type
     procedure SetForm(aForm : ICurlForm);
     function GetForm : ICurlForm;
 
-    ///  Sets custom HTTP headers
+    ///  For all these options the object stores a reference to an ICurlSList
+    ///  for itself.
+
+    ///  This points to a linked list of headers. This
+    ///  list is also used for RTSP.
     procedure SetCustomHeaders(v : ICurlSList);
+    ///  send linked-list of post-transfer QUOTE commands
+    procedure SetPostQuote(v : ICurlSList);
+    ///  Provide a pointer to a curl_slist with variables to pass to the telnet
+    ///  negotiations. The variables should be in the format <option=value>.
+    ///  libcurl supports the options 'TTYPE', 'XDISPLOC' and 'NEW_ENV'.
+    ///  See the TELNET standard for details.
+    procedure SetTelnetOptions(v : ICurlSList);
+    ///  send linked-list of pre-transfer QUOTE commands
+    procedure SetPreQuote(v : ICurlSList);
+    ///  Set aliases for HTTP 200 in the HTTP Response header
+    procedure SetHttp200Aliases(v : ICurlSList);
+    ///  set the SMTP mail receiver(s)
+    procedure SetMailRcpt(v : ICurlSList);
+    ///  send linked-list of name:port:address sets
+    procedure SetResolveList(v : ICurlSList);
+    ///  This points to a linked list of headers used for proxy requests only,
+    ///  struct curl_slist kind
+    procedure SetProxyHeader(v : ICurlSList);
 
     ///  Performs the action.
     ///  Actually does RaiseIf(PerformNe).
@@ -121,7 +145,8 @@ type
       OaSListEntry = array of TSListEntry;
   private
     fHandle : TCurlHandle;
-    fCustomHeaders : ICurlSList;
+    fCustomHeaders, fPostQuote, fTelnetOptions, fPreQuote,
+        fHttp200Aliases, fMailRcpt, fResolveList, fProxyHeader : ICurlSList;
     fForm :  ICurlForm;
 
     procedure SetSList(
@@ -173,6 +198,13 @@ type
     function GetForm : ICurlForm;
 
     procedure SetCustomHeaders(v : ICurlSList);
+    procedure SetPostQuote(v : ICurlSList);
+    procedure SetTelnetOptions(v : ICurlSList);
+    procedure SetPreQuote(v : ICurlSList);
+    procedure SetHttp200Aliases(v : ICurlSList);
+    procedure SetMailRcpt(v : ICurlSList);
+    procedure SetResolveList(v : ICurlSList);
+    procedure SetProxyHeader(v : ICurlSList);
 
     procedure Perform;
     function PerformNe : TCurlCode;
@@ -468,10 +500,12 @@ procedure TEasyCurlImpl.SetSList(
 var
   rawVal : PCurlSList;
 begin
+  // New value = nil — do not dereference
   if aNewValue = nil
     then rawVal := nil
     else rawVal := aNewValue.RawValue;
 
+  // Raw value = nil — do not store
   if rawVal = nil
     then aOldValue := nil
     else aOldValue := aNewValue;
@@ -484,10 +518,47 @@ begin
   SetSList(CURLOPT_HTTPHEADER, fCustomHeaders, v);
 end;
 
+procedure TEasyCurlImpl.SetPostQuote(v : ICurlSList);
+begin
+  SetSList(CURLOPT_POSTQUOTE, fPostQuote, v);
+end;
+
+procedure TEasyCurlImpl.SetTelnetOptions(v : ICurlSList);
+begin
+  SetSList(CURLOPT_TELNETOPTIONS, fTelnetOptions, v);
+end;
+
+procedure TEasyCurlImpl.SetPreQuote(v : ICurlSList);
+begin
+  SetSList(CURLOPT_PREQUOTE, fPreQuote, v);
+end;
+
+procedure TEasyCurlImpl.SetHttp200Aliases(v : ICurlSList);
+begin
+  SetSList(CURLOPT_HTTP200ALIASES, fHttp200Aliases, v);
+end;
+
+procedure TEasyCurlImpl.SetMailRcpt(v : ICurlSList);
+begin
+  SetSList(CURLOPT_MAIL_RCPT, fMailRcpt, v);
+end;
+
+procedure TEasyCurlImpl.SetResolveList(v : ICurlSList);
+begin
+  SetSList(CURLOPT_RESOLVE, fResolveList, v);
+end;
+
+procedure TEasyCurlImpl.SetProxyHeader(v : ICurlSList);
+begin
+  SetSList(CURLOPT_PROXYHEADER, fProxyHeader, v);
+end;
+
 procedure TEasyCurlImpl.SetFollowLocation(aData : boolean);
 begin
   SetOpt(CURLOPT_FOLLOWLOCATION, aData);
 end;
+
+
 procedure TEasyCurlImpl.SetSslVerifyHost(aData : TCurlVerifyHost);
 begin
   SetOpt(CURLOPT_SSL_VERIFYHOST, ord(aData));
