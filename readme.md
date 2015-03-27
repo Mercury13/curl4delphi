@@ -13,7 +13,7 @@ My initial version will support “easy” interface only.
 Quick start
 ===========
 
-1. Add to project files `Curl.Lib`, `Curl.Easy`, `Curl.Interfaces`.
+1. Add files `Curl.Lib`, `Curl.Easy`, `Curl.Interfaces` to your project.
 1. Write such a piece of code.
 
 ```
