@@ -4,7 +4,7 @@ object fmMain: TfmMain
   AutoSize = True
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
-  Caption = 'POST form demo'
+  Caption = 'File upload demo'
   ClientHeight = 200
   ClientWidth = 309
   Color = clBtnFace

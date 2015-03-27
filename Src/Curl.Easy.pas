@@ -14,7 +14,7 @@ type
       CURL_VERIFYHOST_EXISTENCE,
       CURL_VERIFYHOST_MATCH );
 
-  ICurl = interface
+  ICurl = interface (ICloseable)
     function GetHandle : TCurlHandle;
     property Handle : TCurlHandle read GetHandle;
 
@@ -58,19 +58,19 @@ type
     ///  WRITEFUNCTION and WRITEDATA.
     ///  Does not destroy the stream, you should dispose of it manually!
     ///  If aData = nil: removes all custom receivers.
-    procedure SetRecvStream(aData : TStream);
+    procedure SetRecvStream(aData : TStream; aFlags : TCurlStreamFlags);
 
     ///  Sets a sender stream. Equivalent to twin SetOpt,
     ///  READFUNCTION and READDATA.
     ///  Does not destroy the stream, you should dispose of it manually!
     ///  If aData = nil: removes all custom senders.
-    procedure SetSendStream(aData : TStream);
+    procedure SetSendStream(aData : TStream; aFlags : TCurlStreamFlags);
 
     ///  Sets a receiver stream. Equivalent to twin SetOpt,
     ///  HEADERFUNCTION and HEADERDATA.
     ///  Does not destroy the stream, you should dispose of it manually!
     ///  If aData = nil: removes all custom receivers.
-    procedure SetHeaderStream(aData : TStream);
+    procedure SetHeaderStream(aData : TStream; aFlags : TCurlStreamFlags);
 
     ///  Sets whether cURL will follow redirections.
     procedure SetFollowLocation(aData : boolean);
@@ -147,12 +147,16 @@ type
     fHandle : TCurlHandle;
     fCustomHeaders, fPostQuote, fTelnetOptions, fPreQuote,
         fHttp200Aliases, fMailRcpt, fResolveList, fProxyHeader : ICurlSList;
-    fForm :  ICurlForm;
+    fForm : ICurlForm;
+    // We won’t save a few bytes of memory; repeatable code is more important.
+    fRecvStream, fSendStream, fHeaderStream : TCurlAutoStream;
 
     procedure SetSList(
             aOpt : TCurlSlistOption;
             var aOldValue : ICurlSList;
             aNewValue : ICurlSList);
+
+    procedure RewindStreams;
   public
     constructor Create;  overload;
     constructor Create(aSource : TEasyCurlImpl);  overload;
@@ -188,9 +192,9 @@ type
     procedure SetSslVerifyHost(aData : TCurlVerifyHost);
     procedure SetSslVerifyPeer(aData : boolean);
 
-    procedure SetRecvStream(aData : TStream);
-    procedure SetSendStream(aData : TStream);
-    procedure SetHeaderStream(aData : TStream);
+    procedure SetRecvStream(aData : TStream; aFlags : TCurlStreamFlags);
+    procedure SetSendStream(aData : TStream; aFlags : TCurlStreamFlags);
+    procedure SetHeaderStream(aData : TStream; aFlags : TCurlStreamFlags);
 
     procedure SetFollowLocation(aData : boolean);
 
@@ -230,6 +234,8 @@ type
             OutStream : pointer) : NativeUInt;  cdecl;  static;
 
     property Form : ICurlForm read GetForm write SetForm;
+
+    procedure CloseStreams;
   end;
 
   ECurlError = class (ECurl)
@@ -292,6 +298,9 @@ end;
 constructor TEasyCurlImpl.Create(aSource : TEasyCurlImpl);
 begin
   inherited Create;
+  fSendStream.Init;
+  fRecvStream.Init;
+  fHeaderStream.Init;
   fHandle := curl_easy_duphandle(aSource.fHandle);
   if fHandle = nil then
     raise ECurlInternal.Create('[TEasyCurlImpl.Create(TEasyCurlImpl)] Cannot clone cURL object.');
@@ -299,6 +308,7 @@ end;
 
 destructor TEasyCurlImpl.Destroy;
 begin
+  CloseStreams;
   curl_easy_cleanup(fHandle);
   inherited;
 end;
@@ -317,11 +327,12 @@ end;
 
 procedure TEasyCurlImpl.Perform;
 begin
-  RaiseIf(curl_easy_perform(fHandle));
+  RaiseIf(PerformNe);
 end;
 
 function TEasyCurlImpl.PerformNe : TCurlCode;
 begin
+  RewindStreams;
   Result := curl_easy_perform(fHandle);
 end;
 
@@ -464,8 +475,9 @@ begin
 end;
 
 
-procedure TEasyCurlImpl.SetRecvStream(aData : TStream);
+procedure TEasyCurlImpl.SetRecvStream(aData : TStream; aFlags : TCurlStreamFlags);
 begin
+  fRecvStream.Assign(aData, aFlags);
   SetOpt(CURLOPT_WRITEDATA, aData);
   if aData = nil
     then SetOpt(CURLOPT_WRITEFUNCTION, nil)
@@ -473,15 +485,17 @@ begin
 end;
 
 
-procedure TEasyCurlImpl.SetSendStream(aData : TStream);
+procedure TEasyCurlImpl.SetSendStream(aData : TStream; aFlags : TCurlStreamFlags);
 begin
+  fSendStream.Assign(aData, aFlags);
   SetOpt(CURLOPT_READDATA, aData);
   // Don’t set NULL to read function, as the function may be needed by form
   SetOpt(CURLOPT_READFUNCTION, @StreamRead);
 end;
 
-procedure TEasyCurlImpl.SetHeaderStream(aData : TStream);
+procedure TEasyCurlImpl.SetHeaderStream(aData : TStream; aFlags : TCurlStreamFlags);
 begin
+  fHeaderStream.Assign(aData, aFlags);
   SetOpt(CURLOPT_HEADERDATA, aData);
   if aData = nil
     then SetOpt(CURLOPT_HEADERFUNCTION, nil)
@@ -585,6 +599,24 @@ end;
 function TEasyCurlImpl.GetForm : ICurlForm;
 begin
   Result := fForm;
+end;
+
+procedure TEasyCurlImpl.RewindStreams;
+begin
+  if fForm <> nil
+    then fForm.RewindStreams;
+  fSendStream.RewindRead;
+  fRecvStream.RewindWrite;
+  fHeaderStream.RewindWrite;
+end;
+
+procedure TEasyCurlImpl.CloseStreams;
+begin
+  if fForm <> nil
+    then fForm.CloseStreams;
+  fSendStream.Destroy;
+  fRecvStream.Destroy;
+  fHeaderStream.Destroy;
 end;
 
 ///// Standalone functions /////////////////////////////////////////////////////

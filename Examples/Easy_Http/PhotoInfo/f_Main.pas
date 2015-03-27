@@ -94,8 +94,7 @@ begin
   if not GetFile(fname, ftype) then Exit;
 
   curl := CurlGet;
-  stream.Data := '';
-  curl.SetRecvStream(stream);
+  curl.SetRecvStream(stream, [csfAutoRewind]);
   curl.SetUrl(edUrl.Text);
   curl.SetOpt(CURLOPT_POST, true);
 
@@ -115,8 +114,7 @@ begin
   if not GetFile(fname, ftype) then Exit;
 
   curl := CurlGet;
-  stream.Data := '';
-  curl.SetRecvStream(stream);
+  curl.SetRecvStream(stream, [csfAutoRewind]);
   curl.SetUrl(edUrl.Text);
   curl.SetOpt(CURLOPT_POST, true);
 
@@ -134,13 +132,9 @@ procedure TfmMain.btSynthMemoryClick(Sender: TObject);
 var
   curl : ICurl;
 begin
-  // Seek to beginning again
-  pngStream.Position := 0;
-
   // cURL
   curl := CurlGet;
-  stream.Data := '';
-  curl.SetRecvStream(stream);
+  curl.SetRecvStream(stream, [csfAutoRewind]);
   curl.SetUrl(edUrl.Text);
   curl.SetOpt(CURLOPT_POST, true);
 
@@ -164,15 +158,14 @@ begin
 
   // cURL
   curl := CurlGet;
-  stream.Data := '';
-  curl.SetRecvStream(stream);
+  curl.SetRecvStream(stream, [csfAutoRewind]);
   curl.SetUrl(edUrl.Text);
   curl.SetOpt(CURLOPT_POST, true);
 
   curl.Form := CurlGetForm.Add(
                   CurlGetField
                       .Name('photo')
-                      .FileStream(pngStream)
+                      .FileStream(pngStream, [csfAutoRewind])
                       .ContentType('image/png')
                       .FileName('synth_stream.png'));
 

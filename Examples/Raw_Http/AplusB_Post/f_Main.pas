@@ -29,9 +29,7 @@ var
 implementation
 
 uses
-  Curl.Lib,
-  Curl.RawByteStream,
-  Curl.Interfaces, Curl.Slist;
+  Curl.Lib, Curl.RawByteStream, Curl.Interfaces, Curl.Slist;
 
 {$R *.dfm}
 
@@ -56,9 +54,10 @@ begin
   last := nil;
   curl := curl_easy_init;
   stream := TRawByteStream.Create;
-  list := CurlGetSlist;
-  list.AddRaw('Alpha: Bravo');
-  list.AddRaw('Charlie: Delta');
+  // For simplicity, I’ll use a wrapper for SList.
+  list := CurlGetSlist
+          .AddRaw('Alpha: Bravo')
+          .AddRaw('Charlie: Delta');
   try
     curl_easy_setopt(curl, CURLOPT_URL, UTF8Encode(edUrl.Text));
     curl_easy_setopt(curl, CURLOPT_POST, true);

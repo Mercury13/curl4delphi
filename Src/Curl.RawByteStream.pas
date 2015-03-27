@@ -5,6 +5,9 @@ interface
 uses
   System.Classes;
 
+// Turn it on to ensure that the stream is properly destroyed.
+{.$DEFINE DESTRUCTION_TEST}
+
 type
   TRawByteStream = class(TStream)
   private
@@ -18,6 +21,9 @@ type
   public
     constructor Create;  overload;
     constructor Create(aData : RawByteString);  overload;
+    {$IFDEF DESTRUCTION_TEST}
+    destructor Destroy;  override;
+    {$ENDIF}
     function Read(var Buffer; Count: Longint): Longint; override;
     function Write(const Buffer; Count: Longint): Longint; override;
     function Seek(const Offset: Int64; Origin: TSeekOrigin): Int64; override;
@@ -35,13 +41,23 @@ const
 
 constructor TRawByteStream.Create;
 begin
+  inherited;
   Clear;
 end;
 
 constructor TRawByteStream.Create(aData : RawByteString);
 begin
+  inherited Create;
   Data := aData;
 end;
+
+{$IFDEF DESTRUCTION_TEST}
+destructor TRawByteStream.Destroy;
+begin
+  // Debug: test for destruction
+  inherited;
+end;
+{$ENDIF}
 
 procedure TRawByteStream.SetData(x : RawByteString);
 begin

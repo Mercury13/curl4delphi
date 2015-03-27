@@ -87,7 +87,7 @@ implementation
 
 uses
   System.IOUtils,
-  Curl.HttpCodes;
+  Curl.Interfaces, Curl.HttpCodes;
 
 {$R *.dfm}
 
@@ -209,7 +209,7 @@ begin
   fs := TFileStream.Create(aTempName, fmCreate);
   curl := CurlGet;
   curl.SetUrl(aUrl);
-  curl.SetRecvStream(fs);
+  curl.SetRecvStream(fs, [csfAutoDestroy]);
   curl.SetFollowLocation(true);
   // Progress
   curl.SetOpt(CURLOPT_NOPROGRESS, 0);
@@ -226,11 +226,7 @@ end;
 procedure TMyThread.Execute;
 begin
   try
-    try
-      curl.Perform;
-    finally
-      fs.Free;
-    end;
+    curl.Perform;
     if curl.GetResponseCode = HTTP_OK
       then fmMain.AsyncStop(true)
       else fmMain.SetError(Format('HTTP error %d.', [curl.GetResponseCode]));

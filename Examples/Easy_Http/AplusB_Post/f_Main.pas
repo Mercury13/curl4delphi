@@ -46,30 +46,27 @@ begin
   curl := CurlGet;
   form := CurlGetForm;
   stream := TRawByteStream.Create;
-  try
-    curl.SetUrl(edUrl.Text);
-    curl.SetOpt(CURLOPT_POST, true);
-    // I tested it on my free hosting — it has a bot protection.
-    curl.SetUserAgent(UserAgent);
 
-    // Complex version
-    form.Add(CurlGetField
-               .Name('a')
-               .Content(edA.Text)
-               .CustomHeaders(CurlGetSlist
-                                .AddRaw('Alpha: Bravo')
-                                .AddRaw('Charlie: Delta')));
+  curl.SetUrl(edUrl.Text);
+  curl.SetOpt(CURLOPT_POST, true);
+  // I tested it on my free hosting — it has a bot protection.
+  curl.SetUserAgent(UserAgent);
 
-    // Simple
-    form.Add('b', edB.Text);
+  // Complex version (requires additional headers)
+  form.Add(CurlGetField
+             .Name('a')
+             .Content(edA.Text)
+             .CustomHeaders(CurlGetSlist
+                              .AddRaw('Alpha: Bravo')
+                              .AddRaw('Charlie: Delta')));
 
-    curl.Form := form;
-    curl.SetRecvStream(stream);
-    curl.Perform;
-    memoResponse.Text := string(stream.Data);
-  finally
-    stream.Free;
-  end;
+  // Simple version (just add a field)
+  form.Add('b', edB.Text);
+
+  curl.Form := form;
+  curl.SetRecvStream(stream, [csfAutoDestroy]);
+  curl.Perform;
+  memoResponse.Text := string(stream.Data);
 end;
 
 end.

@@ -13,60 +13,111 @@ implementation
 
 uses
   // System
-  System.Classes,
-  System.Generics.Collections,
+  System.Classes, System.SysUtils, System.Generics.Collections,
   // Curl
   Curl.Easy;
 
-///// TCurlStorage /////////////////////////////////////////////////////////////
-
+///// TCurlStreamStorage ///////////////////////////////////////////////////////
 
 ///
 ///  An object that stores one or several ref-counted objects.
 ///
 type
-  TCurlStorage = class (TInterfacedObject)
-  private
-    fSingleStorage : IInterface;
-    fMultiStorage : IInterfaceList;
+  TCurlStreamStorage = class (TInterfacedObject, IRewindable)
   protected
-    procedure Store(x : IInterface);
+    fStreams : TList<TCurlAutoStream>;
   public
-    function Storage : IInterface;
+    constructor Create;
+    destructor Destroy; override;
+    procedure Store(aStream : TStream; aFlags : TCurlStreamFlags);
+    procedure RewindStreams;  virtual;
+    procedure CloseStreams;   virtual;
   end;
 
-procedure TCurlStorage.Store(x : IInterface);
+constructor TCurlStreamStorage.Create;
 begin
-  if x = nil
-    then Exit;
-
-  // Store only one object?
-  if fSingleStorage = nil then begin
-    fSingleStorage := x;
-    Exit;
-  end;
-
-  // Otherwise convert single storage to multi-storage
-  if fMultiStorage = nil then begin
-    fMultiStorage := TInterfaceList.Create;
-    fMultiStorage.Add(fSingleStorage);
-    fSingleStorage := nil;
-  end;
-
-  fMultiStorage.Add(x);
+  inherited;
+  fStreams := nil;
 end;
 
-function TCurlStorage.Storage : IInterface;
+destructor TCurlStreamStorage.Destroy;
 begin
-  if fSingleStorage <> nil
-    then Result := fSingleStorage
-    else Result := fMultiStorage;
+  CloseStreams;
+  inherited;
+end;
+
+procedure TCurlStreamStorage.Store(
+        aStream : TStream; aFlags : TCurlStreamFlags);
+var
+  q : TCurlAutoStream;
+begin
+  if aFlags <> [] then begin
+    q.Stream := aStream;
+    q.Flags := aFlags;
+    if fStreams = nil
+      then fStreams := TList<TCurlAutoStream>.Create;
+    fStreams.Add(q);
+  end;
+end;
+
+procedure TCurlStreamStorage.RewindStreams;
+var
+  q : TCurlAutoStream;
+begin
+  if fStreams <> nil then
+    for q in fStreams do
+      q.RewindRead;
+end;
+
+procedure TCurlStreamStorage.CloseStreams;
+var
+  q : TCurlAutoStream;
+begin
+  if fStreams <> nil then begin
+    for q in fStreams do
+      q.Destroy;
+    FreeAndNil(fStreams);
+  end;
+end;
+
+
+///// TCurlStorage /////////////////////////////////////////////////////////////
+
+type
+  TCurlStorage<Intf : IInterface> = class (TCurlStreamStorage)
+  protected
+    fStorage : TList<Intf>;
+    procedure Store(x : Intf);  overload;
+  public
+    constructor Create;
+    destructor Destroy; override;
+  end;
+
+constructor TCurlStorage<Intf>.Create;
+begin
+  inherited;
+  fStorage := nil;
+end;
+
+destructor TCurlStorage<Intf>.Destroy;
+begin
+  fStorage.Free;
+  inherited;
+end;
+
+procedure TCurlStorage<Intf>.Store(x : Intf);
+begin
+  if x <> nil then begin
+    if fStorage = nil
+      then fStorage := TList<Intf>.Create;
+    fStorage.Add(x);
+  end;
 end;
 
 ///// TCurlForm ////////////////////////////////////////////////////////////////
 
 type
-  TCurlForm = class (TCurlStorage, ICurlForm)
+  TCurlForm = class (TCurlStorage<ICurlField>, ICurlForm)
   private
     fStart, fEnd : PCurlHttpPost;
     fDoesUseStream : boolean;
@@ -87,6 +138,8 @@ type
 
     function RawValue : PCurlHttpPost;
     function DoesUseStream : boolean;
+    procedure RewindStreams;  override;
+    procedure CloseStreams;  override;
   end;
 
 constructor TCurlForm.Create;
@@ -94,6 +147,7 @@ begin
   inherited;
   fStart := nil;
   fEnd := nil;
+  fStreams := nil;
   fDoesUseStream := false;
 end;
 
@@ -101,6 +155,7 @@ end;
 destructor TCurlForm.Destroy;
 begin
   curl_formfree(fStart);
+  fStreams.Free;
 end;
 
 
@@ -139,7 +194,8 @@ end;
 
 function TCurlForm.Add(aField : ICurlField) : ICurlForm;
 begin
-  Store(aField.Storage);
+  if aField.DoesStore
+    then Store(aField);
   curl_formadd(fStart, fEnd,
           CURLFORM_ARRAY, PAnsiChar(aField.Build),
           CURLFORM_END);
@@ -153,13 +209,29 @@ function TCurlForm.AddDiskFile(
           aFieldName : RawByteString;
           aFileName : string;
           aContentType : RawByteString) : ICurlForm;
+var
+  stream : TFileStream;
 begin
+// Used to be…
+//  u8 := UTF8Encode(aFileName);
+//  curl_formadd(fStart, fEnd,
+//          CURLFORM_COPYNAME, PAnsiChar(aFieldName),
+//          CURLFORM_NAMELENGTH, PAnsiChar(length(aFieldName)),
+//          CURLFORM_FILE, PAnsiChar(u8),
+//          CURLFORM_CONTENTTYPE, PAnsiChar(aContentType),
+//          CURLFORM_END);
+  // CURLFORM_FILE is not Unicode-enabled, so we’ll do this thingy.
+  stream := TFileStream.Create(aFileName, fmOpenRead + fmShareDenyWrite);
   curl_formadd(fStart, fEnd,
           CURLFORM_COPYNAME, PAnsiChar(aFieldName),
           CURLFORM_NAMELENGTH, PAnsiChar(length(aFieldName)),
-          CURLFORM_FILE, PAnsiChar(UTF8Encode(aFileName)),
+          CURLFORM_FILENAME, PAnsiChar(UTF8Encode(ExtractFileName(aFileName))),
+          CURLFORM_STREAM, PAnsiChar(stream),
+          CURLFORM_CONTENTSLENGTH, PAnsiChar(stream.Size),
           CURLFORM_CONTENTTYPE, PAnsiChar(aContentType),
           CURLFORM_END);
+  Store(stream, [csfAutoRewind, csfAutoDestroy]);
+  fDoesUseStream := true;
   Result := Self;
 end;
 
@@ -173,6 +245,25 @@ begin
   Result := fDoesUseStream;
 end;
 
+procedure TCurlForm.RewindStreams;
+var
+  fld : ICurlField;
+begin
+  inherited;
+  if fStorage <> nil then
+    for fld in fStorage do
+      fld.RewindStreams;
+end;
+
+procedure TCurlForm.CloseStreams;
+var
+  fld : ICurlField;
+begin
+  inherited;
+  if fStorage <> nil then
+    for fld in fStorage do
+      fld.CloseStreams;
+end;
 
 
 ///// TCurlField ///////////////////////////////////////////////////////////////
@@ -188,7 +279,7 @@ begin
 end;
 
 type
-  TCurlField = class (TCurlStorage, ICurlField)
+  TCurlField = class (TCurlStorage<IInterface>, ICurlField)
   private
     fData : array of TCurlForms;
     fSize : integer;
@@ -206,7 +297,6 @@ type
     destructor Destroy;  override;
 
     function Name(const x : RawByteString) : ICurlField;
-    function PtrName(const x : RawByteString) : ICurlField;
 
     function ContentRaw(const x : RawByteString) : ICurlField;  overload;
     function Content(const x : string) : ICurlField;  overload;
@@ -227,11 +317,12 @@ type
     function FileBuffer(
             const aFname : RawByteString;
             length : integer; const data) : ICurlField;  overload;
-    function FileStream(x : TStream) : ICurlField;
+    function FileStream(x : TStream; aFlags : TCurlStreamFlags) : ICurlField;
 
     function CustomHeaders(x : ICurlSlist) : ICurlField;
 
     function DoesUseStream : boolean;
+    function DoesStore : boolean;
 
     function Build : PCurlHttpPost;
   end;
@@ -288,12 +379,6 @@ begin
   Result := Self;
 end;
 
-function TCurlField.PtrName(const x : RawByteString) : ICurlField;
-begin
-  Add(CURLFORM_PTRNAME, PAnsiChar(x));
-  Result := Self;
-end;
-
 function TCurlField.ContentRaw(const x : RawByteString) : ICurlField;
 begin
   Store(x);
@@ -332,6 +417,7 @@ function TCurlField.FileContent(const x : string) : ICurlField;
 var
   utf : RawByteString;
 begin
+  /// @todo [bug] FileContent is not Unicode-enabled
   utf := UTF8Encode(x);
   Store(utf);
   Add(CURLFORM_FILECONTENT, PAnsiChar(utf));
@@ -376,7 +462,7 @@ begin
   Result := Self;
 end;
 
-function TCurlField.FileStream(x : TStream) : ICurlField;
+function TCurlField.FileStream(x : TStream; aFlags : TCurlStreamFlags) : ICurlField;
 begin
   fDoesUseStream := true;
   Add(CURLFORM_CONTENTSLENGTH, PAnsiChar(x.Size));
@@ -408,6 +494,11 @@ end;
 function TCurlField.DoesUseStream : boolean;
 begin
   Result := fDoesUseStream;
+end;
+
+function TCurlField.DoesStore : boolean;
+begin
+  Result := (fStreams <> nil) or (fStorage <> nil);
 end;
 
 ///// Misc. functions //////////////////////////////////////////////////////////

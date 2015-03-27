@@ -28,25 +28,17 @@ begin
     curl.SetFollowLocation(true);
 
     fs := TFileStream.Create('index.html', fmCreate);
-    curl.SetRecvStream(fs);
+    curl.SetRecvStream(fs, [csfAutoDestroy]);
 
     // Perform the request
-    try
-      curl.Perform;
-    finally
-      fs.Free;
-    end;
+    curl.Perform;
 
     // Perform once again, to RawByteStream.
     // And write the first 1000
     rbs := TRawByteStream.Create;
-    curl.SetRecvStream(rbs);
-    try
-      curl.Perform;
-      Writeln(Copy(rbs.Data, 1, 1000));
-    finally
-      rbs.Free;
-    end;
+    curl.SetRecvStream(rbs, [csfAutoDestroy]);
+    curl.Perform;
+    Writeln(Copy(rbs.Data, 1, 1000));
 
     // Check for some info
     code := curl.GetResponseCode;
