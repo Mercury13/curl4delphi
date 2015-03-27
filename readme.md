@@ -23,13 +23,9 @@ var
 
 curl := CurlGet;
 stream := TFileStream.Create('curl.out', fmCreate);
-try
-  curl.SetUrl('http://example.com');
-  curl.SetRecvStream(stream);
-  curl.Perform;
-finally
-  stream.Free;
-end;
+curl.SetUrl('http://example.com');
+curl.SetRecvStream(stream, [csfAutoDestroy]);
+curl.Perform;
 ```
 
 Examples
