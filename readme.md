@@ -26,6 +26,8 @@ curl.SetRecvStream(stream, [csfAutoDestroy]);
 curl.Perform;
 ```
 
+[A bit more elaborate version of this example is `EasyHttp\StreamedDl`].
+
 Examples
 ========
 
