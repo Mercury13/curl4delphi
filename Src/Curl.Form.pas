@@ -129,6 +129,7 @@ type
   TCurlForm = class (TCurlStorage<ICurlField>, ICurlForm)
   private
     fStart, fEnd : PCurlHttpPost;
+    class procedure RaiseIf(v : TCurlFormCode);  static;
   public
     constructor Create;
     destructor Destroy;  override;
@@ -164,23 +165,41 @@ begin
 end;
 
 
+class procedure TCurlForm.RaiseIf(v : TCurlFormCode);
+const
+  OptionNames : array [TCurlFormCode] of string = (
+      '',                               // CURL_FORMADD_OK,
+      'Not enough memory',              // CURL_FORMADD_MEMORY,
+      'An option os mentioned twice',   // CURL_FORMADD_OPTION_TWICE,
+      'Nil as an option',               // CURL_FORMADD_NULL,
+      'Unknown option',                 // CURL_FORMADD_UNKNOWN_OPTION,
+      'Incomplete option set',          // CURL_FORMADD_INCOMPLETE,
+      'Illegal array',                  // CURL_FORMADD_ILLEGAL_ARRAY,
+      'cURL is built w/o this feature'  // CURL_FORMADD_DISABLED
+  );
+begin
+  if v = CURL_FORMADD_OK then Exit;
+  raise ECurlInternal.Create(OptionNames[v]);
+end;
+
+
 function TCurlForm.Add(aName, aValue : PAnsiChar) : ICurlForm;
 begin
-  curl_formadd(fStart, fEnd,
+  RaiseIf(curl_formadd(fStart, fEnd,
           CURLFORM_COPYNAME, aName,
           CURLFORM_COPYCONTENTS, aValue,
-          CURLFORM_END);
+          CURLFORM_END));
   Result := Self;
 end;
 
 function TCurlForm.Add(aName, aValue : RawByteString) : ICurlForm;
 begin
-  curl_formadd(fStart, fEnd,
+  RaiseIf(curl_formadd(fStart, fEnd,
           CURLFORM_COPYNAME, PAnsiChar(aName),
           CURLFORM_NAMELENGTH, PAnsiChar(length(aName)),
           CURLFORM_COPYCONTENTS, PAnsiChar(aValue),
           CURLFORM_CONTENTSLENGTH, PAnsiChar(length(aValue)),
-          CURLFORM_END);
+          CURLFORM_END));
   Result := Self;
 end;
 
@@ -191,9 +210,9 @@ end;
 
 function TCurlForm.Add(aArray : array of TCurlPostOption) : ICurlForm;
 begin
-  curl_formadd(fStart, fEnd,
+  RaiseIf(curl_formadd(fStart, fEnd,
           CURLFORM_ARRAY, PAnsiChar(@aArray[0]),
-          CURLFORM_END);
+          CURLFORM_END));
   Result := Self;
 end;
 
@@ -201,9 +220,9 @@ function TCurlForm.Add(aField : ICurlField) : ICurlForm;
 begin
   if aField.DoesStore
     then Store(aField);
-  curl_formadd(fStart, fEnd,
+  RaiseIf(curl_formadd(fStart, fEnd,
           CURLFORM_ARRAY, PAnsiChar(aField.Build),
-          CURLFORM_END);
+          CURLFORM_END));
   if aField.DoesUseStream
     then fDoesUseStream := true;
 
@@ -227,14 +246,14 @@ begin
 //          CURLFORM_END);
   // CURLFORM_FILE is not Unicode-enabled, so we’ll do this thingy.
   stream := TFileStream.Create(aFileName, fmOpenRead + fmShareDenyWrite);
-  curl_formadd(fStart, fEnd,
+  RaiseIf(curl_formadd(fStart, fEnd,
           CURLFORM_COPYNAME, PAnsiChar(aFieldName),
           CURLFORM_NAMELENGTH, PAnsiChar(length(aFieldName)),
           CURLFORM_FILENAME, PAnsiChar(UTF8Encode(ExtractFileName(aFileName))),
           CURLFORM_STREAM, PAnsiChar(stream),
           CURLFORM_CONTENTSLENGTH, PAnsiChar(stream.Size),
           CURLFORM_CONTENTTYPE, PAnsiChar(aContentType),
-          CURLFORM_END);
+          CURLFORM_END));
   Store(stream, [csfAutoRewind, csfAutoDestroy]);
   fDoesUseStream := true;
   Result := Self;
