@@ -63,9 +63,15 @@ type
     ///  @warning  This buffer should live until Perform ends.
     function PtrContent(length : integer; const data) : ICurlField;  overload;
 
-    function FileContent(const x : string) : ICurlField;
+    // Unused right now: FORM_FILECONTENT is not Unicode-aware
+    //function FileContent(const x : string) : ICurlField;
 
+    ///  @warning
+    ///  When you do UploadFile, you SHOULD use Delphi streams for all
+    ///     other reading operations of ICurl concerned!
+    ///  E.g. use SetSendStream, not SetOpt(CURLOPT_READFUNCTION).
     function UploadFile(const aFname : string) : ICurlField;
+
     function ContentType(const aFname : RawByteString) : ICurlField;
 
     // Sets a file name
@@ -114,7 +120,7 @@ type
     ///     You SHOULD use Delphi streams for all other reading operations
     ///     of ICurl concerned!
     ///  E.g. use SetSendStream, not SetOpt(CURLOPT_READFUNCTION).
-    function AddDiskFile(
+    function AddFile(
               aFieldName : RawByteString;
               aFileName : string;
               aContentType : RawByteString) : ICurlForm;  overload;

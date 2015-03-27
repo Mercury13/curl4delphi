@@ -26,18 +26,21 @@ type
   TCurlStreamStorage = class (TInterfacedObject, IRewindable)
   protected
     fStreams : TList<TCurlAutoStream>;
+    fDoesUseStream : boolean;
   public
     constructor Create;
     destructor Destroy; override;
     procedure Store(aStream : TStream; aFlags : TCurlStreamFlags);
     procedure RewindStreams;  virtual;
     procedure CloseStreams;   virtual;
+    function DoesUseStream : boolean;
   end;
 
 constructor TCurlStreamStorage.Create;
 begin
   inherited;
   fStreams := nil;
+  fDoesUseStream := false;
 end;
 
 destructor TCurlStreamStorage.Destroy;
@@ -51,6 +54,7 @@ procedure TCurlStreamStorage.Store(
 var
   q : TCurlAutoStream;
 begin
+  fDoesUseStream := true;
   if aFlags <> [] then begin
     q.Stream := aStream;
     q.Flags := aFlags;
@@ -78,6 +82,11 @@ begin
       q.Destroy;
     FreeAndNil(fStreams);
   end;
+end;
+
+function TCurlStreamStorage.DoesUseStream : boolean;
+begin
+  Result := fDoesUseStream;
 end;
 
 
@@ -120,7 +129,6 @@ type
   TCurlForm = class (TCurlStorage<ICurlField>, ICurlForm)
   private
     fStart, fEnd : PCurlHttpPost;
-    fDoesUseStream : boolean;
   public
     constructor Create;
     destructor Destroy;  override;
@@ -131,13 +139,12 @@ type
     function Add(aField : ICurlField) : ICurlForm;  overload;
     function Add(aArray : array of TCurlPostOption) : ICurlForm;  overload;
 
-    function AddDiskFile(
+    function AddFile(
               aFieldName : RawByteString;
               aFileName : string;
               aContentType : RawByteString) : ICurlForm;
 
     function RawValue : PCurlHttpPost;
-    function DoesUseStream : boolean;
     procedure RewindStreams;  override;
     procedure CloseStreams;  override;
   end;
@@ -147,8 +154,6 @@ begin
   inherited;
   fStart := nil;
   fEnd := nil;
-  fStreams := nil;
-  fDoesUseStream := false;
 end;
 
 
@@ -205,7 +210,7 @@ begin
   Result := Self;
 end;
 
-function TCurlForm.AddDiskFile(
+function TCurlForm.AddFile(
           aFieldName : RawByteString;
           aFileName : string;
           aContentType : RawByteString) : ICurlForm;
@@ -238,11 +243,6 @@ end;
 function TCurlForm.RawValue : PCurlHttpPost;
 begin
   Result := fStart;
-end;
-
-function TCurlForm.DoesUseStream : boolean;
-begin
-  Result := fDoesUseStream;
 end;
 
 procedure TCurlForm.RewindStreams;
@@ -286,7 +286,6 @@ type
 
     fStrings : TList<RawByteString>;
     fIsLocked : boolean;
-    fDoesUseStream : boolean;
 
     procedure Store(x : RawByteString);  overload;
     procedure Add(aOption : TCurlFormOption; aValue : PAnsiChar);
@@ -305,7 +304,7 @@ type
     function PtrContent(const x : RawByteString) : ICurlField;  overload;
     function PtrContent(length : integer; const data) : ICurlField;  overload;
 
-    function FileContent(const x : string) : ICurlField;
+    //function FileContent(const x : string) : ICurlField;
 
     function UploadFile(const aFname : string) : ICurlField;
     function ContentType(const x : RawByteString) : ICurlField;
@@ -413,24 +412,32 @@ begin
   Result := Self;
 end;
 
-function TCurlField.FileContent(const x : string) : ICurlField;
-var
-  utf : RawByteString;
-begin
-  /// @todo [bug] FileContent is not Unicode-enabled
-  utf := UTF8Encode(x);
-  Store(utf);
-  Add(CURLFORM_FILECONTENT, PAnsiChar(utf));
-  Result := Self;
-end;
+//function TCurlField.FileContent(const x : string) : ICurlField;
+//var
+//  utf : RawByteString;
+//begin
+//  /// @todo [bug] FileContent is not Unicode-enabled
+//  utf := UTF8Encode(x);
+//  Store(utf);
+//  Add(CURLFORM_FILECONTENT, PAnsiChar(utf));
+//  Result := Self;
+//end;
 
 function TCurlField.UploadFile(const aFname : string) : ICurlField;
 var
   utf : RawByteString;
+  stream : TStream;
 begin
   utf := UTF8Encode(aFname);
   Store(utf);
-  Add(CURLFORM_FILE, PAnsiChar(utf));
+
+  stream := TFileStream.Create(aFname, fmOpenRead + fmShareDenyWrite);
+  Store(stream, [csfAutoRewind, csfAutoDestroy]);
+
+  Add(CURLFORM_FILENAME, PAnsiChar(utf));
+  Add(CURLFORM_STREAM, PAnsiChar(stream));
+  Add(CURLFORM_CONTENTSLENGTH, PAnsiChar(stream.Size));
+
   Result := Self;
 end;
 
@@ -464,7 +471,7 @@ end;
 
 function TCurlField.FileStream(x : TStream; aFlags : TCurlStreamFlags) : ICurlField;
 begin
-  fDoesUseStream := true;
+  Store(x, aFlags);
   Add(CURLFORM_CONTENTSLENGTH, PAnsiChar(x.Size));
   Add(CURLFORM_STREAM, PAnsiChar(x));
   Result := Self;

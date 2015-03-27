@@ -98,7 +98,7 @@ begin
   curl.SetUrl(edUrl.Text);
   curl.SetOpt(CURLOPT_POST, true);
 
-  curl.Form := CurlGetForm.AddDiskFile('photo', fname, ftype);
+  curl.Form := CurlGetForm.AddFile('photo', fname, ftype);
 
   curl.Perform;
   memoResponse.Text := UTF8ToString(stream.Data);
