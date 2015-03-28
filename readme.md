@@ -49,7 +49,7 @@ Redirection, basic HTTPS support, CA files, Unicode in file names.
 
 Downloading to Delphi TStream’s.
 
-### EasyHttp\ProgressBar
+### EasyHttp\FileDownloader
 
 A GUI file downloader. This example is rather complex because of multithreading and `Content-Disposition`. We do as most browsers do: request headers, then start writing to temporary file and simultaneously ask where to save it on HDD.
 
@@ -63,4 +63,6 @@ Forms (one field is set in a simple way, the other in more complex one).
 
 ### EasyHttp\PhotoInfo
 
-File uploading: disk file (2 ways), memory buffer, stream. Please copy `php_curl` directory to a PHP-capable web server.
+File uploading: disk file (2 ways), memory buffer, stream.
+
+Please copy `php_curl` directory to a PHP-capable web server.
