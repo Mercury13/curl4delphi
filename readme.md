@@ -65,4 +65,6 @@ Forms (one field is set in a simple way, the other in more complex one).
 
 File uploading: disk file (2 ways), memory buffer, stream.
 
+ICurl cloning demo (not particularly good, it is more an illustration that Clone works).
+
 Please copy `php_curl` directory to a PHP-capable web server.

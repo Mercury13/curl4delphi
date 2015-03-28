@@ -18,12 +18,14 @@ type
     btSynthStream: TButton;
     od: TOpenDialog;
     btSynthMemory: TButton;
+    btCloneDemo: TButton;
     procedure btHardClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btEasyClick(Sender: TObject);
     procedure btSynthStreamClick(Sender: TObject);
     procedure btSynthMemoryClick(Sender: TObject);
+    procedure btCloneDemoClick(Sender: TObject);
   private
     { Private declarations }
     stream : TRawByteStream;
@@ -82,6 +84,29 @@ begin
     then rFType := 'image/jpeg'
   else Exit(false);
   Exit(true);
+end;
+
+procedure TfmMain.btCloneDemoClick(Sender: TObject);
+var
+  curl1, curl2 : ICurl;
+  fname : string;
+  ftype : RawByteString;
+begin
+  // It is BAD code!! — it is just an illustration that options are copied.
+  // cur1 and curl2 share streams, so problems will rise when we use them
+  // simultaneously, or destroy curl1 prematurely.
+  if not GetFile(fname, ftype) then Exit;
+
+  curl1 := CurlGet;
+  curl1.SetRecvStream(stream, [csfAutoRewind]);
+  curl1.SetUrl(edUrl.Text);
+  curl1.SetOpt(CURLOPT_POST, true);
+
+  curl1.Form := CurlGetForm.AddFile('photo', fname, ftype);
+
+  curl2 := curl1.Clone;
+  curl2.Perform;
+  memoResponse.Text := UTF8ToString(stream.Data);
 end;
 
 procedure TfmMain.btEasyClick(Sender: TObject);

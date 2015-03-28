@@ -25,6 +25,7 @@ type
     Flags : TCurlStreamFlags;
 
     procedure Init;  inline;
+    procedure InitFrom(const v : TCurlAutoStream);
     procedure Assign(aStream : TStream; aFlags : TCurlStreamFlags);
     procedure RewindRead;
     procedure RewindWrite;
@@ -172,5 +173,13 @@ begin
   if aStream <> nil
     then Flags := aFlags;
 end;
+
+
+procedure TCurlAutoStream.InitFrom(const v : TCurlAutoStream);
+begin
+  Stream := v.Stream;
+  Flags := v.Flags - [csfAutoDestroy];
+end;
+
 
 end.

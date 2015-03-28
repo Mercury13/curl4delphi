@@ -130,19 +130,20 @@ type
     function GetResponseCode : longint;
 
     ///  Makes an exact copy, e.g. for multithreading.
+    ///  @warning  Receiver, sender and header streams will be shared,
+    ///        but not auto-destroyed. Form, together with its streams,
+    ///        will be shared. So it is wise to replace all streams with unique
+    ///        copies for each clone.
+    ///  @warning  String lists assigned via SetXXX are shared and,
+    ///        as they are ref-counted, destroyed when the last reference
+    ///        disappears. For large objects assigned via SetOpt the programmer
+    ///        should bother about destruction for himself.
     function Clone : ICurl;
 
     property Form : ICurlForm read GetForm write SetForm;
   end;
 
   TEasyCurlImpl = class (TInterfacedObject, ICurl)
-  private
-    type
-      TSListEntry = record
-        str : RawByteString;
-        entry : TCurlSList;
-      end;
-      OaSListEntry = array of TSListEntry;
   private
     fHandle : TCurlHandle;
     fCustomHeaders, fPostQuote, fTelnetOptions, fPreQuote,
@@ -290,6 +291,9 @@ end;
 constructor TEasyCurlImpl.Create;
 begin
   inherited;
+  fSendStream.Init;
+  fRecvStream.Init;
+  fHeaderStream.Init;
   fHandle := curl_easy_init;
   if fHandle = nil then
     raise ECurlInternal.Create('[TEasyCurlImpl.Create] Cannot create cURL object.');
@@ -298,12 +302,24 @@ end;
 constructor TEasyCurlImpl.Create(aSource : TEasyCurlImpl);
 begin
   inherited Create;
-  fSendStream.Init;
-  fRecvStream.Init;
-  fHeaderStream.Init;
+  // Streams
+  fSendStream.InitFrom(aSource.fSendStream);
+  fRecvStream.InitFrom(aSource.fRecvStream);
+  fHeaderStream.InitFrom(aSource.fHeaderStream);
+  // Handle
   fHandle := curl_easy_duphandle(aSource.fHandle);
   if fHandle = nil then
     raise ECurlInternal.Create('[TEasyCurlImpl.Create(TEasyCurlImpl)] Cannot clone cURL object.');
+  // Copy settings!
+  fForm := aSource.fForm;
+  fCustomHeaders := aSource.fCustomHeaders;
+  fPostQuote := aSource.fPostQuote;
+  fTelnetOptions := aSource.fTelnetOptions;
+  fPreQuote := aSource.fPreQuote;
+  fHttp200Aliases := aSource.fHttp200Aliases;
+  fMailRcpt := aSource.fMailRcpt;
+  fResolveList := aSource.fResolveList;
+  fProxyHeader := aSource.fProxyHeader;
 end;
 
 destructor TEasyCurlImpl.Destroy;

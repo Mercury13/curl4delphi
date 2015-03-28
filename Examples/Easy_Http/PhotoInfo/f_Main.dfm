@@ -6,7 +6,7 @@ object fmMain: TfmMain
   BorderStyle = bsSingle
   Caption = 'File upload demo'
   ClientHeight = 200
-  ClientWidth = 309
+  ClientWidth = 321
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -46,7 +46,7 @@ object fmMain: TfmMain
   object edUrl: TEdit
     Left = 37
     Top = 8
-    Width = 257
+    Width = 272
     Height = 21
     TabOrder = 1
     Text = 'http://localhost/php_curl/photoinfo/action.php'
@@ -54,7 +54,7 @@ object fmMain: TfmMain
   object memoResponse: TMemo
     Left = 15
     Top = 97
-    Width = 282
+    Width = 294
     Height = 95
     TabOrder = 0
   end
@@ -94,10 +94,19 @@ object fmMain: TfmMain
     TabOrder = 5
     OnClick = btSynthMemoryClick
   end
+  object btCloneDemo: TButton
+    Left = 216
+    Top = 35
+    Width = 93
+    Height = 25
+    Caption = 'ICurl.Clone demo'
+    TabOrder = 6
+    OnClick = btCloneDemoClick
+  end
   object od: TOpenDialog
     Filter = 'Images (*.jpg; *.jpeg; *.png)|*.jpg; *.jpeg; *.png'
     Options = [ofHideReadOnly, ofPathMustExist, ofFileMustExist, ofEnableSizing]
-    Left = 264
-    Top = 8
+    Left = 24
+    Top = 108
   end
 end
