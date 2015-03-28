@@ -512,8 +512,10 @@ end;
 
 function TCurlField.Build : PCurlHttpPost;
 begin
-  Add(CURLFORM_END, nil);
-  fIsLocked := true;
+  if not fIsLocked then begin
+    Add(CURLFORM_END, nil);
+    fIsLocked := true;
+  end;
   Result := @fData[0];
 end;
 
