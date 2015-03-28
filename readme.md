@@ -12,7 +12,7 @@ Quick start
 ===========
 
 1. Add files `Curl.Lib`, `Curl.Easy`, `Curl.Interfaces` to your project.
-1. Write such a piece of code.
+2. Write such a piece of code.
 
 ```
 var
