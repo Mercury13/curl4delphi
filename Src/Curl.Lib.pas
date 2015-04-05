@@ -1516,6 +1516,7 @@ type
       Option : TCurlFormOption;
       Value : PAnsiChar;
   end;
+  PCurlForms = ^TCurlForms;
 
   // use this for multipart formpost building
   // Returns code for curl_formadd()

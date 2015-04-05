@@ -3,8 +3,77 @@ unit Curl.Form;
 interface
 
 uses
+  // System
+  System.Classes,
   // cURL
   Curl.Lib, Curl.Interfaces;
+
+type
+  ICurlField = interface (ICurlCustomField)
+    function Name(const x : RawByteString) : ICurlField;
+
+    function ContentRaw(const x : RawByteString) : ICurlField;
+    function Content(const x : string) : ICurlField;  overload;
+    function Content(length : integer; const data) : ICurlField;  overload;
+
+    ///  Sets content from a RawByteString.
+    ///  @warning  This RawByteString should live until Perform ends.
+    function PtrContent(const x : RawByteString) : ICurlField;  overload;
+    ///  Sets content from a memory buffer.
+    ///  @warning  This buffer should live until Perform ends.
+    function PtrContent(length : integer; const data) : ICurlField;  overload;
+
+    // Unused right now: FORM_FILECONTENT is not Unicode-aware
+    //function FileContent(const x : string) : ICurlField;
+
+    ///  @warning
+    ///  When you do UploadFile, you SHOULD use Delphi streams for all
+    ///     other reading operations of ICurl concerned!
+    ///  E.g. use SetSendStream, not SetOpt(CURLOPT_READFUNCTION).
+    function UploadFile(const aFname : string) : ICurlField;
+
+    function ContentType(const aFname : RawByteString) : ICurlField;
+
+    // Sets a file name
+    function FileName(const x : RawByteString) : ICurlField;
+    // Sets file data, either as RawByteString or as data buffer
+    function FileBuffer(
+            const aFname, aData : RawByteString) : ICurlField;  overload;
+    function FileBuffer(
+            const aFname : RawByteString;
+            length : integer; const data) : ICurlField;  overload;
+    ///  @warning
+    ///  When you assign FileStream, you SHOULD use Delphi streams for all
+    ///     other reading operations of ICurl concerned!
+    ///  E.g. use SetSendStream, not SetOpt(CURLOPT_READFUNCTION).
+    function FileStream(x : TStream; aFlags : TCurlStreamFlags) : ICurlField;
+
+    function CustomHeaders(x : ICurlCustomSList) : ICurlField;
+  end;
+
+  ICurlForm = interface (ICurlCustomForm)
+    ///  This is the simplest version of Add; use it if you want something
+    ///  like name=value.
+    function Add(aName, aValue : RawByteString) : ICurlForm;  overload;
+    function Add(aName, aValue : string) : ICurlForm;  overload;
+    ///  This is a rawmost version of Add.
+    ///  @warning  Please have CURLFORM_END in the end.
+    ///  @warning  Some options of Windows cURL request disk file name
+    ///         in a single-byte encoding.
+    function Add(aArray : array of TCurlPostOption) : ICurlForm;  overload;
+    ///  Adds a field using a special array-builder.
+    function Add(aField : ICurlCustomField) : ICurlForm;  overload;
+
+    ///  Adds a single disk file for uploading.
+    ///  @warning  Because of cURL bug, it uses a stream internally.
+    ///     You SHOULD use Delphi streams for all other reading operations
+    ///     of ICurl concerned!
+    ///  E.g. use SetSendStream, not SetOpt(CURLOPT_READFUNCTION).
+    function AddFile(
+              aFieldName : RawByteString;
+              aFileName : string;
+              aContentType : RawByteString) : ICurlForm;  overload;
+  end;
 
 function CurlGetForm : ICurlForm;
 function CurlGetField : ICurlField;
@@ -13,7 +82,7 @@ implementation
 
 uses
   // System
-  System.Classes, System.SysUtils, System.Generics.Collections,
+  System.SysUtils, System.Generics.Collections,
   // Curl
   Curl.Easy;
 
@@ -126,7 +195,7 @@ end;
 ///// TCurlForm ////////////////////////////////////////////////////////////////
 
 type
-  TCurlForm = class (TCurlStorage<ICurlField>, ICurlForm)
+  TCurlForm = class (TCurlStorage<ICurlCustomField>, ICurlForm)
   private
     fStart, fEnd : PCurlHttpPost;
     class procedure RaiseIf(v : TCurlFormCode);  static;
@@ -137,7 +206,7 @@ type
     function Add(aName, aValue : PAnsiChar) : ICurlForm;  overload;
     function Add(aName, aValue : RawByteString) : ICurlForm;  overload;  inline;
     function Add(aName, aValue : string) : ICurlForm;  overload;
-    function Add(aField : ICurlField) : ICurlForm;  overload;
+    function Add(aField : ICurlCustomField) : ICurlForm;  overload;
     function Add(aArray : array of TCurlPostOption) : ICurlForm;  overload;
 
     function AddFile(
@@ -216,7 +285,7 @@ begin
   Result := Self;
 end;
 
-function TCurlForm.Add(aField : ICurlField) : ICurlForm;
+function TCurlForm.Add(aField : ICurlCustomField) : ICurlForm;
 begin
   if aField.DoesStore
     then Store(aField);
@@ -266,7 +335,7 @@ end;
 
 procedure TCurlForm.RewindStreams;
 var
-  fld : ICurlField;
+  fld : ICurlCustomField;
 begin
   inherited;
   if fStorage <> nil then
@@ -276,7 +345,7 @@ end;
 
 procedure TCurlForm.CloseStreams;
 var
-  fld : ICurlField;
+  fld : ICurlCustomField;
 begin
   inherited;
   if fStorage <> nil then
@@ -337,12 +406,12 @@ type
             length : integer; const data) : ICurlField;  overload;
     function FileStream(x : TStream; aFlags : TCurlStreamFlags) : ICurlField;
 
-    function CustomHeaders(x : ICurlSlist) : ICurlField;
+    function CustomHeaders(x : ICurlCustomSList) : ICurlField;
 
     function DoesUseStream : boolean;
     function DoesStore : boolean;
 
-    function Build : PCurlHttpPost;
+    function Build : PCurlForms;
   end;
 
 constructor TCurlField.Create;
@@ -496,7 +565,7 @@ begin
   Result := Self;
 end;
 
-function TCurlField.CustomHeaders(x : ICurlSlist) : ICurlField;
+function TCurlField.CustomHeaders(x : ICurlCustomSList) : ICurlField;
 begin
   Store(x);
   Add(CURLFORM_CONTENTHEADER, PAnsiChar(x.RawValue));
@@ -510,7 +579,7 @@ begin
   Result := Self;
 end;
 
-function TCurlField.Build : PCurlHttpPost;
+function TCurlField.Build : PCurlForms;
 begin
   if not fIsLocked then begin
     Add(CURLFORM_END, nil);

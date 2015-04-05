@@ -11,6 +11,12 @@ interface
 uses
   Curl.Lib, Curl.Interfaces;
 
+type
+  ICurlSList = interface (ICurlCustomSList)
+    function AddRaw(s : RawByteString) : ICurlSList;
+    function Add(s : string) : ICurlSList;
+  end;
+
 function CurlGetSList : ICurlSList;
 
 implementation
