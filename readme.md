@@ -68,3 +68,7 @@ File uploading: disk file (2 ways), memory buffer, stream.
 ICurl cloning demo (not particularly good, it is more an illustration that Clone works).
 
 Please copy `php_curl` directory to a PHP-capable web server.
+
+### EasyHttp\AplusB_Get
+
+Using ICurlGetBuilder to build a GET URL. Please copy `php_curl` directory to a PHP-capable web server.

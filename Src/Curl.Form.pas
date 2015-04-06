@@ -102,7 +102,7 @@ type
     procedure Store(aStream : TStream; aFlags : TCurlStreamFlags);
     procedure RewindStreams;  virtual;
     procedure CloseStreams;   virtual;
-    function DoesUseStream : boolean;
+    function ReadFunction : EvCurlRead;
   end;
 
 constructor TCurlStreamStorage.Create;
@@ -153,9 +153,11 @@ begin
   end;
 end;
 
-function TCurlStreamStorage.DoesUseStream : boolean;
+function TCurlStreamStorage.ReadFunction : EvCurlRead;
 begin
-  Result := fDoesUseStream;
+  if fDoesUseStream
+    then Result := @CurlStreamRead
+    else Result := nil;
 end;
 
 

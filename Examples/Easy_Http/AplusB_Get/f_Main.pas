@@ -29,8 +29,7 @@ var
 implementation
 
 uses
-  Curl.Interfaces, Curl.Easy, Curl.Form, Curl.Lib, Curl.RawByteStream,
-  Curl.Slist;
+  Curl.Interfaces, Curl.Easy, Curl.Lib, Curl.RawByteStream, Curl.Encoders;
 
 {$R *.dfm}
 
@@ -40,24 +39,20 @@ const
       'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:36.0) Gecko/20100101 Firefox/36.0';
 var
   curl : ICurl;
-  form : ICurlForm;
   stream : TRawByteStream;
 begin
   curl := CurlGet;
-  form := CurlGetForm;
   stream := TRawByteStream.Create;
 
-  curl.SetUrl(edUrl.Text);
-  // I tested it on my free hosting — it has a bot protection.
   curl.SetUserAgent(UserAgent);
-  form.Add('a', edA.Text);
-  form.Add('b', edB.Text);
-
-  curl.Form := form;
-  curl.SetOpt(CURLOPT_HTTPGET, true);
+  curl.SetUrl(CurlGetBuilder(edUrl.Text)
+                .Param('a', edA.Text)
+                .Param('b', edB.Text));
   curl.SetRecvStream(stream, [csfAutoDestroy]);
   curl.Perform;
-  memoResponse.Text := string(stream.Data);
+  memoResponse.Text := string(stream.Data)
+          + #13#10#13#10'URL: ' +
+          string(curl.GetInfo(CURLINFO_EFFECTIVE_URL));
 end;
 
 end.

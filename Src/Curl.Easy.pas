@@ -36,6 +36,7 @@ type
     procedure SetUrl(aData : PAnsiChar);  overload;
     procedure SetUrl(aData : RawByteString);  overload;
     procedure SetUrl(aData : UnicodeString);  overload;
+    procedure SetUrl(aData : ICurlStringBuilder);  overload;
 
     ///  Sets a CA file for SSL
     procedure SetCaFile(aData : PAnsiChar);      overload;
@@ -179,6 +180,7 @@ type
     procedure SetUrl(aData : PAnsiChar);      overload;   inline;
     procedure SetUrl(aData : RawByteString);  overload;   inline;
     procedure SetUrl(aData : UnicodeString);  overload;   inline;
+    procedure SetUrl(aData : ICurlStringBuilder);  overload;  inline;
 
     procedure SetCaFile(aData : PAnsiChar);      overload;   inline;
     procedure SetCaFile(aData : RawByteString);  overload;   inline;
@@ -224,15 +226,6 @@ type
     ///  This is implementation of ICurl.Clone. If you dislike
     ///  reference-counting, use TEasyCurlImpl.Create(someCurl).
     function Clone : ICurl;
-
-    class function StreamWrite(
-            var Buffer;
-            Size, NItems : NativeUInt;
-            OutStream : pointer) : NativeUInt;  cdecl;  static;
-    class function StreamRead(
-            var Buffer;
-            Size, NItems : NativeUInt;
-            OutStream : pointer) : NativeUInt;  cdecl;  static;
 
     property Form : ICurlCustomForm read GetForm write SetForm;
 
@@ -438,6 +431,11 @@ begin
   SetOpt(CURLOPT_URL, aData);
 end;
 
+procedure TEasyCurlImpl.SetUrl(aData : ICurlStringBuilder);
+begin
+  SetUrl(aData.Build);
+end;
+
 procedure TEasyCurlImpl.SetCaFile(aData : PAnsiChar);
 begin
   SetOpt(CURLOPT_CAINFO, aData);
@@ -473,40 +471,25 @@ begin
   SetOpt(CURLOPT_USERAGENT, PAnsiChar(UTF8Encode(aData)));
 end;
 
-class function TEasyCurlImpl.StreamWrite(
-        var Buffer;
-        Size, NItems : NativeUInt;
-        OutStream : pointer) : NativeUInt;  cdecl;
-begin
-  Result := TStream(OutStream).Write(Buffer, Size * NItems);
-end;
-
-
-class function TEasyCurlImpl.StreamRead(
-        var Buffer;
-        Size, NItems : NativeUInt;
-        OutStream : pointer) : NativeUInt;  cdecl;
-begin
-  Result := TStream(OutStream).Read(Buffer, Size * NItems);
-end;
-
-
 procedure TEasyCurlImpl.SetRecvStream(aData : TStream; aFlags : TCurlStreamFlags);
 begin
   fRecvStream.Assign(aData, aFlags);
   SetOpt(CURLOPT_WRITEDATA, aData);
   if aData = nil
     then SetOpt(CURLOPT_WRITEFUNCTION, nil)
-    else SetOpt(CURLOPT_WRITEFUNCTION, @StreamWrite);
+    else SetOpt(CURLOPT_WRITEFUNCTION, @CurlStreamWrite);
 end;
 
 
 procedure TEasyCurlImpl.SetSendStream(aData : TStream; aFlags : TCurlStreamFlags);
 begin
+  // Form and sender stream exclude each other
+  fForm := nil;
   fSendStream.Assign(aData, aFlags);
   SetOpt(CURLOPT_READDATA, aData);
-  // Don’t set NULL to read function, as the function may be needed by form
-  SetOpt(CURLOPT_READFUNCTION, @StreamRead);
+  if aData = nil
+    then SetOpt(CURLOPT_READFUNCTION, nil)
+    else SetOpt(CURLOPT_READFUNCTION, @CurlStreamRead);
 end;
 
 procedure TEasyCurlImpl.SetHeaderStream(aData : TStream; aFlags : TCurlStreamFlags);
@@ -515,7 +498,7 @@ begin
   SetOpt(CURLOPT_HEADERDATA, aData);
   if aData = nil
     then SetOpt(CURLOPT_HEADERFUNCTION, nil)
-    else SetOpt(CURLOPT_HEADERFUNCTION, @StreamWrite);
+    else SetOpt(CURLOPT_HEADERFUNCTION, @CurlStreamWrite);
 end;
 
 function TEasyCurlImpl.GetResponseCode : longint;
@@ -602,12 +585,14 @@ end;
 
 procedure TEasyCurlImpl.SetForm(aForm : ICurlCustomForm);
 begin
+  // Form and sender stream exclude each other
+  fSendStream.Destroy;
   if aForm <> nil then begin
     SetOpt(CURLOPT_HTTPPOST, aForm.RawValue);
-    if aForm.DoesUseStream
-      then SetOpt(CURLOPT_READFUNCTION, @StreamRead);
+    SetOpt(CURLOPT_READFUNCTION, @aForm.ReadFunction);
   end else begin
     SetOpt(CURLOPT_HTTPPOST, nil);
+    SetOpt(CURLOPT_READFUNCTION, nil);
   end;
   fForm := aForm;
 end;

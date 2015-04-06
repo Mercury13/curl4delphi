@@ -276,7 +276,7 @@ type
           DlTotal, DlNow, UlTotal, UlNow : TCurlOff) : integer;  cdecl;
 
   EvCurlWrite = function (
-          var Buffer;
+          const Buffer;
           Size, NItems : NativeUInt;
           OutStream : pointer) : NativeUInt;  cdecl;
 
@@ -377,7 +377,7 @@ const
 
 type
   EvCurlRead = function (
-          Buffer : PChar;
+          var Buffer;
           Size, NItems : NativeUInt;
           InStream : pointer) : NativeUInt;
 

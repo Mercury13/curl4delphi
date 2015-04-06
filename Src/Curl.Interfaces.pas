@@ -63,12 +63,25 @@ type
   ICurlCustomForm = interface (IRewindable)
     function RawValue : PCurlHttpPost;
 
-    ///  @return [+] the form uses some stream for reading
-    function DoesUseStream : boolean;
+    ///  @return  form read function, or nil
+    function ReadFunction : EvCurlRead;
+  end;
+
+  ICurlStringBuilder = interface
+    function Build : RawByteString;
   end;
 
   ECurl = class (Exception) end;
   ECurlInternal = class (Exception) end;
+
+function CurlStreamWrite(
+        var Buffer;
+        Size, NItems : NativeUInt;
+        OutStream : pointer) : NativeUInt;  cdecl;
+function CurlStreamRead(
+        var Buffer;
+        Size, NItems : NativeUInt;
+        OutStream : pointer) : NativeUInt;  cdecl;
 
 implementation
 
@@ -114,6 +127,24 @@ procedure TCurlAutoStream.InitFrom(const v : TCurlAutoStream);
 begin
   Stream := v.Stream;
   Flags := v.Flags - [csfAutoDestroy];
+end;
+
+
+function CurlStreamWrite(
+        var Buffer;
+        Size, NItems : NativeUInt;
+        OutStream : pointer) : NativeUInt;  cdecl;
+begin
+  Result := TStream(OutStream).Write(Buffer, Size * NItems);
+end;
+
+
+function CurlStreamRead(
+        var Buffer;
+        Size, NItems : NativeUInt;
+        OutStream : pointer) : NativeUInt;  cdecl;
+begin
+  Result := TStream(OutStream).Read(Buffer, Size * NItems);
 end;
 
 

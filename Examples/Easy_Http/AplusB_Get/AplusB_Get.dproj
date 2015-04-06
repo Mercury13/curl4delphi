@@ -6,7 +6,7 @@
 			<MainSource>AplusB_Get.dpr</MainSource>
 			<Base>True</Base>
 			<Config Condition="'$(Config)'==''">Debug</Config>
-			<Platform Condition="'$(Platform)'==''">Win32</Platform>
+			<Platform Condition="'$(Platform)'==''">Win64</Platform>
 			<TargetedPlatforms>3</TargetedPlatforms>
 			<AppType>Application</AppType>
 		</PropertyGroup>
@@ -92,12 +92,12 @@
 			<DCCReference Include="..\..\..\Src\Curl.Lib.pas"/>
 			<DCCReference Include="..\..\..\Src\Curl.RawByteStream.pas"/>
 			<DCCReference Include="..\..\..\Src\Curl.Easy.pas"/>
-			<DCCReference Include="..\..\..\Src\Curl.Form.pas"/>
 			<DCCReference Include="f_Main.pas">
 				<Form>fmMain</Form>
 			</DCCReference>
 			<DCCReference Include="..\..\..\Src\Curl.Interfaces.pas"/>
 			<DCCReference Include="..\..\..\Src\Curl.Slist.pas"/>
+			<DCCReference Include="..\..\..\Src\Curl.Encoders.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
