@@ -19,11 +19,17 @@ function CurlUrlEncodeCustom(
 function CurlUrlEncodeCustom(
         const s : UnicodeString;
         const aAllowedChars : TCurlChars) : RawByteString;  overload;
+
+///  Does “full” URL encoding.
+///  All characters that have special meaning in URLs are %-encoded
 function CurlUrlEncodeFull(const s : RawByteString) : RawByteString;  overload;
 function CurlUrlEncodeFull(const s : UnicodeString) : RawByteString;  overload;
+
+///  Does “light” URL encoding for GET parameters.
 function CurlUrlEncodeParam(const s : RawByteString) : RawByteString;  overload;
 function CurlUrlEncodeParam(const s : UnicodeString) : RawByteString;  overload;
 
+///  Returns an ICurlGetBuilder that builds a GET URL.
 function CurlGetBuilder(const aUrl : RawByteString) : ICurlGetBuilder;  overload;
 function CurlGetBuilder(const aUrl : UnicodeString) : ICurlGetBuilder;  overload;
 
