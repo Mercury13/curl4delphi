@@ -5,8 +5,8 @@ object fmMain: TfmMain
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'File upload demo'
-  ClientHeight = 200
-  ClientWidth = 421
+  ClientHeight = 231
+  ClientWidth = 373
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -46,15 +46,15 @@ object fmMain: TfmMain
   object edUrl: TEdit
     Left = 37
     Top = 8
-    Width = 372
+    Width = 324
     Height = 21
     TabOrder = 1
     Text = 'http://localhost/php_curl/photoinfo/action.php'
   end
   object memoResponse: TMemo
     Left = 15
-    Top = 97
-    Width = 394
+    Top = 128
+    Width = 346
     Height = 95
     TabOrder = 0
   end
@@ -104,13 +104,22 @@ object fmMain: TfmMain
     OnClick = btCloneDemoClick
   end
   object btSynthMemory2: TButton
-    Left = 295
-    Top = 66
+    Left = 94
+    Top = 97
     Width = 114
     Height = 25
     Caption = 'Memory (easy way)'
     TabOrder = 7
     OnClick = btSynthMemory2Click
+  end
+  object btSynthMemory3: TButton
+    Left = 214
+    Top = 97
+    Width = 131
+    Height = 25
+    Caption = 'Memory (using strings)'
+    TabOrder = 8
+    OnClick = btSynthMemory3Click
   end
   object od: TOpenDialog
     Filter = 'Images (*.jpg; *.jpeg; *.png)|*.jpg; *.jpeg; *.png'

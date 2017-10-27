@@ -39,7 +39,8 @@ type
     function FileName(const x : RawByteString) : ICurlField;
     // Sets file data, either as RawByteString or as data buffer
     function FileBuffer(
-            const aFname, aData : RawByteString) : ICurlField;  overload;
+            const aFname : RawByteString;
+            var aData : RawByteString) : ICurlField;  overload;
     function FileBuffer(
             const aFname : RawByteString;
             length : integer; const data) : ICurlField;  overload;
@@ -76,17 +77,17 @@ type
               const aFieldName : RawByteString;
               const aFileName : string;
               const aContentType : RawByteString) : ICurlForm;
-    function AddPtrFile(
+    function AddFileBuffer(
               const aFieldName : RawByteString;
               const aFileName : RawByteString;
               const aContentType : RawByteString;
               aLength : integer;
-              const aData) : ICurlForm;
-    function AddStrFile(
+              const aData) : ICurlForm;  overload;
+    function AddFileBuffer(
               const aFieldName : RawByteString;
               const aFileName : RawByteString;
               const aContentType : RawByteString;
-              var aData : RawByteString) : ICurlForm;
+              var aData : RawByteString) : ICurlForm;  overload;
   end;
 
 function CurlGetForm : ICurlForm;
@@ -229,17 +230,17 @@ type
               const aFieldName : RawByteString;
               const aFileName : string;
               const aContentType : RawByteString) : ICurlForm;
-    function AddPtrFile(
+    function AddFileBuffer(
               const aFieldName : RawByteString;
               const aFileName : RawByteString;
               const aContentType : RawByteString;
               aLength : integer;
-              const aData) : ICurlForm;
-    function AddStrFile(
+              const aData) : ICurlForm;  overload;
+    function AddFileBuffer(
               const aFieldName : RawByteString;
               const aFileName : RawByteString;
               const aContentType : RawByteString;
-              var aData : RawByteString) : ICurlForm;
+              var aData : RawByteString) : ICurlForm;   overload;
 
     function RawValue : PCurlHttpPost;
     procedure RewindStreams;  override;
@@ -355,7 +356,7 @@ begin
   Result := Self;
 end;
 
-function TCurlForm.AddPtrFile(
+function TCurlForm.AddFileBuffer(
           const aFieldName : RawByteString;
           const aFileName : RawByteString;
           const aContentType : RawByteString;
@@ -374,13 +375,13 @@ begin
 end;
 
 
-function TCurlForm.AddStrFile(
+function TCurlForm.AddFileBuffer(
           const aFieldName : RawByteString;
           const aFileName : RawByteString;
           const aContentType : RawByteString;
           var aData : RawByteString) : ICurlForm;
 begin
-  Result := AddPtrFile(aFieldName, aFileName, aContentType,
+  Result := AddFileBuffer(aFieldName, aFileName, aContentType,
               Length(aData), PAnsiChar(aData)^);
 end;
 
@@ -457,7 +458,8 @@ type
     // Custom file uploading
     function FileName(const x : RawByteString) : ICurlField;
     function FileBuffer(
-            const aFname, aData : RawByteString) : ICurlField;  overload;
+            const aFname : RawByteString;
+            var aData : RawByteString) : ICurlField;  overload;
     function FileBuffer(
             const aFname : RawByteString;
             length : integer; const data) : ICurlField;  overload;
@@ -593,7 +595,9 @@ begin
   Result := Self;
 end;
 
-function TCurlField.FileBuffer(const aFname, aData : RawByteString) : ICurlField;
+function TCurlField.FileBuffer(
+    const aFname : RawByteString;
+    var aData : RawByteString) : ICurlField;
 begin
   Store(aFname);
   Store(aData);

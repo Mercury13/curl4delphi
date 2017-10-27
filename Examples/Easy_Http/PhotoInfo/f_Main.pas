@@ -20,6 +20,7 @@ type
     btSynthMemory: TButton;
     btCloneDemo: TButton;
     btSynthMemory2: TButton;
+    btSynthMemory3: TButton;
     procedure btHardClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -28,6 +29,7 @@ type
     procedure btSynthMemoryClick(Sender: TObject);
     procedure btCloneDemoClick(Sender: TObject);
     procedure btSynthMemory2Click(Sender: TObject);
+    procedure btSynthMemory3Click(Sender: TObject);
   private
     { Private declarations }
     stream : TRawByteStream;
@@ -168,6 +170,26 @@ begin
   curl.Form := CurlGetForm.AddFileBuffer(
                     'photo', 'synth_buffer2.png', 'image/png',
                     pngStream.Size, pngStream.Memory^);
+
+  curl.Perform;
+  memoResponse.Text := UTF8ToString(stream.Data);
+end;
+
+procedure TfmMain.btSynthMemory3Click(Sender: TObject);
+var
+  curl : ICurl;
+  str : RawByteString;
+begin
+  SetLength(str, pngStream.Size);
+  Move(pngStream.Memory^, PChar(str)^, pngStream.Size);
+  // cURL
+  curl := CurlGet;
+  curl.SetRecvStream(stream, [csfAutoRewind]);
+  curl.SetUrl(edUrl.Text);
+  curl.SetOpt(CURLOPT_POST, true);
+
+  curl.Form := CurlGetForm.AddFileBuffer(
+                    'photo', 'synth_buffer3.png', 'image/png', str);
 
   curl.Perform;
   memoResponse.Text := UTF8ToString(stream.Data);
