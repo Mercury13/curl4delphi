@@ -8,6 +8,9 @@ uses
   // cUrl
   Curl.Lib, Curl.Interfaces;
 
+const
+  NiceUserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:53.0) Gecko/20100101 Firefox/53.0';
+
 type
   TCurlVerifyHost = (
       CURL_VERIFYHOST_NONE,
@@ -15,6 +18,7 @@ type
       CURL_VERIFYHOST_MATCH );
 
   ICurl = interface (ICloseable)
+    ['{5B165EC5-E831-4814-8263-C8D18AE8760E}']
     function GetHandle : TCurlHandle;
     property Handle : TCurlHandle read GetHandle;
 
@@ -27,6 +31,7 @@ type
     procedure SetOpt(aOption : TCurlStringOption; aData : PAnsiChar);  overload;
     procedure SetOpt(aOption : TCurlStringOption; aData : RawByteString);  overload;
     procedure SetOpt(aOption : TCurlStringOption; aData : UnicodeString);  overload;
+    procedure SetOpt(aOption : TCurlProxyTypeOption; aData : TCurlProxyType);  overload;
     procedure SetOpt(aOption : TCurlSlistOption; aData : PCurlSList);  overload;
               deprecated 'Use SetXXX instead: SetCustomHeaders, SetResolveList, etc.';
     procedure SetOpt(aOption : TCurlPostOption; aData : PCurlHttpPost);  overload;
@@ -105,6 +110,8 @@ type
     ///  struct curl_slist kind
     procedure SetProxyHeader(v : ICurlCustomSList);
 
+    procedure SetProxyFromIe;
+
     ///  Performs the action.
     ///  Actually does RaiseIf(PerformNe).
     procedure Perform;
@@ -176,6 +183,7 @@ type
     procedure SetOpt(aOption : TCurlStringOption; aData : UnicodeString);  overload;
     procedure SetOpt(aOption : TCurlSlistOption; aData : PCurlSList);  overload;
     procedure SetOpt(aOption : TCurlPostOption; aData : PCurlHttpPost);  overload;
+    procedure SetOpt(aOption : TCurlProxyTypeOption; aData : TCurlProxyType);  overload;
 
     procedure SetUrl(aData : PAnsiChar);      overload;   inline;
     procedure SetUrl(aData : RawByteString);  overload;   inline;
@@ -212,6 +220,7 @@ type
     procedure SetMailRcpt(v : ICurlCustomSList);
     procedure SetResolveList(v : ICurlCustomSList);
     procedure SetProxyHeader(v : ICurlCustomSList);
+    procedure SetProxyFromIe;
 
     procedure Perform;
     function PerformNe : TCurlCode;
@@ -260,6 +269,9 @@ var
 function CurlGet : ICurl;
 
 implementation
+
+uses
+  System.Win.Registry, Winapi.Windows;
 
 ///// Errors and error localization ////////////////////////////////////////////
 
@@ -409,6 +421,12 @@ procedure TEasyCurlImpl.SetOpt(aOption : TCurlPostOption; aData : PCurlHttpPost)
 begin
   RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
 end;
+
+procedure TEasyCurlImpl.SetOpt(aOption : TCurlProxyTypeOption; aData : TCurlProxyType);
+begin
+  RaiseIf(curl_easy_setopt(fHandle, TCurlIntOption(aOption), NativeUInt(aData)));
+end;
+
 
 
 function TEasyCurlImpl.Clone : ICurl;
@@ -619,6 +637,47 @@ begin
   fRecvStream.Destroy;
   fHeaderStream.Destroy;
 end;
+
+procedure TEasyCurlImpl.SetProxyFromIe;
+var
+  reg : TRegistry;
+  us : UnicodeString;
+  strs : TStringList;
+  i, pEqual : integer;
+  s : string;
+begin
+  strs := nil;
+  reg  := TRegistry.Create;
+  try
+    reg.RootKey := HKEY_CURRENT_USER;
+    reg.OpenKeyReadOnly('\Software\Microsoft\Windows\CurrentVersion\Internet Settings');
+    if reg.ReadInteger('ProxyEnable') <> 0 then begin
+        us := reg.ReadString('ProxyServer');
+        strs := TStringList.Create;
+        strs.Delimiter := ';';
+        strs.StrictDelimiter := true;
+        strs.DelimitedText := us;
+
+        for i := 0 to strs.Count - 1 do begin
+            s := strs[i];
+            pEqual := Pos('=', s);
+            if pEqual > 0 then begin
+                if Trim(Copy(s, 0, pEqual)) <> 'http'
+                  then continue;
+            end;
+
+            SetOpt(CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
+            SetOpt(CURLOPT_PROXY, Copy(s, pEqual + 1, Length(s)));
+            break;
+        end;
+    end;
+    reg.CloseKey;
+  finally
+    reg.Free;
+    strs.Free;
+  end;
+end;
+
 
 ///// Standalone functions /////////////////////////////////////////////////////
 

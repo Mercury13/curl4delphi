@@ -7,6 +7,7 @@ uses
 
 type
   ICurlCustomSList = interface
+    ['{C30EFFEA-DE64-4970-9578-2A1FD2366DBB}']
     function RawValue : PCurlSList;
   end;
 
@@ -30,6 +31,7 @@ type
   end;
 
   ICloseable = interface
+    ['{96909B92-B968-4CFA-9D6C-B6E92FC16779}']
     ///  There’s a common problem of garbage collection that’s frequent for
     ///     ref-counting too. You don’t exactly know when the object
     ///     disappears, and if the stream is not shareable, the underlying
@@ -43,11 +45,13 @@ type
   end;
 
   IRewindable = interface (ICloseable)
+    ['{0A02FFBE-6DC8-4BA3-B274-53A997D7B054}']
     ///  Rewinds all internal streams.
     procedure RewindStreams;
   end;
 
   ICurlCustomField = interface (IRewindable)
+    ['{6949D247-DAB9-4D4E-95F4-93B0A132ECF0}']
     ///  Some CurlField’s store some data.
     ///  @return  [+] It stores some data, and we should keep a reference.
     function DoesStore : boolean;
@@ -61,6 +65,7 @@ type
   end;
 
   ICurlCustomForm = interface (IRewindable)
+    ['{EDCE1A47-3ED1-49CA-A399-D2E8B29326E1}']
     function RawValue : PCurlHttpPost;
 
     ///  @return  form read function, or nil
@@ -68,6 +73,7 @@ type
   end;
 
   ICurlStringBuilder = interface
+    ['{6AA116D5-F0AC-4DF1-8438-E72D8C62982C}']
     function Build : RawByteString;
   end;
 

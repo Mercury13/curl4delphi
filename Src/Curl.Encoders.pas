@@ -9,6 +9,7 @@ type
   TCurlChars = set of AnsiChar;
 
   ICurlGetBuilder = interface (ICurlStringBuilder)
+    ['{1952FC73-9D2B-4AF4-93E7-1D3BFADE7353}']
     function Param(aName, aValue : RawByteString) : ICurlGetBuilder;  overload;
     function Param(aName : RawByteString; aValue : string) : ICurlGetBuilder;  overload;
   end;

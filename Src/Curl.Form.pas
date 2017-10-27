@@ -10,6 +10,7 @@ uses
 
 type
   ICurlField = interface (ICurlCustomField)
+    ['{201DEF1A-8A28-4ABC-8617-5ACAF9F3751C}']
     function Name(const x : RawByteString) : ICurlField;
 
     function ContentRaw(const x : RawByteString) : ICurlField;
@@ -52,10 +53,12 @@ type
   end;
 
   ICurlForm = interface (ICurlCustomForm)
+    ['{6C1069CA-47A4-4096-A2AD-7F23C8D31D8E}']
     ///  This is the simplest version of Add; use it if you want something
     ///  like name=value.
-    function Add(aName, aValue : RawByteString) : ICurlForm;  overload;
-    function Add(aName, aValue : string) : ICurlForm;  overload;
+    //function Add(aName, aValue : PAnsiChar) : ICurlForm;  overload;
+    function Add(const aName, aValue : RawByteString) : ICurlForm;  overload;
+    function Add(const aName, aValue : string) : ICurlForm;  overload;
     ///  This is a rawmost version of Add.
     ///  @warning  Please have CURLFORM_END in the end.
     ///  @warning  Some options of Windows cURL request disk file name
@@ -70,9 +73,20 @@ type
     ///     of ICurl concerned!
     ///  E.g. use SetSendStream, not SetOpt(CURLOPT_READFUNCTION).
     function AddFile(
-              aFieldName : RawByteString;
-              aFileName : string;
-              aContentType : RawByteString) : ICurlForm;  overload;
+              const aFieldName : RawByteString;
+              const aFileName : string;
+              const aContentType : RawByteString) : ICurlForm;
+    function AddPtrFile(
+              const aFieldName : RawByteString;
+              const aFileName : RawByteString;
+              const aContentType : RawByteString;
+              aLength : integer;
+              const aData) : ICurlForm;
+    function AddStrFile(
+              const aFieldName : RawByteString;
+              const aFileName : RawByteString;
+              const aContentType : RawByteString;
+              var aData : RawByteString) : ICurlForm;
   end;
 
 function CurlGetForm : ICurlForm;
@@ -206,15 +220,26 @@ type
     destructor Destroy;  override;
 
     function Add(aName, aValue : PAnsiChar) : ICurlForm;  overload;
-    function Add(aName, aValue : RawByteString) : ICurlForm;  overload;  inline;
-    function Add(aName, aValue : string) : ICurlForm;  overload;
+    function Add(const aName, aValue : RawByteString) : ICurlForm;  overload;  inline;
+    function Add(const aName, aValue : string) : ICurlForm;  overload;
     function Add(aField : ICurlCustomField) : ICurlForm;  overload;
     function Add(aArray : array of TCurlPostOption) : ICurlForm;  overload;
 
     function AddFile(
-              aFieldName : RawByteString;
-              aFileName : string;
-              aContentType : RawByteString) : ICurlForm;
+              const aFieldName : RawByteString;
+              const aFileName : string;
+              const aContentType : RawByteString) : ICurlForm;
+    function AddPtrFile(
+              const aFieldName : RawByteString;
+              const aFileName : RawByteString;
+              const aContentType : RawByteString;
+              aLength : integer;
+              const aData) : ICurlForm;
+    function AddStrFile(
+              const aFieldName : RawByteString;
+              const aFileName : RawByteString;
+              const aContentType : RawByteString;
+              var aData : RawByteString) : ICurlForm;
 
     function RawValue : PCurlHttpPost;
     procedure RewindStreams;  override;
@@ -263,7 +288,7 @@ begin
   Result := Self;
 end;
 
-function TCurlForm.Add(aName, aValue : RawByteString) : ICurlForm;
+function TCurlForm.Add(const aName, aValue : RawByteString) : ICurlForm;
 begin
   RaiseIf(curl_formadd(fStart, fEnd,
           CURLFORM_COPYNAME, PAnsiChar(aName),
@@ -274,7 +299,7 @@ begin
   Result := Self;
 end;
 
-function TCurlForm.Add(aName, aValue : string) : ICurlForm;
+function TCurlForm.Add(const aName, aValue : string) : ICurlForm;
 begin
   Result := Add(UTF8Encode(aName), UTF8Encode(aValue));
 end;
@@ -301,9 +326,9 @@ begin
 end;
 
 function TCurlForm.AddFile(
-          aFieldName : RawByteString;
-          aFileName : string;
-          aContentType : RawByteString) : ICurlForm;
+          const aFieldName : RawByteString;
+          const aFileName : string;
+          const aContentType : RawByteString) : ICurlForm;
 var
   stream : TFileStream;
 begin
@@ -329,6 +354,36 @@ begin
   fDoesUseStream := true;
   Result := Self;
 end;
+
+function TCurlForm.AddPtrFile(
+          const aFieldName : RawByteString;
+          const aFileName : RawByteString;
+          const aContentType : RawByteString;
+          aLength : integer;
+          const aData) : ICurlForm;
+begin
+  RaiseIf(curl_formadd(fStart, fEnd,
+          CURLFORM_COPYNAME, PAnsiChar(aFieldName),
+          CURLFORM_NAMELENGTH, PAnsiChar(length(aFieldName)),
+          CURLFORM_BUFFER, PAnsiChar(aFileName),
+          CURLFORM_CONTENTTYPE, PAnsiChar(aContentType),
+          CURLFORM_BUFFERLENGTH, PAnsiChar(aLength),
+          CURLFORM_BUFFERPTR, PAnsiChar(@aData),
+          CURLFORM_END));
+  Result := Self;
+end;
+
+
+function TCurlForm.AddStrFile(
+          const aFieldName : RawByteString;
+          const aFileName : RawByteString;
+          const aContentType : RawByteString;
+          var aData : RawByteString) : ICurlForm;
+begin
+  Result := AddPtrFile(aFieldName, aFileName, aContentType,
+              Length(aData), PAnsiChar(aData)^);
+end;
+
 
 function TCurlForm.RawValue : PCurlHttpPost;
 begin
