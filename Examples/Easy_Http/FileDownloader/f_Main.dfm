@@ -43,8 +43,8 @@ object fmMain: TfmMain
     Height = 21
     TabOrder = 0
     Text = 
-      'http://tdf.ip-connect.vn.ua/libreoffice/stable/4.4.1/win/x86/Lib' +
-      'reOffice_4.4.1_Win_x86.msi'
+      'http://tdf.ip-connect.vn.ua/libreoffice/stable/5.3.6/win/x86_64/' +
+      'LibreOffice_5.3.6_Win_x64.msi'
   end
   object btDownload: TButton
     Left = 414
