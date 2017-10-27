@@ -808,12 +808,6 @@ type
     // platforms which have larger off_t sizes.  See MAXFILESIZE_LARGE below.
     CURLOPT_MAXFILESIZE = CURLOPTTYPE_LONG + 114,
 
-    // Enable SSL/TLS for FTP, pick one of:
-    // CURLUSESSL_TRY     - try using SSL, proceed anyway otherwise
-    // CURLUSESSL_CONTROL - SSL for the control connection or fail
-    // CURLUSESSL_ALL     - SSL for all communication or fail
-    CURLOPT_USE_SSL = CURLOPTTYPE_LONG + 119,
-
     // Enable/disable the TCP Nagle algorithm
     CURLOPT_TCP_NODELAY = CURLOPTTYPE_LONG + 121,
 
@@ -836,10 +830,6 @@ type
     // that. libcurl will then instead use the same IP address it used for the
     // control connection.
     CURLOPT_FTP_SKIP_PASV_IP = CURLOPTTYPE_LONG + 137,
-
-    // Select "file method" to use when doing FTP, see the curl_ftpmethod
-    // above.
-    CURLOPT_FTP_FILEMETHOD = CURLOPTTYPE_LONG + 138,
 
     // Local port number to bind the socket to
     CURLOPT_LOCALPORT = CURLOPTTYPE_LONG + 139,
@@ -974,6 +964,20 @@ type
     // indicates type of proxy. accepted values are CURLPROXY_HTTP (default,
     // CURLPROXY_SOCKS4, CURLPROXY_SOCKS4A and CURLPROXY_SOCKS5.
     CURLOPT_PROXYTYPE = CURLOPTTYPE_LONG + 101
+  );
+
+  TCurlUseSslOption = (
+    // Enable SSL/TLS for FTP, pick one of:
+    // CURLUSESSL_TRY     - try using SSL, proceed anyway otherwise
+    // CURLUSESSL_CONTROL - SSL for the control connection or fail
+    // CURLUSESSL_ALL     - SSL for all communication or fail
+    CURLOPT_USE_SSL = CURLOPTTYPE_LONG + 119
+  );
+
+  TCurlFtpMethodOption = (
+    // Select "file method" to use when doing FTP, see the curl_ftpmethod
+    // above.
+    CURLOPT_FTP_FILEMETHOD = CURLOPTTYPE_LONG + 138
   );
 
   TCurlOffOption = (
@@ -2210,6 +2214,21 @@ function curl_easy_setopt(
         option : TCurlPostOption;
         data : PCurlHttpPost) : TCurlCode;  overload;  inline;
 
+function curl_easy_setopt(
+        curl : TCurlHandle;
+        option : TCurlProxyTypeOption;
+        data : TCurlProxyType) : TCurlCode;  overload;  inline;
+
+function curl_easy_setopt(
+        curl : TCurlHandle;
+        option : TCurlUseSslOption;
+        data : TCurlUseSsl) : TCurlCode;  overload;  inline;
+
+function curl_easy_setopt(
+        curl : TCurlHandle;
+        option : TCurlFtpMethodOption;
+        data : TCurlFtpMethod) : TCurlCode;  overload;  inline;
+
 function curl_easy_perform(curl : TCurlHandle) : TCurlCode;
           cdecl;  external 'libcurl.dll';
 
@@ -2524,6 +2543,30 @@ function curl_easy_setopt(
         data : TCurlOff) : TCurlCode;
 begin
   Result := curl_easy_setopt_initial(curl, option, data);
+end;
+
+function curl_easy_setopt(
+        curl : TCurlHandle;
+        option : TCurlProxyTypeOption;
+        data : TCurlProxyType) : TCurlCode;
+begin
+  Result := curl_easy_setopt_initial(curl, option, NativeUInt(data));
+end;
+
+function curl_easy_setopt(
+        curl : TCurlHandle;
+        option : TCurlUseSslOption;
+        data : TCurlUseSsl) : TCurlCode;
+begin
+  Result := curl_easy_setopt_initial(curl, option, NativeUInt(data));
+end;
+
+function curl_easy_setopt(
+        curl : TCurlHandle;
+        option : TCurlFtpMethodOption;
+        data : TCurlFtpMethod) : TCurlCode;
+begin
+  Result := curl_easy_setopt_initial(curl, option, NativeUInt(data));
 end;
 
 function curl_easy_getinfo(

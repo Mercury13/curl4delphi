@@ -32,6 +32,8 @@ type
     procedure SetOpt(aOption : TCurlStringOption; aData : RawByteString);  overload;
     procedure SetOpt(aOption : TCurlStringOption; aData : UnicodeString);  overload;
     procedure SetOpt(aOption : TCurlProxyTypeOption; aData : TCurlProxyType);  overload;
+    procedure SetOpt(aOption : TCurlUseSslOption; aData : TCurlUseSsl);  overload;
+    procedure SetOpt(aOption : TCurlFtpMethodOption; aData : TCurlFtpMethod);  overload;
     procedure SetOpt(aOption : TCurlSlistOption; aData : PCurlSList);  overload;
               deprecated 'Use SetXXX instead: SetCustomHeaders, SetResolveList, etc.';
     procedure SetOpt(aOption : TCurlPostOption; aData : PCurlHttpPost);  overload;
@@ -184,6 +186,8 @@ type
     procedure SetOpt(aOption : TCurlSlistOption; aData : PCurlSList);  overload;
     procedure SetOpt(aOption : TCurlPostOption; aData : PCurlHttpPost);  overload;
     procedure SetOpt(aOption : TCurlProxyTypeOption; aData : TCurlProxyType);  overload;
+    procedure SetOpt(aOption : TCurlUseSslOption; aData : TCurlUseSsl);  overload;
+    procedure SetOpt(aOption : TCurlFtpMethodOption; aData : TCurlFtpMethod);  overload;
 
     procedure SetUrl(aData : PAnsiChar);      overload;   inline;
     procedure SetUrl(aData : RawByteString);  overload;   inline;
@@ -424,7 +428,17 @@ end;
 
 procedure TEasyCurlImpl.SetOpt(aOption : TCurlProxyTypeOption; aData : TCurlProxyType);
 begin
-  RaiseIf(curl_easy_setopt(fHandle, TCurlIntOption(aOption), NativeUInt(aData)));
+  RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
+end;
+
+procedure TEasyCurlImpl.SetOpt(aOption : TCurlUseSslOption; aData : TCurlUseSsl);
+begin
+  RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
+end;
+
+procedure TEasyCurlImpl.SetOpt(aOption : TCurlFtpMethodOption; aData : TCurlFtpMethod);
+begin
+  RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
 end;
 
 
