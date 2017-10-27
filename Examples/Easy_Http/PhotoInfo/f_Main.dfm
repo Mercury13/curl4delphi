@@ -6,7 +6,7 @@ object fmMain: TfmMain
   BorderStyle = bsSingle
   Caption = 'File upload demo'
   ClientHeight = 200
-  ClientWidth = 321
+  ClientWidth = 421
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -46,7 +46,7 @@ object fmMain: TfmMain
   object edUrl: TEdit
     Left = 37
     Top = 8
-    Width = 272
+    Width = 372
     Height = 21
     TabOrder = 1
     Text = 'http://localhost/php_curl/photoinfo/action.php'
@@ -54,12 +54,12 @@ object fmMain: TfmMain
   object memoResponse: TMemo
     Left = 15
     Top = 97
-    Width = 294
+    Width = 394
     Height = 95
     TabOrder = 0
   end
   object btEasy: TButton
-    Left = 54
+    Left = 94
     Top = 35
     Width = 75
     Height = 25
@@ -68,7 +68,7 @@ object fmMain: TfmMain
     OnClick = btEasyClick
   end
   object btHard: TButton
-    Left = 135
+    Left = 175
     Top = 35
     Width = 75
     Height = 25
@@ -88,20 +88,29 @@ object fmMain: TfmMain
   object btSynthMemory: TButton
     Left = 175
     Top = 66
-    Width = 75
+    Width = 114
     Height = 25
-    Caption = 'Memory'
+    Caption = 'Memory (hard way)'
     TabOrder = 5
     OnClick = btSynthMemoryClick
   end
   object btCloneDemo: TButton
-    Left = 216
+    Left = 256
     Top = 35
-    Width = 93
+    Width = 105
     Height = 25
     Caption = 'ICurl.Clone demo'
     TabOrder = 6
     OnClick = btCloneDemoClick
+  end
+  object btSynthMemory2: TButton
+    Left = 295
+    Top = 66
+    Width = 114
+    Height = 25
+    Caption = 'Memory (easy way)'
+    TabOrder = 7
+    OnClick = btSynthMemory2Click
   end
   object od: TOpenDialog
     Filter = 'Images (*.jpg; *.jpeg; *.png)|*.jpg; *.jpeg; *.png'
