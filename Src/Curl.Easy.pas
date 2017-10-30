@@ -101,6 +101,8 @@ type
     ///  See the TELNET standard for details.
     procedure SetTelnetOptions(v : ICurlCustomSList);
     ///  send linked-list of pre-transfer QUOTE commands
+    procedure SetQuote(v : ICurlCustomSList);
+    ///  Set aliases for HTTP 200 in the HTTP Response header
     procedure SetPreQuote(v : ICurlCustomSList);
     ///  Set aliases for HTTP 200 in the HTTP Response header
     procedure SetHttp200Aliases(v : ICurlCustomSList);
@@ -111,6 +113,9 @@ type
     ///  This points to a linked list of headers used for proxy requests only,
     ///  struct curl_slist kind
     procedure SetProxyHeader(v : ICurlCustomSList);
+    /// Linked-list of host:port:connect-to-host:connect-to-port,
+    /// overrides the URL's host:port (only for the network layer) */
+    procedure SetConnectTo(v : ICurlCustomSlist);
 
     procedure SetProxyFromIe;
 
@@ -156,8 +161,9 @@ type
   TEasyCurlImpl = class (TInterfacedObject, ICurl)
   private
     fHandle : TCurlHandle;
-    fCustomHeaders, fPostQuote, fTelnetOptions, fPreQuote,
-        fHttp200Aliases, fMailRcpt, fResolveList, fProxyHeader : ICurlCustomSList;
+    fCustomHeaders, fPostQuote, fTelnetOptions, fQuote, fPreQuote,
+        fHttp200Aliases, fMailRcpt, fResolveList, fProxyHeader,
+        fConnectTo : ICurlCustomSList;
     fForm : ICurlCustomForm;
     // We won’t save a few bytes of memory; repeatable code is more important.
     fRecvStream, fSendStream, fHeaderStream : TCurlAutoStream;
@@ -219,11 +225,13 @@ type
     procedure SetCustomHeaders(v : ICurlCustomSList);
     procedure SetPostQuote(v : ICurlCustomSList);
     procedure SetTelnetOptions(v : ICurlCustomSList);
+    procedure SetQuote(v : ICurlCustomSList);
     procedure SetPreQuote(v : ICurlCustomSList);
     procedure SetHttp200Aliases(v : ICurlCustomSList);
     procedure SetMailRcpt(v : ICurlCustomSList);
     procedure SetResolveList(v : ICurlCustomSList);
     procedure SetProxyHeader(v : ICurlCustomSList);
+    procedure SetConnectTo(v : ICurlCustomSlist);
     procedure SetProxyFromIe;
 
     procedure Perform;
@@ -573,6 +581,11 @@ begin
   SetSList(CURLOPT_TELNETOPTIONS, fTelnetOptions, v);
 end;
 
+procedure TEasyCurlImpl.SetQuote(v : ICurlCustomSList);
+begin
+  SetSList(CURLOPT_PREQUOTE, fQuote, v);
+end;
+
 procedure TEasyCurlImpl.SetPreQuote(v : ICurlCustomSList);
 begin
   SetSList(CURLOPT_PREQUOTE, fPreQuote, v);
@@ -596,6 +609,11 @@ end;
 procedure TEasyCurlImpl.SetProxyHeader(v : ICurlCustomSList);
 begin
   SetSList(CURLOPT_PROXYHEADER, fProxyHeader, v);
+end;
+
+procedure TEasyCurlImpl.SetConnectTo(v : ICurlCustomSList);
+begin
+  SetSList(CURLOPT_CONNECT_TO, fConnectTo, v);
 end;
 
 procedure TEasyCurlImpl.SetFollowLocation(aData : boolean);

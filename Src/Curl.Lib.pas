@@ -10,13 +10,13 @@ uses
 
 const
   CurlBindingVersionMajor = 7;
-  CurlBindingVersionMinor = 40;
-  CurlBindingVersionPatch = 0;
+  CurlBindingVersionMinor = 56;
+  CurlBindingVersionPatch = 1;
   CurlBindingVersionHex =
         CurlBindingVersionMajor shl 16 +
         CurlBindingVersionMinor shl 8 +
         CurlBindingVersionPatch;
-  CurlBindingVersionString = '7.40.0';
+  CurlBindingVersionString = '7.56.1';
 
 
 type
@@ -35,11 +35,6 @@ type
     CURLFILETYPE_UNKNOWN  // should never occur
     );
 
-  TCurlSockType = (
-    CURLSOCKTYPE_IPCXN,  // socket created for a specific IP connection
-    CURLSOCKTYPE_ACCEPT  // socket created by accept() call
-    );
-
   TCurlIoErr = (
     CURLIOE_OK,            // I/O operation successful
     CURLIOE_UNKNOWNCMD,    // command was unknown to callback
@@ -51,175 +46,28 @@ type
     CURLIOCMD_RESTARTREAD  // restart the read stream from start
   );
 
-  // the kind of data that is passed to information_callback
-  TCurlInfoType = (
-    CURLINFO_TEXT,         // 0
-    CURLINFO_HEADER_IN,    // 1
-    CURLINFO_HEADER_OUT,   // 2
-    CURLINFO_DATA_IN,      // 3
-    CURLINFO_DATA_OUT,     // 4
-    CURLINFO_SSL_DATA_IN,  // 5
-    CURLINFO_SSL_DATA_OUT, // 6
-    CURLINFO_END
-  );
-
-  // All possible error codes from all sorts of curl functions. Future versions
-  // may return other values, stay prepared.
-  TCurlCode = (
-    CURLE_OK,
-    CURLE_UNSUPPORTED_PROTOCOL,    // 1
-    CURLE_FAILED_INIT,             // 2
-    CURLE_URL_MALFORMAT,           // 3
-    CURLE_NOT_BUILT_IN,            // 4 - [was obsoleted in August 2007 for
-                                   //   7.17.0, reused in April 2011 for 7.21.5]
-    CURLE_COULDNT_RESOLVE_PROXY,   // 5
-    CURLE_COULDNT_RESOLVE_HOST,    // 6
-    CURLE_COULDNT_CONNECT,         // 7
-    CURLE_FTP_WEIRD_SERVER_REPLY,  // 8
-    CURLE_REMOTE_ACCESS_DENIED,    // 9 a service was denied by the server
-                                   //   due to lack of access - when login fails
-                                   //   this is not returned.
-    CURLE_FTP_ACCEPT_FAILED,       // 10 - [was obsoleted in April 2006 for
-                                   //   7.15.4, reused in Dec 2011 for 7.24.0]
-    CURLE_FTP_WEIRD_PASS_REPLY,    // 11
-    CURLE_FTP_ACCEPT_TIMEOUT,      // 12 - timeout occurred accepting server
-                                   //   [was obsoleted in August 2007 for 7.17.0,
-                                   //   reused in Dec 2011 for 7.24.0]
-    CURLE_FTP_WEIRD_PASV_REPLY,    // 13
-    CURLE_FTP_WEIRD_227_FORMAT,    // 14
-    CURLE_FTP_CANT_GET_HOST,       // 15
-    CURLE_HTTP2,                   // 16 - A problem in the http2 framing layer.
-                                   //   [was obsoleted in August 2007 for 7.17.0,
-                                   //   reused in July 2014 for 7.38.0]
-    CURLE_FTP_COULDNT_SET_TYPE,    // 17
-    CURLE_PARTIAL_FILE,            // 18
-    CURLE_FTP_COULDNT_RETR_FILE,   // 19
-    CURLE_OBSOLETE20,              // 20 - NOT USED
-    CURLE_QUOTE_ERROR,             // 21 - quote command failure
-    CURLE_HTTP_RETURNED_ERROR,     // 22
-    CURLE_WRITE_ERROR,             // 23
-    CURLE_OBSOLETE24,              // 24 - NOT USED
-    CURLE_UPLOAD_FAILED,           // 25 - failed upload "command"
-    CURLE_READ_ERROR,              // 26 - couldn't open/read from file
-    CURLE_OUT_OF_MEMORY,           // 27
-    // Note: CURLE_OUT_OF_MEMORY may sometimes indicate a conversion error
-    //        instead of a memory allocation error if CURL_DOES_CONVERSIONS
-    //        is defined
-    CURLE_OPERATION_TIMEDOUT,      // 28 - the timeout time was reached
-    CURLE_OBSOLETE29,              // 29 - NOT USED
-    CURLE_FTP_PORT_FAILED,         // 30 - FTP PORT operation failed
-    CURLE_FTP_COULDNT_USE_REST,    // 31 - the REST command failed
-    CURLE_OBSOLETE32,              // 32 - NOT USED
-    CURLE_RANGE_ERROR,             // 33 - RANGE "command" didn't work
-    CURLE_HTTP_POST_ERROR,         // 34
-    CURLE_SSL_CONNECT_ERROR,       // 35 - wrong when connecting with SSL
-    CURLE_BAD_DOWNLOAD_RESUME,     // 36 - couldn't resume download
-    CURLE_FILE_COULDNT_READ_FILE,  // 37
-    CURLE_LDAP_CANNOT_BIND,        // 38
-    CURLE_LDAP_SEARCH_FAILED,      // 39
-    CURLE_OBSOLETE40,              // 40 - NOT USED
-    CURLE_FUNCTION_NOT_FOUND,      // 41
-    CURLE_ABORTED_BY_CALLBACK,     // 42
-    CURLE_BAD_FUNCTION_ARGUMENT,   // 43
-    CURLE_OBSOLETE44,              // 44 - NOT USED
-    CURLE_INTERFACE_FAILED,        // 45 - CURLOPT_INTERFACE failed
-    CURLE_OBSOLETE46,              // 46 - NOT USED
-    CURLE_TOO_MANY_REDIRECTS ,     // 47 - catch endless re-direct loops
-    CURLE_UNKNOWN_OPTION,          // 48 - User specified an unknown option
-    CURLE_TELNET_OPTION_SYNTAX ,   // 49 - Malformed telnet option
-    CURLE_OBSOLETE50,              // 50 - NOT USED
-    CURLE_PEER_FAILED_VERIFICATION, // 51 - peer's certificate or fingerprint
-                                    //   wasn't verified fine
-    CURLE_GOT_NOTHING,             // 52 - when this is a specific error
-    CURLE_SSL_ENGINE_NOTFOUND,     // 53 - SSL crypto engine not found
-    CURLE_SSL_ENGINE_SETFAILED,    // 54 - can not set SSL crypto engine as
-                                   //   default
-    CURLE_SEND_ERROR,              // 55 - failed sending network data
-    CURLE_RECV_ERROR,              // 56 - failure in receiving network data
-    CURLE_OBSOLETE57,              // 57 - NOT IN USE
-    CURLE_SSL_CERTPROBLEM,         // 58 - problem with the local certificate
-    CURLE_SSL_CIPHER,              // 59 - couldn't use specified cipher
-    CURLE_SSL_CACERT,              // 60 - problem with the CA cert (path?)
-    CURLE_BAD_CONTENT_ENCODING,    // 61 - Unrecognized/bad encoding
-    CURLE_LDAP_INVALID_URL,        // 62 - Invalid LDAP URL
-    CURLE_FILESIZE_EXCEEDED,       // 63 - Maximum file size exceeded
-    CURLE_USE_SSL_FAILED,          // 64 - Requested FTP SSL level failed
-    CURLE_SEND_FAIL_REWIND,        // 65 - Sending the data requires a rewind
-                                   //   that failed
-    CURLE_SSL_ENGINE_INITFAILED,   // 66 - failed to initialise ENGINE
-    CURLE_LOGIN_DENIED,            // 67 - user, password or similar was not
-                                   //   accepted and we failed to login
-    CURLE_TFTP_NOTFOUND,           // 68 - file not found on server
-    CURLE_TFTP_PERM,               // 69 - permission problem on server
-    CURLE_REMOTE_DISK_FULL,        // 70 - out of disk space on server
-    CURLE_TFTP_ILLEGAL,            // 71 - Illegal TFTP operation
-    CURLE_TFTP_UNKNOWNID,          // 72 - Unknown transfer ID
-    CURLE_REMOTE_FILE_EXISTS,      // 73 - File already exists
-    CURLE_TFTP_NOSUCHUSER,         // 74 - No such user
-    CURLE_CONV_FAILED,             // 75 - conversion failed
-    CURLE_CONV_REQD,               // 76 - caller must register conversion
-                                   //   callbacks using curl_easy_setopt options
-                                   //   CURLOPT_CONV_FROM_NETWORK_FUNCTION,
-                                   //   CURLOPT_CONV_TO_NETWORK_FUNCTION, and
-                                   //   CURLOPT_CONV_FROM_UTF8_FUNCTION
-    CURLE_SSL_CACERT_BADFILE,      // 77 - could not load CACERT file, missing
-                                   //   or wrong format
-    CURLE_REMOTE_FILE_NOT_FOUND,   // 78 - remote file not found
-    CURLE_SSH,                     // 79 - error from the SSH layer, somewhat
-                                   //   generic so the error message will be of
-                                   //   interest when this has happened
-
-    CURLE_SSL_SHUTDOWN_FAILED,     // 80 - Failed to shut down the SSL
-                                   //   connection
-    CURLE_AGAIN,                   // 81 - socket is not ready for send/recv,
-                                   //   wait till it's ready and try again (Added
-                                   //   in 7.18.2)
-    CURLE_SSL_CRL_BADFILE,         // 82 - could not load CRL file, missing or
-                                   //   wrong format (Added in 7.19.0)
-    CURLE_SSL_ISSUER_ERROR,        // 83 - Issuer check failed.  (Added in
-                                   //   7.19.0)
-    CURLE_FTP_PRET_FAILED,         // 84 - a PRET command failed
-    CURLE_RTSP_CSEQ_ERROR,         // 85 - mismatch of RTSP CSeq numbers
-    CURLE_RTSP_SESSION_ERROR,      // 86 - mismatch of RTSP Session Ids
-    CURLE_FTP_BAD_FILE_LIST,       // 87 - unable to parse FTP file list
-    CURLE_CHUNK_FAILED,            // 88 - chunk callback reported error
-    CURLE_NO_CONNECTION_AVAILABLE, // 89 - No connection available, the
-                                   //   session will be queued
-    CURLE_SSL_PINNEDPUBKEYNOTMATCH  // 90 - specified pinned public key did not
-                                    //   match
-  );
-
-  TCurlProxyType = (
-    CURLPROXY_HTTP = 0,     // added in 7.10, new in 7.19.4 default is to use
-                            // CONNECT HTTP/1.1
-    CURLPROXY_HTTP_1_0 = 1, // added in 7.19.4, force to use CONNECT
-                            //   HTTP/1.0
-    CURLPROXY_SOCKS4 = 4,   // support added in 7.15.2, enum existed already
-                            //  in 7.10
-    CURLPROXY_SOCKS5 = 5,   // added in 7.10
-    CURLPROXY_SOCKS4A = 6,  // added in 7.18.0
-    CURLPROXY_SOCKS5_HOSTNAME = 7 // Use the SOCKS5 protocol but pass along the
-                                  // host name rather than the IP address. added
-                                  // in 7.18.0
-  );
-
 
 const
   // cUrl constants
   CURL_SOCKET_BAD = High(TCurlSocket);
 
-  HTTPPOST_FILENAME    = 1 shl 0;   // specified content is a file name
-  HTTPPOST_READFILE    = 1 shl 1;   // specified content is a file name
-  HTTPPOST_PTRNAME     = 1 shl 2;   // name is only stored pointer
-                                    //   do not free in formfree
-  HTTPPOST_PTRCONTENTS = 1 shl 3;   // contents is only stored pointer
-                                    //   do not free in formfree
-  HTTPPOST_BUFFER      = 1 shl 4;   // upload file from buffer
-  HTTPPOST_PTRBUFFER   = 1 shl 5;   // upload file from pointer contents
-  HTTPPOST_CALLBACK    = 1 shl 6;   // upload file contents by using the
-                                    //   regular read callback to get the data
-                                    //   and pass the given pointer as custom
-                                    //   pointer
+  CURL_HTTPPOST_FILENAME    = 1 shl 0;   // specified content is a file name
+  CURL_HTTPPOST_READFILE    = 1 shl 1;   // specified content is a file name
+  CURL_HTTPPOST_PTRNAME     = 1 shl 2;   // name is only stored pointer
+                                         //   do not free in formfree
+  CURL_HTTPPOST_PTRCONTENTS = 1 shl 3;   // contents is only stored pointer
+                                         //   do not free in formfree
+  CURL_HTTPPOST_BUFFER      = 1 shl 4;   // upload file from buffer
+  CURL_HTTPPOST_PTRBUFFER   = 1 shl 5;   // upload file from pointer contents
+  CURL_HTTPPOST_CALLBACK    = 1 shl 6;   // upload file contents by using the
+                                         //   regular read callback to get the data
+                                         //   and pass the given pointer as custom
+                                         //   pointer
+  CURL_HTTPPOST_LARGE       = 1 shl 7;   //  use size in 'contentlen',
+                                         //   added in 7.46.0 */
+
+  // The maximum receive buffer size configurable via CURLOPT_BUFFERSIZE.
+  CURL_MAX_READ_SIZE = 524288;
 
   // Tests have proven that 20K is a very bad buffer size for uploads on
   //   Windows, while 16K for some odd reason performed a lot better.
@@ -381,19 +229,25 @@ type
           Size, NItems : NativeUInt;
           InStream : pointer) : NativeUInt;
 
-const
-  // The return code from the sockopt_callback can signal information back
-  // to libcurl:
-  CURL_SOCKOPT_OK = 0;
-  CURL_SOCKOPT_ERROR = 1; // causes libcurl to abort and return
-                          //      CURLE_ABORTED_BY_CALLBACK
-  CURL_SOCKOPT_ALREADY_CONNECTED = 2;
-
 type
+  TCurlSockType = (
+    CURLSOCKTYPE_IPCXN,  // socket created for a specific IP connection
+    CURLSOCKTYPE_ACCEPT  // socket created by accept() call
+    );
+
+  TCurlSockOpt = (
+    // The return code from the sockopt_callback can signal information back
+    // to libcurl:
+    CURL_SOCKOPT_OK,
+    CURL_SOCKOPT_ERROR,  // causes libcurl to abort and return
+                         //      CURLE_ABORTED_BY_CALLBACK
+    CURL_SOCKOPT_ALREADY_CONNECTED
+  );
+
   EvCurlSockopt = function(
           ClientP : pointer;
           Curlfd : TCurlSocket;
-          Purpose : TCurlSockType) : integer;  cdecl;
+          Purpose : TCurlSockType) : TCurlSockOpt;  cdecl;
 
   TCurlSockAddr = record
     Family, SockType, Protocol : integer;
@@ -425,12 +279,152 @@ type
   EvCurlStrDup = function (Str : PAnsiChar) : PAnsiChar;  cdecl;
   EvCurlCalloc = function (Nmemb, Size : NativeUInt) : pointer;  cdecl;
 
+  // the kind of data that is passed to information_callback
+  TCurlInfoType = (
+    CURLINFO_TEXT,         // 0
+    CURLINFO_HEADER_IN,    // 1
+    CURLINFO_HEADER_OUT,   // 2
+    CURLINFO_DATA_IN,      // 3
+    CURLINFO_DATA_OUT,     // 4
+    CURLINFO_SSL_DATA_IN,  // 5
+    CURLINFO_SSL_DATA_OUT, // 6
+    CURLINFO_END
+  );
+
   EvCurlDebug = function (
         Handle : TCurlHandle;
         aType : TCurlInfoType;
         Data : PAnsiChar;
         Size : NativeUInt;
         UserPtr : pointer) : integer;  cdecl;
+
+  // All possible error codes from all sorts of curl functions. Future versions
+  // may return other values, stay prepared.
+  TCurlCode = (
+    CURLE_OK,
+    CURLE_UNSUPPORTED_PROTOCOL,    // 1
+    CURLE_FAILED_INIT,             // 2
+    CURLE_URL_MALFORMAT,           // 3
+    CURLE_NOT_BUILT_IN,            // 4 - [was obsoleted in August 2007 for
+                                   //   7.17.0, reused in April 2011 for 7.21.5]
+    CURLE_COULDNT_RESOLVE_PROXY,   // 5
+    CURLE_COULDNT_RESOLVE_HOST,    // 6
+    CURLE_COULDNT_CONNECT,         // 7
+    CURLE_FTP_WEIRD_SERVER_REPLY,  // 8
+    CURLE_REMOTE_ACCESS_DENIED,    // 9 a service was denied by the server
+                                   //   due to lack of access - when login fails
+                                   //   this is not returned.
+    CURLE_FTP_ACCEPT_FAILED,       // 10 - [was obsoleted in April 2006 for
+                                   //   7.15.4, reused in Dec 2011 for 7.24.0]
+    CURLE_FTP_WEIRD_PASS_REPLY,    // 11
+    CURLE_FTP_ACCEPT_TIMEOUT,      // 12 - timeout occurred accepting server
+                                   //   [was obsoleted in August 2007 for 7.17.0,
+                                   //   reused in Dec 2011 for 7.24.0]
+    CURLE_FTP_WEIRD_PASV_REPLY,    // 13
+    CURLE_FTP_WEIRD_227_FORMAT,    // 14
+    CURLE_FTP_CANT_GET_HOST,       // 15
+    CURLE_HTTP2,                   // 16 - A problem in the http2 framing layer.
+                                   //   [was obsoleted in August 2007 for 7.17.0,
+                                   //   reused in July 2014 for 7.38.0]
+    CURLE_FTP_COULDNT_SET_TYPE,    // 17
+    CURLE_PARTIAL_FILE,            // 18
+    CURLE_FTP_COULDNT_RETR_FILE,   // 19
+    CURLE_OBSOLETE20,              // 20 - NOT USED
+    CURLE_QUOTE_ERROR,             // 21 - quote command failure
+    CURLE_HTTP_RETURNED_ERROR,     // 22
+    CURLE_WRITE_ERROR,             // 23
+    CURLE_OBSOLETE24,              // 24 - NOT USED
+    CURLE_UPLOAD_FAILED,           // 25 - failed upload "command"
+    CURLE_READ_ERROR,              // 26 - couldn't open/read from file
+    CURLE_OUT_OF_MEMORY,           // 27
+    // Note: CURLE_OUT_OF_MEMORY may sometimes indicate a conversion error
+    //        instead of a memory allocation error if CURL_DOES_CONVERSIONS
+    //        is defined
+    CURLE_OPERATION_TIMEDOUT,      // 28 - the timeout time was reached
+    CURLE_OBSOLETE29,              // 29 - NOT USED
+    CURLE_FTP_PORT_FAILED,         // 30 - FTP PORT operation failed
+    CURLE_FTP_COULDNT_USE_REST,    // 31 - the REST command failed
+    CURLE_OBSOLETE32,              // 32 - NOT USED
+    CURLE_RANGE_ERROR,             // 33 - RANGE "command" didn't work
+    CURLE_HTTP_POST_ERROR,         // 34
+    CURLE_SSL_CONNECT_ERROR,       // 35 - wrong when connecting with SSL
+    CURLE_BAD_DOWNLOAD_RESUME,     // 36 - couldn't resume download
+    CURLE_FILE_COULDNT_READ_FILE,  // 37
+    CURLE_LDAP_CANNOT_BIND,        // 38
+    CURLE_LDAP_SEARCH_FAILED,      // 39
+    CURLE_OBSOLETE40,              // 40 - NOT USED
+    CURLE_FUNCTION_NOT_FOUND,      // 41
+    CURLE_ABORTED_BY_CALLBACK,     // 42
+    CURLE_BAD_FUNCTION_ARGUMENT,   // 43
+    CURLE_OBSOLETE44,              // 44 - NOT USED
+    CURLE_INTERFACE_FAILED,        // 45 - CURLOPT_INTERFACE failed
+    CURLE_OBSOLETE46,              // 46 - NOT USED
+    CURLE_TOO_MANY_REDIRECTS ,     // 47 - catch endless re-direct loops
+    CURLE_UNKNOWN_OPTION,          // 48 - User specified an unknown option
+    CURLE_TELNET_OPTION_SYNTAX ,   // 49 - Malformed telnet option
+    CURLE_OBSOLETE50,              // 50 - NOT USED
+    CURLE_PEER_FAILED_VERIFICATION, // 51 - peer's certificate or fingerprint
+                                    //   wasn't verified fine
+    CURLE_GOT_NOTHING,             // 52 - when this is a specific error
+    CURLE_SSL_ENGINE_NOTFOUND,     // 53 - SSL crypto engine not found
+    CURLE_SSL_ENGINE_SETFAILED,    // 54 - can not set SSL crypto engine as
+                                   //   default
+    CURLE_SEND_ERROR,              // 55 - failed sending network data
+    CURLE_RECV_ERROR,              // 56 - failure in receiving network data
+    CURLE_OBSOLETE57,              // 57 - NOT IN USE
+    CURLE_SSL_CERTPROBLEM,         // 58 - problem with the local certificate
+    CURLE_SSL_CIPHER,              // 59 - couldn't use specified cipher
+    CURLE_SSL_CACERT,              // 60 - problem with the CA cert (path?)
+    CURLE_BAD_CONTENT_ENCODING,    // 61 - Unrecognized/bad encoding
+    CURLE_LDAP_INVALID_URL,        // 62 - Invalid LDAP URL
+    CURLE_FILESIZE_EXCEEDED,       // 63 - Maximum file size exceeded
+    CURLE_USE_SSL_FAILED,          // 64 - Requested FTP SSL level failed
+    CURLE_SEND_FAIL_REWIND,        // 65 - Sending the data requires a rewind
+                                   //   that failed
+    CURLE_SSL_ENGINE_INITFAILED,   // 66 - failed to initialise ENGINE
+    CURLE_LOGIN_DENIED,            // 67 - user, password or similar was not
+                                   //   accepted and we failed to login
+    CURLE_TFTP_NOTFOUND,           // 68 - file not found on server
+    CURLE_TFTP_PERM,               // 69 - permission problem on server
+    CURLE_REMOTE_DISK_FULL,        // 70 - out of disk space on server
+    CURLE_TFTP_ILLEGAL,            // 71 - Illegal TFTP operation
+    CURLE_TFTP_UNKNOWNID,          // 72 - Unknown transfer ID
+    CURLE_REMOTE_FILE_EXISTS,      // 73 - File already exists
+    CURLE_TFTP_NOSUCHUSER,         // 74 - No such user
+    CURLE_CONV_FAILED,             // 75 - conversion failed
+    CURLE_CONV_REQD,               // 76 - caller must register conversion
+                                   //   callbacks using curl_easy_setopt options
+                                   //   CURLOPT_CONV_FROM_NETWORK_FUNCTION,
+                                   //   CURLOPT_CONV_TO_NETWORK_FUNCTION, and
+                                   //   CURLOPT_CONV_FROM_UTF8_FUNCTION
+    CURLE_SSL_CACERT_BADFILE,      // 77 - could not load CACERT file, missing
+                                   //   or wrong format
+    CURLE_REMOTE_FILE_NOT_FOUND,   // 78 - remote file not found
+    CURLE_SSH,                     // 79 - error from the SSH layer, somewhat
+                                   //   generic so the error message will be of
+                                   //   interest when this has happened
+
+    CURLE_SSL_SHUTDOWN_FAILED,     // 80 - Failed to shut down the SSL
+                                   //   connection
+    CURLE_AGAIN,                   // 81 - socket is not ready for send/recv,
+                                   //   wait till it's ready and try again (Added
+                                   //   in 7.18.2)
+    CURLE_SSL_CRL_BADFILE,         // 82 - could not load CRL file, missing or
+                                   //   wrong format (Added in 7.19.0)
+    CURLE_SSL_ISSUER_ERROR,        // 83 - Issuer check failed.  (Added in
+                                   //   7.19.0)
+    CURLE_FTP_PRET_FAILED,         // 84 - a PRET command failed
+    CURLE_RTSP_CSEQ_ERROR,         // 85 - mismatch of RTSP CSeq numbers
+    CURLE_RTSP_SESSION_ERROR,      // 86 - mismatch of RTSP Session Ids
+    CURLE_FTP_BAD_FILE_LIST,       // 87 - unable to parse FTP file list
+    CURLE_CHUNK_FAILED,            // 88 - chunk callback reported error
+    CURLE_NO_CONNECTION_AVAILABLE, // 89 - No connection available, the
+                                   //   session will be queued
+    CURLE_SSL_PINNEDPUBKEYNOTMATCH, // 90 - specified pinned public key did not
+                                    //   match
+    CURLE_SSL_INVALIDCERTSTATUS,   // 91 - invalid certificate status */
+    CURLE_HTTP2_STREAM             // 92 - stream error in HTTP/2 framing layer
+  );
 
   // This prototype applies to all conversion callbacks
   EvCurlConv = function (Buffer : PChar; Length : NativeUInt) : TCurlCode;  cdecl;
@@ -440,32 +434,34 @@ type
           SslCtx : pointer;         // actually an OpenSSL SSL_CTX
           UserPtr : pointer) : TCurlCode;  cdecl;
 
+  TCurlProxyType = (
+    CURLPROXY_HTTP = 0,     // added in 7.10, new in 7.19.4 default is to use
+                            // CONNECT HTTP/1.1
+    CURLPROXY_HTTP_1_0 = 1, // added in 7.19.4, force to use CONNECT
+                            //   HTTP/1.0
+    CURLPROXY_SOCKS4 = 4,   // support added in 7.15.2, enum existed already
+                            //  in 7.10
+    CURLPROXY_SOCKS5 = 5,   // added in 7.10
+    CURLPROXY_SOCKS4A = 6,  // added in 7.18.0
+    CURLPROXY_SOCKS5_HOSTNAME = 7 // Use the SOCKS5 protocol but pass along the
+                                  // host name rather than the IP address. added
+                                  // in 7.18.0
+  );
+
 const
  // Bitmasks for CURLOPT_HTTPAUTH and CURLOPT_PROXYAUTH options:
- //
- // CURLAUTH_NONE         - No HTTP authentication
- // CURLAUTH_BASIC        - HTTP Basic authentication (default)
- // CURLAUTH_DIGEST       - HTTP Digest authentication
- // CURLAUTH_NEGOTIATE    - HTTP Negotiate (SPNEGO) authentication
- // CURLAUTH_GSSNEGOTIATE - Alias for CURLAUTH_NEGOTIATE (deprecated)
- // CURLAUTH_NTLM         - HTTP NTLM authentication
- // CURLAUTH_DIGEST_IE    - HTTP Digest authentication with IE flavour
- // CURLAUTH_NTLM_WB      - HTTP NTLM authentication delegated to winbind helper
- // CURLAUTH_ONLY         - Use together with a single other type to force no
- //                         authentication or just that single type
- // CURLAUTH_ANY          - All fine types set
- // CURLAUTH_ANYSAFE      - All fine types except Basic
-
-  CURLAUTH_NONE         = 0;
-  CURLAUTH_BASIC        = 1 shl 0;
-  CURLAUTH_DIGEST       = 1 shl 1;
-  CURLAUTH_NEGOTIATE    = 1 shl 2;
-  CURLAUTH_NTLM         = 1 shl 3;
-  CURLAUTH_DIGEST_IE    = 1 shl 4;
-  CURLAUTH_NTLM_WB      = 1 shl 5;
+  CURLAUTH_NONE         = 0;          // No HTTP authentication
+  CURLAUTH_BASIC        = 1 shl 0;    // HTTP Basic authentication (default)
+  CURLAUTH_DIGEST       = 1 shl 1;    // HTTP Digest authentication
+  CURLAUTH_NEGOTIATE    = 1 shl 2;    // HTTP Negotiate (SPNEGO) authentication
+  CURLAUTH_NTLM         = 1 shl 3;    // HTTP NTLM authentication
+  CURLAUTH_DIGEST_IE    = 1 shl 4;    // HTTP Digest authentication with IE flavour
+  CURLAUTH_NTLM_WB      = 1 shl 5;    // HTTP NTLM authentication delegated to winbind helper
+      // Use together with a single other type to force no
+      // authentication or just that single type
   CURLAUTH_ONLY         = 1 shl 31;
-  CURLAUTH_ANY          = not CURLAUTH_DIGEST_IE;
-  CURLAUTH_ANYSAFE      = not (CURLAUTH_BASIC or CURLAUTH_DIGEST_IE);
+  CURLAUTH_ANY          = not CURLAUTH_DIGEST_IE;     // All fine types set
+  CURLAUTH_ANYSAFE      = not (CURLAUTH_BASIC or CURLAUTH_DIGEST_IE);   // All fine types except Basic
 
   CURLSSH_AUTH_ANY       = not 0;   // all types supported by the server
   CURLSSH_AUTH_NONE      = 0;       // none allowed, silly but complete
@@ -494,7 +490,7 @@ type
     Key : PAnsiChar; // points to a zero-terminated string encoded with base64
                      // if len is zero, otherwise to the "raw" data
     Len : NativeUInt;
-    KeyType : TCurlKhType
+    KeyType : TCurlKhType;
   end;
 
   // this is the set of return values expected from the curl_sshkeycallback
@@ -537,6 +533,11 @@ const
   // make the SSL communication fail. To regain functionality with those broken
   // servers, a user can this way allow the vulnerability back.
   CURLSSLOPT_ALLOW_BEAST = 1 shl 0;
+
+
+  // - NO_REVOKE tells libcurl to disable certificate revocation checks for those
+  // SSL backends where such behavior is present. */
+  CURLSSLOPT_NO_REVOKE   = 1 shl 1;
 
 type
   // parameter for the CURLOPT_FTP_SSL_CCC option
@@ -610,6 +611,7 @@ const
 //   but 32
   CURLOPTTYPE_LONG          = 0;
   CURLOPTTYPE_OBJECTPOINT   = 10000;
+  CURLOPTTYPE_STRINGPOINT   = CURLOPTTYPE_OBJECTPOINT;
   CURLOPTTYPE_FUNCTIONPOINT = 20000;
   CURLOPTTYPE_OFF_T         = 30000;
 
@@ -709,8 +711,6 @@ type
     // Max amount of cached alive connections
     CURLOPT_MAXCONNECTS = CURLOPTTYPE_LONG + 71,
 
-    CURLOPT_OBSOLETE72 = CURLOPTTYPE_LONG + 72,   // OBSOLETE, do not use!
-
     // Set to explicitly use a new connection for the upcoming transfer.
     // Do not use this unless you're absolutely sure of this, as it makes the
     // operation slower and is less friendly for the network.
@@ -808,6 +808,9 @@ type
     // platforms which have larger off_t sizes.  See MAXFILESIZE_LARGE below.
     CURLOPT_MAXFILESIZE = CURLOPTTYPE_LONG + 114,
 
+    // Gone to its own enum
+    //CURLOPT_USE_SSL = CURLOPTTYPE_LONG + 119,
+
     // Enable/disable the TCP Nagle algorithm
     CURLOPT_TCP_NODELAY = CURLOPTTYPE_LONG + 121,
 
@@ -830,6 +833,9 @@ type
     // that. libcurl will then instead use the same IP address it used for the
     // control connection.
     CURLOPT_FTP_SKIP_PASV_IP = CURLOPTTYPE_LONG + 137,
+
+    // Gone to its own enum
+    //CURLOPT_FTP_FILEMETHOD = CURLOPTTYPE_LONG + 138,
 
     // Local port number to bind the socket to
     CURLOPT_LOCALPORT = CURLOPTTYPE_LONG + 139,
@@ -913,9 +919,6 @@ type
     // Turn on wildcard matching
     CURLOPT_WILDCARDMATCH = CURLOPTTYPE_LONG + 197,
 
-    // Set authentication type for authenticated TLS
-    CURLOPT_TLSAUTH_TYPE = CURLOPTTYPE_OBJECTPOINT + 206,
-
     // Set to 1 to enable the "TE:" header in HTTP requests to ask for
     // compressed transfer-encoded responses. Set to 0 to disable the use of TE:
     // in outgoing requests. The current default is 0, but it might change in a
@@ -957,7 +960,58 @@ type
     CURLOPT_EXPECT_100_TIMEOUT_MS = CURLOPTTYPE_LONG + 227,
 
     // Pass in a bitmask of "header options"
-    CURLOPT_HEADEROPT = CURLOPTTYPE_LONG + 229
+    CURLOPT_HEADEROPT = CURLOPTTYPE_LONG + 229,
+
+    // Set if we should verify the certificate status
+    CURLOPT_SSL_VERIFYSTATUS = CURLOPTTYPE_LONG + 232,
+
+    // Set if we should enable TLS false start.
+    CURLOPT_SSL_FALSESTART = CURLOPTTYPE_LONG + 233,
+
+    // Do not squash dot-dot sequences
+    CURLOPT_PATH_AS_IS = CURLOPTTYPE_LONG + 234,
+
+    // Wait/don't wait for pipe/mutex to clarify
+    CURLOPT_PIPEWAIT = CURLOPTTYPE_LONG + 237,
+
+    // Set stream weight, 1 - 256 (default is 16)
+    CURLOPT_STREAM_WEIGHT = CURLOPTTYPE_LONG + 239,
+
+    // Do not send any tftp option requests to the server
+    CURLOPT_TFTP_NO_OPTIONS = CURLOPTTYPE_LONG + 242,
+
+    // Set TCP Fast Open
+    CURLOPT_TCP_FASTOPEN = CURLOPTTYPE_LONG + 244,
+
+    // Continue to send data if the server responds early with an
+    // HTTP status code >= 300
+    CURLOPT_KEEP_SENDING_ON_ERROR = CURLOPTTYPE_LONG + 245,
+
+    // Set if we should verify the proxy in ssl handshake,
+    // set 1 to verify.
+    CURLOPT_PROXY_SSL_VERIFYPEER = CURLOPTTYPE_LONG + 248,
+
+    // Set if we should verify the Common name from the proxy certificate in ssl
+    // handshake, set 1 to check existence, 2 to ensure that it matches
+    // the provided hostname.
+    CURLOPT_PROXY_SSL_VERIFYHOST = CURLOPTTYPE_LONG + 249,
+
+    // What version to specifically try to use for proxy.
+    // See CURL_SSLVERSION defines below. */
+    CURLOPT_PROXY_SSLVERSION = CURLOPTTYPE_LONG + 250,
+
+    // Enable/disable specific SSL features with a bitmask for proxy, see
+    // CURLSSLOPT_*
+    CURLOPT_PROXY_SSL_OPTIONS = CURLOPTTYPE_LONG + 261,
+
+    // Suppress proxy CONNECT response headers from user callbacks
+    CURLOPT_SUPPRESS_CONNECT_HEADERS = CURLOPTTYPE_LONG + 265,
+
+    // bitmask of allowed auth methods for connections to SOCKS5 proxies
+    CURLOPT_SOCKS5_AUTH = CURLOPTTYPE_LONG + 267,
+
+    // Enable/disable SSH compression
+    CURLOPT_SSH_COMPRESSION = CURLOPTTYPE_LONG + 268
   );
 
   TCurlProxyTypeOption = (
@@ -1004,139 +1058,135 @@ type
 
   TCurlStringOption = (
     // The full URL to get/put
-    CURLOPT_URL = CURLOPTTYPE_OBJECTPOINT + 2,
+    CURLOPT_URL = CURLOPTTYPE_STRINGPOINT + 2,
 
     // Name of proxy to use.
-    CURLOPT_PROXY = CURLOPTTYPE_OBJECTPOINT + 4,
-
+    CURLOPT_PROXY = CURLOPTTYPE_STRINGPOINT + 4,
 
     // "user:password;options" to use when fetching.
-    CURLOPT_USERPWD = CURLOPTTYPE_OBJECTPOINT + 5,
+    CURLOPT_USERPWD = CURLOPTTYPE_STRINGPOINT + 5,
 
     // "user:password" to use with proxy.
-    CURLOPT_PROXYUSERPWD = CURLOPTTYPE_OBJECTPOINT + 6,
+    CURLOPT_PROXYUSERPWD = CURLOPTTYPE_STRINGPOINT + 6,
 
     // Range to get, specified as an ASCII string.
-    CURLOPT_RANGE = CURLOPTTYPE_OBJECTPOINT + 7,
-
-    // POST static input fields.
-    CURLOPT_POSTFIELDS = CURLOPTTYPE_OBJECTPOINT + 15,
+    CURLOPT_RANGE = CURLOPTTYPE_STRINGPOINT + 7,
 
     // Set the referrer page (needed by some CGIs)
-    CURLOPT_REFERER = CURLOPTTYPE_OBJECTPOINT + 16,
+    CURLOPT_REFERER = CURLOPTTYPE_STRINGPOINT + 16,
 
     // Set the FTP PORT string (interface name, named or numerical IP address)
     // Use i.e '-' to use default address.
-    CURLOPT_FTPPORT = CURLOPTTYPE_OBJECTPOINT + 17,
+    CURLOPT_FTPPORT = CURLOPTTYPE_STRINGPOINT + 17,
 
     // Set the User-Agent string (examined by some CGIs)
-    CURLOPT_USERAGENT = CURLOPTTYPE_OBJECTPOINT + 18,
+    CURLOPT_USERAGENT = CURLOPTTYPE_STRINGPOINT + 18,
 
     // Set cookie in request:
-    CURLOPT_COOKIE = CURLOPTTYPE_OBJECTPOINT + 22,
+    CURLOPT_COOKIE = CURLOPTTYPE_STRINGPOINT + 22,
 
     // name of the file keeping your private SSL-certificate
-    CURLOPT_SSLCERT = CURLOPTTYPE_OBJECTPOINT + 25,
+    CURLOPT_SSLCERT = CURLOPTTYPE_STRINGPOINT + 25,
+
+    // password for the SSL or SSH private key
+    CURLOPT_KEYPASSWD = CURLOPTTYPE_STRINGPOINT + 26,
 
     // point to a file to read the initial cookies from, also enables
     // "cookie awareness"
-    CURLOPT_COOKIEFILE = CURLOPTTYPE_OBJECTPOINT + 31,
-
-    // password for the SSL or SSH private key
-    CURLOPT_KEYPASSWD = CURLOPTTYPE_OBJECTPOINT + 26,
+    CURLOPT_COOKIEFILE = CURLOPTTYPE_STRINGPOINT + 31,
 
     // Custom request, for customizing the get command like
     // HTTP: DELETE, TRACE and others
     // FTP: to use a different list command
-    CURLOPT_CUSTOMREQUEST = CURLOPTTYPE_OBJECTPOINT + 36,
+    CURLOPT_CUSTOMREQUEST = CURLOPTTYPE_STRINGPOINT + 36,
 
     // Set the interface string to use as outgoing network interface
-    CURLOPT_INTERFACE = CURLOPTTYPE_OBJECTPOINT + 62,
+    CURLOPT_INTERFACE = CURLOPTTYPE_STRINGPOINT + 62,
 
     // Set the krb4/5 security level, this also enables krb4/5 awareness.  This
     // is a string, 'clear', 'safe', 'confidential' or 'private'.  If the string
     // is set but doesn't match one of these, 'private' will be used.
-    CURLOPT_KRBLEVEL = CURLOPTTYPE_OBJECTPOINT + 63,
+    CURLOPT_KRBLEVEL = CURLOPTTYPE_STRINGPOINT + 63,
 
     // The CApath or CAfile used to validate the peer certificate
     // this option is used only if SSL_VERIFYPEER is true
-    CURLOPT_CAINFO = CURLOPTTYPE_OBJECTPOINT + 65,
+    CURLOPT_CAINFO = CURLOPTTYPE_STRINGPOINT + 65,
 
     // Set to a file name that contains random data for libcurl to use to
     // seed the random engine when doing SSL connects.
-    CURLOPT_RANDOM_FILE = CURLOPTTYPE_OBJECTPOINT + 76,
+    CURLOPT_RANDOM_FILE = CURLOPTTYPE_STRINGPOINT + 76,
+
+    // Set to the Entropy Gathering Daemon socket pathname
+    CURLOPT_EGDSOCKET = CURLOPTTYPE_STRINGPOINT + 77,
 
     // Specify which file name to write all known cookies in after completed
     // operation. Set file name to "-" (dash) to make it go to stdout.
-    CURLOPT_COOKIEJAR = CURLOPTTYPE_OBJECTPOINT + 82,
+    CURLOPT_COOKIEJAR = CURLOPTTYPE_STRINGPOINT + 82,
 
     // Specify which SSL ciphers to use
-    CURLOPT_SSL_CIPHER_LIST = CURLOPTTYPE_OBJECTPOINT + 83,
+    CURLOPT_SSL_CIPHER_LIST = CURLOPTTYPE_STRINGPOINT + 83,
 
     // type of the file keeping your SSL-certificate ("DER", "PEM", "ENG")
-    CURLOPT_SSLCERTTYPE = CURLOPTTYPE_OBJECTPOINT + 86,
+    CURLOPT_SSLCERTTYPE = CURLOPTTYPE_STRINGPOINT + 86,
 
     // name of the file keeping your private SSL-key
-    CURLOPT_SSLKEY = CURLOPTTYPE_OBJECTPOINT + 87,
+    CURLOPT_SSLKEY = CURLOPTTYPE_STRINGPOINT + 87,
 
     // type of the file keeping your private SSL-key ("DER", "PEM", "ENG")
-    CURLOPT_SSLKEYTYPE = CURLOPTTYPE_OBJECTPOINT + 88,
+    CURLOPT_SSLKEYTYPE = CURLOPTTYPE_STRINGPOINT + 88,
 
     // crypto engine for the SSL-sub system
-    CURLOPT_SSLENGINE = CURLOPTTYPE_OBJECTPOINT + 89,
-
-    // Set to the Entropy Gathering Daemon socket pathname
-    CURLOPT_EGDSOCKET = CURLOPTTYPE_OBJECTPOINT + 77,
+    CURLOPT_SSLENGINE = CURLOPTTYPE_STRINGPOINT + 89,
 
     // The CApath directory used to validate the peer certificate
     // this option is used only if SSL_VERIFYPEER is true
     // Does not work on Windows, so stop!
-    //CURLOPT_CAPATH = CURLOPTTYPE_OBJECTPOINT + 97,
+    //CURLOPT_CAPATH = CURLOPTTYPE_STRINGPOINT + 97,
 
     // Set the Accept-Encoding string. Use this to tell a server you would like
     // the response to be compressed. Before 7.21.6, this was known as
     // CURLOPT_ENCODING
-    CURLOPT_ACCEPT_ENCODING = CURLOPTTYPE_OBJECTPOINT + 102,
+    CURLOPT_ACCEPT_ENCODING = CURLOPTTYPE_STRINGPOINT + 102,
 
     // Set this option to the file name of your .netrc file you want libcurl
     // to parse (using the CURLOPT_NETRC option). If not set, libcurl will do
     // a poor attempt to find the user's home directory and check for a .netrc
     // file in there.
-    CURLOPT_NETRC_FILE = CURLOPTTYPE_OBJECTPOINT + 118,
+    CURLOPT_NETRC_FILE = CURLOPTTYPE_STRINGPOINT + 118,
 
     // zero terminated string for pass on to the FTP server when asked for
     // "account" info
-    CURLOPT_FTP_ACCOUNT = CURLOPTTYPE_OBJECTPOINT + 134,
+    CURLOPT_FTP_ACCOUNT = CURLOPTTYPE_STRINGPOINT + 134,
 
     // feed cookies into cookie engine
-    CURLOPT_COOKIELIST = CURLOPTTYPE_OBJECTPOINT + 135,
+    CURLOPT_COOKIELIST = CURLOPTTYPE_STRINGPOINT + 135,
 
     // Pointer to command string to send if USER/PASS fails.
-    CURLOPT_FTP_ALTERNATIVE_TO_USER = CURLOPTTYPE_OBJECTPOINT + 147,
+    CURLOPT_FTP_ALTERNATIVE_TO_USER = CURLOPTTYPE_STRINGPOINT + 147,
 
     // Used by scp/sftp to do public/private key authentication
-    CURLOPT_SSH_PUBLIC_KEYFILE = CURLOPTTYPE_OBJECTPOINT + 152,
-    CURLOPT_SSH_PRIVATE_KEYFILE = CURLOPTTYPE_OBJECTPOINT + 153,
+    CURLOPT_SSH_PUBLIC_KEYFILE = CURLOPTTYPE_STRINGPOINT + 152,
+    CURLOPT_SSH_PRIVATE_KEYFILE = CURLOPTTYPE_STRINGPOINT + 153,
 
     // used by scp/sftp to verify the host's public key
-    CURLOPT_SSH_HOST_PUBLIC_KEY_MD5 = CURLOPTTYPE_OBJECTPOINT + 162,
+    CURLOPT_SSH_HOST_PUBLIC_KEY_MD5 = CURLOPTTYPE_STRINGPOINT + 162,
 
     // POST volatile input fields.
-    CURLOPT_COPYPOSTFIELDS = CURLOPTTYPE_OBJECTPOINT + 165,
+    CURLOPT_COPYPOSTFIELDS = CURLOPTTYPE_STRINGPOINT + 165,
 
     // CRL file
-    CURLOPT_CRLFILE = CURLOPTTYPE_OBJECTPOINT + 169,
+    CURLOPT_CRLFILE = CURLOPTTYPE_STRINGPOINT + 169,
 
     // Issuer certificate
-    CURLOPT_ISSUERCERT = CURLOPTTYPE_OBJECTPOINT + 170,
+    CURLOPT_ISSUERCERT = CURLOPTTYPE_STRINGPOINT + 170,
 
     // "name" and "pwd" to use when fetching.
-    CURLOPT_USERNAME = CURLOPTTYPE_OBJECTPOINT + 173,
-    CURLOPT_PASSWORD = CURLOPTTYPE_OBJECTPOINT + 174,
+    CURLOPT_USERNAME = CURLOPTTYPE_STRINGPOINT + 173,
+    CURLOPT_PASSWORD = CURLOPTTYPE_STRINGPOINT + 174,
 
       // "name" and "pwd" to use with Proxy when fetching.
-    CURLOPT_PROXYUSERNAME = CURLOPTTYPE_OBJECTPOINT + 175,
-    CURLOPT_PROXYPASSWORD = CURLOPTTYPE_OBJECTPOINT + 176,
+    CURLOPT_PROXYUSERNAME = CURLOPTTYPE_STRINGPOINT + 175,
+    CURLOPT_PROXYPASSWORD = CURLOPTTYPE_STRINGPOINT + 176,
 
     // Comma separated list of hostnames defining no-proxy zones. These should
     // match both hostnames directly, and hostnames within a domain. For
@@ -1145,69 +1195,137 @@ type
     // implementations of this, .local.com will be considered to be the same as
     // local.com. A single * is the only valid wildcard, and effectively
     // disables the use of proxy.
-    CURLOPT_NOPROXY = CURLOPTTYPE_OBJECTPOINT + 177,
+    CURLOPT_NOPROXY = CURLOPTTYPE_STRINGPOINT + 177,
 
     // Socks Service
-    CURLOPT_SOCKS5_GSSAPI_SERVICE = CURLOPTTYPE_OBJECTPOINT + 179,
+    CURLOPT_SOCKS5_GSSAPI_SERVICE = CURLOPTTYPE_STRINGPOINT + 179,
 
     // set the SSH knownhost file name to use
-    CURLOPT_SSH_KNOWNHOSTS = CURLOPTTYPE_OBJECTPOINT + 183,
+    CURLOPT_SSH_KNOWNHOSTS = CURLOPTTYPE_STRINGPOINT + 183,
 
     // set the SMTP mail originator
-    CURLOPT_MAIL_FROM = CURLOPTTYPE_OBJECTPOINT + 186,
+    CURLOPT_MAIL_FROM = CURLOPTTYPE_STRINGPOINT + 186,
 
     // The RTSP session identifier
-    CURLOPT_RTSP_SESSION_ID = CURLOPTTYPE_OBJECTPOINT + 190,
+    CURLOPT_RTSP_SESSION_ID = CURLOPTTYPE_STRINGPOINT + 190,
 
     // The RTSP stream URI
-    CURLOPT_RTSP_STREAM_URI = CURLOPTTYPE_OBJECTPOINT + 191,
+    CURLOPT_RTSP_STREAM_URI = CURLOPTTYPE_STRINGPOINT + 191,
 
     // The Transport: header to use in RTSP requests
-    CURLOPT_RTSP_TRANSPORT = CURLOPTTYPE_OBJECTPOINT + 192,
+    CURLOPT_RTSP_TRANSPORT = CURLOPTTYPE_STRINGPOINT + 192,
 
     // Set a username for authenticated TLS
-    CURLOPT_TLSAUTH_USERNAME = CURLOPTTYPE_OBJECTPOINT + 204,
+    CURLOPT_TLSAUTH_USERNAME = CURLOPTTYPE_STRINGPOINT + 204,
 
     // Set a password for authenticated TLS
-    CURLOPT_TLSAUTH_PASSWORD = CURLOPTTYPE_OBJECTPOINT + 205,
+    CURLOPT_TLSAUTH_PASSWORD = CURLOPTTYPE_STRINGPOINT + 205,
+
+    // Set authentication type for authenticated TLS
+    CURLOPT_TLSAUTH_TYPE = CURLOPTTYPE_STRINGPOINT + 206,
 
     // Set the name servers to use for DNS resolution
-    CURLOPT_DNS_SERVERS = CURLOPTTYPE_OBJECTPOINT + 211,
+    CURLOPT_DNS_SERVERS = CURLOPTTYPE_STRINGPOINT + 211,
 
     // Set the SMTP auth originator
-    CURLOPT_MAIL_AUTH = CURLOPTTYPE_OBJECTPOINT + 217,
+    CURLOPT_MAIL_AUTH = CURLOPTTYPE_STRINGPOINT + 217,
 
     // The XOAUTH2 bearer token
-    CURLOPT_XOAUTH2_BEARER = CURLOPTTYPE_OBJECTPOINT + 220,
+    CURLOPT_XOAUTH2_BEARER = CURLOPTTYPE_STRINGPOINT + 220,
 
     // Set the interface string to use as outgoing network
     // interface for DNS requests.
     // Only supported by the c-ares DNS backend
-    CURLOPT_DNS_INTERFACE = CURLOPTTYPE_OBJECTPOINT + 221,
+    CURLOPT_DNS_INTERFACE = CURLOPTTYPE_STRINGPOINT + 221,
 
     // Set the local IPv4 address to use for outgoing DNS requests.
     // Only supported by the c-ares DNS backend
-    CURLOPT_DNS_LOCAL_IP4 = CURLOPTTYPE_OBJECTPOINT + 222,
+    CURLOPT_DNS_LOCAL_IP4 = CURLOPTTYPE_STRINGPOINT + 222,
 
     // Set the local IPv4 address to use for outgoing DNS requests.
     // Only supported by the c-ares DNS backend
-    CURLOPT_DNS_LOCAL_IP6 = CURLOPTTYPE_OBJECTPOINT + 223,
+    CURLOPT_DNS_LOCAL_IP6 = CURLOPTTYPE_STRINGPOINT + 223,
 
     // Set authentication options directly
-    CURLOPT_LOGIN_OPTIONS = CURLOPTTYPE_OBJECTPOINT + 224,
+    CURLOPT_LOGIN_OPTIONS = CURLOPTTYPE_STRINGPOINT + 224,
 
     // The public key in DER form used to validate the peer public key
     // this option is used only if SSL_VERIFYPEER is true
-    CURLOPT_PINNEDPUBLICKEY = CURLOPTTYPE_OBJECTPOINT + 230,
+    CURLOPT_PINNEDPUBLICKEY = CURLOPTTYPE_STRINGPOINT + 230,
 
     // Path to Unix domain socket
-    CURLOPT_UNIX_SOCKET_PATH = CURLOPTTYPE_OBJECTPOINT + 231
+    CURLOPT_UNIX_SOCKET_PATH = CURLOPTTYPE_STRINGPOINT + 231,
+
+    // Proxy Service Name
+    CURLOPT_PROXY_SERVICE_NAME = CURLOPTTYPE_STRINGPOINT + 235,
+
+    // Service Name
+    CURLOPT_SERVICE_NAME = CURLOPTTYPE_STRINGPOINT + 236,
+
+    // Set the protocol used when curl is given a URL without a protocol
+    CURLOPT_DEFAULT_PROTOCOL = CURLOPTTYPE_STRINGPOINT + 238,
+
+    // The CApath or CAfile used to validate the proxy certificate
+    // this option is used only if PROXY_SSL_VERIFYPEER is true
+    CURLOPT_PROXY_CAINFO = CURLOPTTYPE_STRINGPOINT + 246,
+
+    // The CApath directory used to validate the proxy certificate
+    // this option is used only if PROXY_SSL_VERIFYPEER is true
+    CURLOPT_PROXY_CAPATH = CURLOPTTYPE_STRINGPOINT + 247,
+
+    // Set a username for authenticated TLS for proxy
+    CURLOPT_PROXY_TLSAUTH_USERNAME = CURLOPTTYPE_STRINGPOINT + 251,
+
+    // Set a password for authenticated TLS for proxy
+    CURLOPT_PROXY_TLSAUTH_PASSWORD = CURLOPTTYPE_STRINGPOINT + 252,
+
+    // Set authentication type for authenticated TLS for proxy
+    CURLOPT_PROXY_TLSAUTH_TYPE = CURLOPTTYPE_STRINGPOINT + 253,
+
+    // name of the file keeping your private SSL-certificate for proxy
+    CURLOPT_PROXY_SSLCERT = CURLOPTTYPE_STRINGPOINT + 254,
+
+    // type of the file keeping your SSL-certificate ("DER", "PEM", "ENG") for
+    // proxy
+    CURLOPT_PROXY_SSLCERTTYPE = CURLOPTTYPE_STRINGPOINT + 255,
+
+    // name of the file keeping your private SSL-key for proxy
+    CURLOPT_PROXY_SSLKEY = CURLOPTTYPE_STRINGPOINT + 256,
+
+    // type of the file keeping your private SSL-key ("DER", "PEM", "ENG") for
+    // proxy
+    CURLOPT_PROXY_SSLKEYTYPE = CURLOPTTYPE_STRINGPOINT + 257,
+
+    // password for the SSL private key for proxy
+    CURLOPT_PROXY_KEYPASSWD = CURLOPTTYPE_STRINGPOINT + 258,
+
+    // Specify which SSL ciphers to use for proxy
+    CURLOPT_PROXY_SSL_CIPHER_LIST = CURLOPTTYPE_STRINGPOINT + 259,
+
+    // CRL file for proxy
+    CURLOPT_PROXY_CRLFILE = CURLOPTTYPE_STRINGPOINT + 260,
+
+    // Name of pre proxy to use.
+    CURLOPT_PRE_PROXY = CURLOPTTYPE_STRINGPOINT + 262,
+
+    // The public key in DER form used to validate the proxy public key
+    // this option is used only if PROXY_SSL_VERIFYPEER is true
+    CURLOPT_PROXY_PINNEDPUBLICKEY = CURLOPTTYPE_STRINGPOINT + 263,
+
+    // Path to an abstract Unix domain socket
+    CURLOPT_ABSTRACT_UNIX_SOCKET = CURLOPTTYPE_STRINGPOINT + 264,
+
+    // The request target, instead of extracted from the URL
+    CURLOPT_REQUEST_TARGET = CURLOPTTYPE_STRINGPOINT + 266
   );
 
   TCurlSlistOption = (
     // This points to a linked list of headers, struct curl_slist kind. This
     // list is also used for RTSP (in spite of its name)
     CURLOPT_HTTPHEADER = CURLOPTTYPE_OBJECTPOINT + 23,
+
+    // send linked-list of QUOTE commands
+    CURLOPT_QUOTE = CURLOPTTYPE_OBJECTPOINT + 28,
 
     // send linked-list of post-transfer QUOTE commands
     CURLOPT_POSTQUOTE = CURLOPTTYPE_OBJECTPOINT + 39,
@@ -1229,12 +1347,21 @@ type
 
     // This points to a linked list of headers used for proxy requests only,
     // struct curl_slist kind
-    CURLOPT_PROXYHEADER = CURLOPTTYPE_OBJECTPOINT + 228
+    CURLOPT_PROXYHEADER = CURLOPTTYPE_OBJECTPOINT + 228,
+
+    // Linked-list of host:port:connect-to-host:connect-to-port,
+    // overrides the URL's host:port (only for the network layer) */
+    CURLOPT_CONNECT_TO = CURLOPTTYPE_OBJECTPOINT + 243
   );
 
   TCurlPostOption = (
     // This points to a linked list of post entries, struct curl_httppost
     CURLOPT_HTTPPOST = CURLOPTTYPE_OBJECTPOINT + 24
+  );
+
+  TCurlMimeOption = (
+    // Post MIME data.
+    CURLOPT_MIMEPOST = CURLOPTTYPE_OBJECTPOINT + 269
   );
 
   TCurlOption = (
@@ -1256,8 +1383,17 @@ type
     // parameters will use fread() syntax, make sure to follow them.
     CURLOPT_READFUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 12,
 
-    // send linked-list of QUOTE commands
-    CURLOPT_QUOTE = CURLOPTTYPE_OBJECTPOINT + 28,
+    // POST static input fields.
+    CURLOPT_POSTFIELDS = CURLOPTTYPE_OBJECTPOINT + 15,
+
+    // Identified as slist
+    // CURLOPT_HTTPHEADER = CURLOPTTYPE_OBJECTPOINT + 23,
+
+    // Identified as httppost
+    //CURLOPT_HTTPPOST = CURLOPTTYPE_OBJECTPOINT + 24,
+
+    // Identified as slist
+    //CURLOPT_QUOTE = CURLOPTTYPE_OBJECTPOINT + 28,
 
     // send FILE * or void * to store headers to, if you use a callback it
     // is simply passed to the callback unmodified
@@ -1272,7 +1408,8 @@ type
 
     // 38 is not used
 
-    CURLOPT_OBSOLETE40 = CURLOPTTYPE_OBJECTPOINT + 40,   // OBSOLETE, do not use!
+    // Identified as slist
+    //CURLOPT_POSTQUOTE = CURLOPTTYPE_OBJECTPOINT + 39,
 
     // 55 = OBSOLETE
 
@@ -1291,9 +1428,15 @@ type
     // 67 = OBSOLETE
     // 73 = OBSOLETE
 
+    // Identified as slist
+    //CURLOPT_TELNETOPTIONS = CURLOPTTYPE_OBJECTPOINT + 70,
+
     // Function that will be called to store headers (instead of fwrite). The
     // parameters will use fwrite() syntax, make sure to follow them.
     CURLOPT_HEADERFUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 79,
+
+    // Identified as slist
+    //CURLOPT_PREQUOTE = CURLOPTTYPE_OBJECTPOINT + 93,
 
     // set the debug function
     CURLOPT_DEBUGFUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 94,
@@ -1306,6 +1449,9 @@ type
 
     // Set pointer to private data
     CURLOPT_PRIVATE = CURLOPTTYPE_OBJECTPOINT + 103,
+
+    // Identified as slist
+    //CURLOPT_HTTP200ALIASES = CURLOPT_OBJECTPOINT + 104,
 
     // Set the ssl context callback function, currently only for OpenSSL ssl_ctx
     // in second argument. The function must be matching the
@@ -1365,6 +1511,9 @@ type
     // set the SSH host key callback custom pointer
     CURLOPT_SSH_KEYDATA = CURLOPTTYPE_OBJECTPOINT + 185,
 
+    // Identified as slist
+    //CURLOPT_MAIL_RCPT = CURLOPTTYPE_OBJECTPOINT + 187,
+
     // The stream to pass to INTERLEAVEFUNCTION.
     CURLOPT_INTERLEAVEDATA = CURLOPTTYPE_OBJECTPOINT + 195,
 
@@ -1388,6 +1537,9 @@ type
     // FNMATCH_FUNCTION user pointer
     CURLOPT_FNMATCH_DATA = CURLOPTTYPE_OBJECTPOINT + 202,
 
+    // Identified as slist
+    //CURLOPT_RESOLVE = CURLOPTTYPE_OBJECTPOINT + 203,
+
     // Callback function for closing socket (instead of close(2)). The callback
     // should have type curl_closesocket_callback
     CURLOPT_CLOSESOCKETFUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 208,
@@ -1396,7 +1548,22 @@ type
     // Function that will be called instead of the internal progress display
     // function. This function should be defined as the curl_xferinfo_callback
     // prototype defines. (Deprecates CURLOPT_PROGRESSFUNCTION)
-    CURLOPT_XFERINFOFUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 219
+    CURLOPT_XFERINFOFUNCTION = CURLOPTTYPE_FUNCTIONPOINT + 219,
+
+    // Identified as slist
+    //CURLOPT_PROXYHEADER = CURLOPTTYPE_OBJECTPOINT + 228,
+
+    // Set stream dependency on another CURL handle
+    CURLOPT_STREAM_DEPENDS = CURLOPTTYPE_OBJECTPOINT + 240,
+
+    // Set E-xclusive stream dependency on another CURL handle
+    CURLOPT_STREAM_DEPENDS_E = CURLOPTTYPE_OBJECTPOINT + 241
+
+    // Identified as slist
+    //CURLOPT_CONNECT_TO = CURLOPTTYPE_OBJECTPOINT + 243,
+
+    // Identified as MIMEdata
+    //CURLOPT_MIMEPOST = CURLOPTTYPE_OBJECTPOINT + 269
   );
 
 
