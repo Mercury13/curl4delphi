@@ -1887,7 +1887,7 @@ type
 //
 function curl_formadd(
         var httppost, last_post : PCurlHttpPost) : TCurlFormCode;
-        varargs; overload; cdecl; external 'libcurl.dll';
+        varargs; cdecl; external 'libcurl.dll';
 
 //
 // callback function for curl_formget()
