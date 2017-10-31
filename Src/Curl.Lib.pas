@@ -1838,6 +1838,7 @@ type
 
     CURLFORM_STREAM,
     CURLFORM_CONTENTLEN   // added in 7.46.0, provide a curl_off_t length
+                          // Note for Delphi users: use TCurlOff(xxx) afterwards
   );
 
 
