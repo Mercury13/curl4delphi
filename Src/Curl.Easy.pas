@@ -36,6 +36,7 @@ type
     procedure SetOpt(aOption : TCurlFtpMethodOption; aData : TCurlFtpMethod);  overload;
     procedure SetOpt(aOption : TCurlIpResolveOption; aData : TCurlIpResolve);  overload;
     procedure SetOpt(aOption : TCurlRtspSeqOption; aData : TCurlRtspSeq);  overload;
+    procedure SetOpt(aOption : TCurlNetRcOption; aData : TCurlNetrc);  overload;
     procedure SetOpt(aOption : TCurlSlistOption; aData : PCurlSList);  overload;
               deprecated 'Use SetXXX instead: SetCustomHeaders, SetResolveList, etc.';
     procedure SetOpt(aOption : TCurlPostOption; aData : PCurlHttpPost);  overload;
@@ -198,6 +199,7 @@ type
     procedure SetOpt(aOption : TCurlFtpMethodOption; aData : TCurlFtpMethod);  overload;
     procedure SetOpt(aOption : TCurlIpResolveOption; aData : TCurlIpResolve);  overload;
     procedure SetOpt(aOption : TCurlRtspSeqOption; aData : TCurlRtspSeq);  overload;
+    procedure SetOpt(aOption : TCurlNetRcOption; aData : TCurlNetrc);  overload;
 
     procedure SetUrl(aData : PAnsiChar);      overload;   inline;
     procedure SetUrl(aData : RawByteString);  overload;   inline;
@@ -459,6 +461,11 @@ begin
 end;
 
 procedure TEasyCurlImpl.SetOpt(aOption : TCurlRtspSeqOption; aData : TCurlRtspSeq);
+begin
+  RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
+end;
+
+procedure TEasyCurlImpl.SetOpt(aOption : TCurlNetRcOption; aData : TCurlNetrc);
 begin
   RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
 end;

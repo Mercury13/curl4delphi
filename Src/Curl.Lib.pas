@@ -676,9 +676,8 @@ type
 
     CURLOPT_APPEND = CURLOPTTYPE_LONG + 50,         // Append instead of overwrite on upload!
 
-    // Specify whether to read the user+password from the .netrc or the URL.
-    // This must be one of the CURL_NETRC_* enums below.
-    CURLOPT_NETRC = CURLOPTTYPE_LONG + 51,
+    // Identified as NetRc
+    //CURLOPT_NETRC = CURLOPTTYPE_LONG + 51,
 
     CURLOPT_FOLLOWLOCATION = CURLOPTTYPE_LONG + 52,    // use Location: Luke!
 
@@ -1040,6 +1039,12 @@ type
   TCurlRtspSeqOption = (
     // RTSP request method (OPTIONS, SETUP, PLAY, etc...)
     CURLOPT_RTSP_REQUEST = CURLOPTTYPE_LONG + 189
+  );
+
+  TCurlNetRcOption = (
+      // Specify whether to read the user+password from the .netrc or the URL.
+    // This must be one of the CURL_NETRC_* enums below.
+    CURLOPT_NETRC = CURLOPTTYPE_LONG + 51
   );
 
   TCurlOffOption = (
@@ -2415,6 +2420,11 @@ function curl_easy_setopt(
         option : TCurlRtspSeqOption;
         data : TCurlRtspSeq) : TCurlCode;  overload; inline;
 
+function curl_easy_setopt(
+        curl : TCurlHandle;
+        option : TCurlNetRcOption;
+        data : TCurlNetrc) : TCurlCode;  overload; inline;
+
 function curl_easy_perform(curl : TCurlHandle) : TCurlCode;
           cdecl;  external 'libcurl.dll';
 
@@ -2767,6 +2777,14 @@ function curl_easy_setopt(
         curl : TCurlHandle;
         option : TCurlRtspSeqOption;
         data : TCurlRtspSeq) : TCurlCode;
+begin
+  Result := curl_easy_setopt_initial(curl, option, NativeUInt(data));
+end;
+
+function curl_easy_setopt(
+        curl : TCurlHandle;
+        option : TCurlNetRcOption;
+        data : TCurlNetrc) : TCurlCode;
 begin
   Result := curl_easy_setopt_initial(curl, option, NativeUInt(data));
 end;
