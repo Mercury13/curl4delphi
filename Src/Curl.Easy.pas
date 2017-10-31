@@ -19,8 +19,8 @@ type
 
   ICurl = interface (ICloseable)
     ['{5B165EC5-E831-4814-8263-C8D18AE8760E}']
-    function GetHandle : TCurlHandle;
-    property Handle : TCurlHandle read GetHandle;
+    function GetHandle : HCurl;
+    property Handle : HCurl read GetHandle;
 
     ///  Sets a cURL option.
     ///  SetXXX functions are simply wrappers for SetOpt.
@@ -161,7 +161,7 @@ type
 
   TEasyCurlImpl = class (TInterfacedObject, ICurl)
   private
-    fHandle : TCurlHandle;
+    fHandle : HCurl;
     fCustomHeaders, fPostQuote, fTelnetOptions, fQuote, fPreQuote,
         fHttp200Aliases, fMailRcpt, fResolveList, fProxyHeader,
         fConnectTo : ICurlCustomSList;
@@ -179,7 +179,7 @@ type
     constructor Create;  overload;
     constructor Create(aSource : TEasyCurlImpl);  overload;
     destructor Destroy;  override;
-    function GetHandle : TCurlHandle;
+    function GetHandle : HCurl;
 
     procedure RaiseIf(aCode : TCurlCode);  inline;
 
@@ -356,7 +356,7 @@ begin
 end;
 
 
-function TEasyCurlImpl.GetHandle : TCurlHandle;
+function TEasyCurlImpl.GetHandle : HCurl;
 begin
   Result := fHandle;
 end;

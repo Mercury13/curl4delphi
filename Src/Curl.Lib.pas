@@ -24,7 +24,9 @@ type
   TCurlSocket = NativeUInt;
   TUnixTime   = NativeUInt;
   TCurlOff    = int64;
-  TCurlHandle = pointer;
+
+  TCurlInner = record end;
+  HCurl = ^TCurlInner;
 
   // enumeration of file types
   TCurlFileType = (
@@ -265,7 +267,7 @@ type
           Item : TCurlSocket) : integer;  cdecl;
 
   EvCurlIoctl = function (
-          Handle : TCurlHandle;
+          Handle : HCurl;
           Cmd : integer;
           ClientP : pointer) : TCurlIoErr;  cdecl;
 
@@ -292,7 +294,7 @@ type
   );
 
   EvCurlDebug = function (
-        Handle : TCurlHandle;
+        Handle : HCurl;
         aType : TCurlInfoType;
         Data : PAnsiChar;
         Size : NativeUInt;
@@ -430,7 +432,7 @@ type
   EvCurlConv = function (Buffer : PChar; Length : NativeUInt) : TCurlCode;  cdecl;
 
   EvCurlSslCtx = function (
-          Curl : TCurlHandle;       // easy handle
+          Curl : HCurl;             // easy handle
           SslCtx : pointer;         // actually an OpenSSL SSL_CTX
           UserPtr : pointer) : TCurlCode;  cdecl;
 
@@ -512,7 +514,7 @@ type
   );
 
   EvCurlSshKey = function (
-          Easy : TCurlHandle;                     // easy handle
+          Easy : HCurl;                           // easy handle
           const KnownKey, FoundKey : TCurlKhKey;  // known / found
           Match : TCurlKhMatch;                   // libcurl's view on the keys
           ClientP : pointer) : integer;  cdecl;   // custom pointer passed from app
@@ -1650,9 +1652,10 @@ type
     CURL_SSLVERSION_TLSv1_1,
     CURL_SSLVERSION_TLSv1_2 );
 
-  TCurlTlsAuth = (
-    CURL_TLSAUTH_NONE,
-    CURL_TLSAUTH_SRP );
+  // Unused right now
+  //TCurlTlsAuth = (
+  //  CURL_TLSAUTH_NONE,
+  //  CURL_TLSAUTH_SRP );
 
 const
   // symbols to use with CURLOPT_POSTREDIR.
@@ -1675,6 +1678,137 @@ const
 //   libcurl, see lib/README.curlx for details
 function curl_strequal(s1, s2 : PAnsiChar) : integer;  cdecl;  external 'libcurl.dll';
 function curl_strnequal(s1, s2 : PAnsiChar; n : NativeUInt) : integer;  cdecl;  external 'libcurl.dll';
+
+// Mime/form handling support.
+type
+  TCurlMimeInner = record end;
+  TCurlMimePartInner = record end;
+  HCurlMime = ^TCurlMimeInner;
+  HCurlMimePart = ^TCurlMimePartInner;
+
+// NAME curl_mime_init()
+//
+// DESCRIPTION
+//
+// Create a mime context and return its handle. The easy parameter is the
+// target handle.
+//
+function curl_mime_init(easy : HCurl) : HCurlMime;  cdecl;  external 'libcurl.dll';
+
+// NAME curl_mime_free()
+//
+// DESCRIPTION
+//
+// release a mime handle and its substructures.
+//
+procedure curl_mime_free(mime : HCurlMime);
+      cdecl;  external 'libcurl.dll';
+
+// NAME curl_mime_addpart()
+//
+// DESCRIPTION
+//
+// Append a new empty part to the given mime context and return a handle to
+// the created part.
+//
+function curl_mime_addpart(mime : HCurlMime) : HCurlMimePart;
+      cdecl;  external 'libcurl.dll';
+
+// NAME curl_mime_name()
+//
+// DESCRIPTION
+//
+// Set mime/form part name.
+//
+function curl_mime_name(part : HCurlMimePart; name : PAnsiChar) : TCurlCode;
+      cdecl;  external 'libcurl.dll';
+
+// NAME curl_mime_filename()
+//
+// DESCRIPTION
+//
+// Set mime part remote file name.
+//
+function curl_mime_filename(
+      Part : HCurlMimePart; filename : PAnsiChar) : TCurlCode;
+      cdecl;  external 'libcurl.dll';
+
+//
+// NAME curl_mime_type()
+//
+// DESCRIPTION
+//
+// Set mime part type.
+//
+function curl_mime_type(part : HCurlMime; mimetype : PAnsiChar) : TCurlCode;
+      cdecl;  external 'libcurl.dll';
+
+// NAME curl_mime_encoder()
+//
+// DESCRIPTION
+//
+// Set mime data transfer encoder.
+//
+function curl_mime_encoder(
+      part : HCurlMimePart; encoding : PAnsiChar) : TCurlCode;
+      cdecl;  external 'libcurl.dll';
+
+// NAME curl_mime_data()
+//
+// DESCRIPTION
+//
+// Set mime part data source from memory data,
+//
+function curl_mime_data(
+      part : HCurlMimePart; data : Pointer; datasize : NativeUint) : TCurlCode;
+      cdecl;  external 'libcurl.dll';
+
+// NAME curl_mime_filedata()
+//
+// DESCRIPTION
+//
+// Set mime part data source from named file.
+//
+function curl_mime_filedata(
+      part : HCurlMimePart; filename : PAnsiChar) : TCurlCode;
+      cdecl;  external 'libcurl.dll';
+
+// NAME curl_mime_data_cb()
+//
+// DESCRIPTION
+//
+// Set mime part data source from callback function.
+//
+function curl_mime_data_cb(
+      part : HCurlMimePart;
+      datasize : TCurlOff;
+      readfunc : EvCurlRead;
+      seekfunc : EvCurlSeek;
+      freefunc : EvCurlFree;
+      arg : pointer) : TCurlCode;
+      cdecl;  external 'libcurl.dll';
+
+// NAME curl_mime_subparts()
+//
+// DESCRIPTION
+//
+// Set mime part data source from subparts.
+//
+function curl_mime_subparts(
+      part : HCurlMimePart; subparts : HCurlMime) : TCurlCode;
+      cdecl;  external 'libcurl.dll';
+
+// NAME curl_mime_headers()
+//
+// DESCRIPTION
+//
+// Set mime part headers.
+//
+function curl_mime_headers(
+      part : HCurlMimePart;
+      headers : PCurlSList;
+      take_ownership : integer) : TCurlCode;
+      cdecl;  external 'libcurl.dll';
 
 
 type
@@ -1702,7 +1836,8 @@ type
     CURLFORM_END,
     CURLFORM_OBSOLETE2,
 
-    CURLFORM_STREAM
+    CURLFORM_STREAM,
+    CURLFORM_CONTENTLEN   // added in 7.46.0, provide a curl_off_t length
   );
 
 
@@ -1748,120 +1883,11 @@ type
 // adds one part that together construct a full post. Then use
 // CURLOPT_HTTPPOST to send it off to libcurl.
 //
-// Note for Delphi users: we’re limited to 10 arguments, just because
-//   I’m lazy to write more overloads :)
-//   If you REALLY know what to do and aren’t afraid of varargs,
-//   you can use curl_formadd_initial.
+// Note for Delphi users: now it is the rawest varargs!
 //
-function curl_formadd_initial(
+function curl_formadd(
         var httppost, last_post : PCurlHttpPost) : TCurlFormCode;
-        varargs; overload; cdecl; external 'libcurl.dll' name 'curl_formadd';
-
-function curl_formadd(
-        var httppost, last_post : PCurlHttpPost;
-        option1 : TCurlFormOption; data1 : PAnsiChar;
-        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
-        overload; inline;
-
-function curl_formadd(
-        var httppost, last_post : PCurlHttpPost;
-        option1 : TCurlFormOption; data1 : PAnsiChar;
-        option2 : TCurlFormOption; data2 : PAnsiChar;
-        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
-        overload;  inline;
-
-function curl_formadd(
-        var httppost, last_post : PCurlHttpPost;
-        option1 : TCurlFormOption; data1 : PAnsiChar;
-        option2 : TCurlFormOption; data2 : PAnsiChar;
-        option3 : TCurlFormOption; data3 : PAnsiChar;
-        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
-        overload; inline;
-
-function curl_formadd(
-        var httppost, last_post : PCurlHttpPost;
-        option1 : TCurlFormOption; data1 : PAnsiChar;
-        option2 : TCurlFormOption; data2 : PAnsiChar;
-        option3 : TCurlFormOption; data3 : PAnsiChar;
-        option4 : TCurlFormOption; data4 : PAnsiChar;
-        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
-        overload; inline;
-
-function curl_formadd(
-        var httppost, last_post : PCurlHttpPost;
-        option1 : TCurlFormOption; data1 : PAnsiChar;
-        option2 : TCurlFormOption; data2 : PAnsiChar;
-        option3 : TCurlFormOption; data3 : PAnsiChar;
-        option4 : TCurlFormOption; data4 : PAnsiChar;
-        option5 : TCurlFormOption; data5 : PAnsiChar;
-        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
-        overload; inline;
-
-function curl_formadd(
-        var httppost, last_post : PCurlHttpPost;
-        option1 : TCurlFormOption; data1 : PAnsiChar;
-        option2 : TCurlFormOption; data2 : PAnsiChar;
-        option3 : TCurlFormOption; data3 : PAnsiChar;
-        option4 : TCurlFormOption; data4 : PAnsiChar;
-        option5 : TCurlFormOption; data5 : PAnsiChar;
-        option6 : TCurlFormOption; data6 : PAnsiChar;
-        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
-        overload; inline;
-
-function curl_formadd(
-        var httppost, last_post : PCurlHttpPost;
-        option1 : TCurlFormOption; data1 : PAnsiChar;
-        option2 : TCurlFormOption; data2 : PAnsiChar;
-        option3 : TCurlFormOption; data3 : PAnsiChar;
-        option4 : TCurlFormOption; data4 : PAnsiChar;
-        option5 : TCurlFormOption; data5 : PAnsiChar;
-        option6 : TCurlFormOption; data6 : PAnsiChar;
-        option7 : TCurlFormOption; data7 : PAnsiChar;
-        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
-        overload; inline;
-
-function curl_formadd(
-        var httppost, last_post : PCurlHttpPost;
-        option1 : TCurlFormOption; data1 : PAnsiChar;
-        option2 : TCurlFormOption; data2 : PAnsiChar;
-        option3 : TCurlFormOption; data3 : PAnsiChar;
-        option4 : TCurlFormOption; data4 : PAnsiChar;
-        option5 : TCurlFormOption; data5 : PAnsiChar;
-        option6 : TCurlFormOption; data6 : PAnsiChar;
-        option7 : TCurlFormOption; data7 : PAnsiChar;
-        option8 : TCurlFormOption; data8 : PAnsiChar;
-        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
-        overload; inline;
-
-function curl_formadd(
-        var httppost, last_post : PCurlHttpPost;
-        option1 : TCurlFormOption; data1 : PAnsiChar;
-        option2 : TCurlFormOption; data2 : PAnsiChar;
-        option3 : TCurlFormOption; data3 : PAnsiChar;
-        option4 : TCurlFormOption; data4 : PAnsiChar;
-        option5 : TCurlFormOption; data5 : PAnsiChar;
-        option6 : TCurlFormOption; data6 : PAnsiChar;
-        option7 : TCurlFormOption; data7 : PAnsiChar;
-        option8 : TCurlFormOption; data8 : PAnsiChar;
-        option9 : TCurlFormOption; data9 : PAnsiChar;
-        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
-        overload; inline;
-
-function curl_formadd(
-        var httppost, last_post : PCurlHttpPost;
-        option1 : TCurlFormOption; data1 : PAnsiChar;
-        option2 : TCurlFormOption; data2 : PAnsiChar;
-        option3 : TCurlFormOption; data3 : PAnsiChar;
-        option4 : TCurlFormOption; data4 : PAnsiChar;
-        option5 : TCurlFormOption; data5 : PAnsiChar;
-        option6 : TCurlFormOption; data6 : PAnsiChar;
-        option7 : TCurlFormOption; data7 : PAnsiChar;
-        option8 : TCurlFormOption; data8 : PAnsiChar;
-        option9 : TCurlFormOption; data9 : PAnsiChar;
-        option10 : TCurlFormOption; data10 : PAnsiChar;
-        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
-        overload; inline;
-
+        varargs; overload; cdecl; external 'libcurl.dll';
 
 //
 // callback function for curl_formget()
@@ -1923,7 +1949,7 @@ function curl_version : PAnsiChar;
 // %XX versions). This function returns a new allocated string or NULL if an
 // error occurred.
 function curl_easy_escape(
-        handle : TCurlHandle;
+        handle : HCurl;
         str : PAnsiChar;
         length : integer) : PAnsiChar;
           cdecl;  external 'libcurl.dll';
@@ -1946,7 +1972,7 @@ function curl_escape(
 // converted into the host encoding.
 //
 function curl_easy_unescape(
-        handle : TCurlHandle;
+        handle : HCurl;
         str : PAnsiChar;
         length : integer;
         var outlength : integer) : PAnsiChar;
@@ -2187,12 +2213,12 @@ type
   );
 
   EvCurlLock = procedure (
-        handle : TCurlHandle;
+        handle : HCurl;
         data : TCurlLockData;
         locktype : TCurlLockAccess;
         userptr : pointer);  cdecl;
   EvCurlUnlock = procedure (
-        handle : TCurlHandle;
+        handle : HCurl;
         data : TCurlLockData;
         userptr : pointer);  cdecl;
 
@@ -2342,8 +2368,7 @@ function curl_share_strerror(code : TCurlShCode) : PAnsiChar;
 // The curl_easy_pause function pauses or unpauses transfers. Select the new
 // state by setting the bitmask, use the convenience defines below.
 //
-function curl_easy_pause(
-        handle : TCurlHandle; bitmask : integer) : TCurlCode;
+function curl_easy_pause(handle : HCurl; bitmask : integer) : TCurlCode;
           cdecl;  external 'libcurl.dll';
 
 const
@@ -2356,92 +2381,92 @@ const
   CURLPAUSE_CONT      = CURLPAUSE_RECV_CONT or CURLPAUSE_SEND_CONT;
 
 
-function curl_easy_init : TCurlHandle;
-          cdecl;  external 'libcurl.dll';
+function curl_easy_init : HCurl;
+        cdecl;  external 'libcurl.dll';
 
 function curl_easy_setopt_initial(
-        curl : TCurlHandle) : TCurlCode;  varargs;  cdecl;
-        external 'libcurl.dll'  name 'curl_easy_setopt';
+        curl : HCurl) : TCurlCode;  varargs;
+        cdecl;  external 'libcurl.dll'  name 'curl_easy_setopt';
 
 function curl_easy_setopt(
-        curl : TCurlHandle;
+        curl : HCurl;
         option : TCurlOffOption;
         data : TCurlOff) : TCurlCode;  overload;  inline;
 
 function curl_easy_setopt(
-        curl : TCurlHandle;
+        curl : HCurl;
         option : TCurlStringOption;
         data : PAnsiChar) : TCurlCode;  overload;  inline;
 
 function curl_easy_setopt(
-        curl : TCurlHandle;
+        curl : HCurl;
         option : TCurlStringOption;
         data : RawByteString) : TCurlCode;  overload;  inline;
 
 function curl_easy_setopt(
-        curl : TCurlHandle;
+        curl : HCurl;
         option : TCurlOption;
         data : pointer) : TCurlCode;  overload;  inline;
 
 function curl_easy_setopt(
-        curl : TCurlHandle;
+        curl : HCurl;
         option : TCurlIntOption;
         data : NativeUInt) : TCurlCode;  overload;  inline;
 
 function curl_easy_setopt(
-        curl : TCurlHandle;
+        curl : HCurl;
         option : TCurlIntOption;
         data : boolean) : TCurlCode;  overload;  inline;
 
 function curl_easy_setopt(
-        curl : TCurlHandle;
+        curl : HCurl;
         option : TCurlSlistOption;
         data : PCurlSList) : TCurlCode;  overload;  inline;
 
 function curl_easy_setopt(
-        curl : TCurlHandle;
+        curl : HCurl;
         option : TCurlPostOption;
         data : PCurlHttpPost) : TCurlCode;  overload;  inline;
 
 function curl_easy_setopt(
-        curl : TCurlHandle;
+        curl : HCurl;
         option : TCurlProxyTypeOption;
         data : TCurlProxyType) : TCurlCode;  overload;  inline;
 
 function curl_easy_setopt(
-        curl : TCurlHandle;
+        curl : HCurl;
         option : TCurlUseSslOption;
         data : TCurlUseSsl) : TCurlCode;  overload;  inline;
 
 function curl_easy_setopt(
-        curl : TCurlHandle;
+        curl : HCurl;
         option : TCurlIpResolveOption;
         data : TCurlIpResolve) : TCurlCode;  overload;  inline;
 
 function curl_easy_setopt(
-        curl : TCurlHandle;
+        curl : HCurl;
         option : TCurlFtpMethodOption;
         data : TCurlFtpMethod) : TCurlCode;  overload;  inline;
 
 function curl_easy_setopt(
-        curl : TCurlHandle;
+        curl : HCurl;
         option : TCurlRtspSeqOption;
         data : TCurlRtspSeq) : TCurlCode;  overload; inline;
 
 function curl_easy_setopt(
-        curl : TCurlHandle;
+        curl : HCurl;
         option : TCurlNetRcOption;
         data : TCurlNetrc) : TCurlCode;  overload; inline;
 
 function curl_easy_setopt(
-        curl : TCurlHandle;
+        curl : HCurl;
         option : TCurlSslVersionOption;
         data : TCurlSslVersion) : TCurlCode;  overload; inline;
 
-function curl_easy_perform(curl : TCurlHandle) : TCurlCode;
+function curl_easy_perform(curl : HCurl) : TCurlCode;
           cdecl;  external 'libcurl.dll';
 
-procedure curl_easy_cleanup(curl : TCurlHandle);
+procedure curl_easy_cleanup(curl : HCurl);
           cdecl;  external 'libcurl.dll';
 
 // NAME curl_easy_getinfo()
@@ -2457,26 +2482,26 @@ procedure curl_easy_cleanup(curl : TCurlHandle);
 // transfer is completed.
 
 function curl_easy_getinfo_initial(
-      curl : TCurlHandle) : TCurlCode;  varargs;
+      curl : HCurl) : TCurlCode;  varargs;
           cdecl;  external 'libcurl.dll' name 'curl_easy_getinfo';
 
 function curl_easy_getinfo(
-      curl : TCurlHandle;
+      curl : HCurl;
       info : TCurlStringInfo;
       var p : PAnsiChar) : TCurlCode;  overload;  inline;
 
 function curl_easy_getinfo(
-      curl : TCurlHandle;
+      curl : HCurl;
       info : TCurlLongInfo;
       var p : longint) : TCurlCode;  overload;  inline;
 
 function curl_easy_getinfo(
-      curl : TCurlHandle;
+      curl : HCurl;
       info : TCurlDoubleInfo;
       var p : double) : TCurlCode;  overload;  inline;
 
 function curl_easy_getinfo(
-      curl : TCurlHandle;
+      curl : HCurl;
       info : TCurlSListInfo;
       var p : PCurlSList) : TCurlCode;  overload;  inline;
 
@@ -2493,7 +2518,7 @@ function curl_easy_getinfo(
 // curl_easy_setopt() invokes in every thread.
 //
 function curl_easy_duphandle(
-      curl : TCurlHandle) : TCurlHandle;
+      curl : HCurl) : HCurl;
           cdecl;  external 'libcurl.dll';
 
 
@@ -2507,7 +2532,7 @@ function curl_easy_duphandle(
 // It does keep: live connections, the Session ID cache, the DNS cache and the
 // cookies.
 //
-procedure curl_easy_reset(curl : TCurlHandle);
+procedure curl_easy_reset(curl : HCurl);
           cdecl;  external 'libcurl.dll';
 
 
@@ -2519,7 +2544,7 @@ procedure curl_easy_reset(curl : TCurlHandle);
 // curl_easy_perform() with CURLOPT_CONNECT_ONLY option.
 //
 function curl_easy_recv(
-        curl : TCurlHandle;
+        curl : HCurl;
         var buffer;
         buflen : NativeUInt;
         out n : NativeUInt) : TCurlCode;
@@ -2534,7 +2559,7 @@ function curl_easy_recv(
 // curl_easy_perform() with CURLOPT_CONNECT_ONLY option.
 //
 function curl_easy_send(
-        curl : TCurlHandle;
+        curl : HCurl;
         var buffer;
         buflen : NativeUint;
         out n : NativeUInt) : TCurlCode;
@@ -2545,153 +2570,8 @@ function curl_easy_send(
 
 implementation
 
-function curl_formadd(
-        var httppost, last_post : PCurlHttpPost;
-        option1 : TCurlFormOption; data1 : PAnsiChar;
-        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
-begin
-  Result := curl_formadd_initial(httppost, last_post, option1, data1, optend);
-end;
-
-function curl_formadd(
-        var httppost, last_post : PCurlHttpPost;
-        option1 : TCurlFormOption; data1 : PAnsiChar;
-        option2 : TCurlFormOption; data2 : PAnsiChar;
-        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
-begin
-  Result := curl_formadd_initial(httppost, last_post,
-            option1, data1, option2, data2, optend);
-end;
-
-function curl_formadd(
-        var httppost, last_post : PCurlHttpPost;
-        option1 : TCurlFormOption; data1 : PAnsiChar;
-        option2 : TCurlFormOption; data2 : PAnsiChar;
-        option3 : TCurlFormOption; data3 : PAnsiChar;
-        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
-begin
-  Result := curl_formadd_initial(httppost, last_post,
-            option1, data1, option2, data2, option3, data3, optend);
-end;
-
-function curl_formadd(
-        var httppost, last_post : PCurlHttpPost;
-        option1 : TCurlFormOption; data1 : PAnsiChar;
-        option2 : TCurlFormOption; data2 : PAnsiChar;
-        option3 : TCurlFormOption; data3 : PAnsiChar;
-        option4 : TCurlFormOption; data4 : PAnsiChar;
-        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
-begin
-  Result := curl_formadd_initial(httppost, last_post,
-        option1, data1, option2, data2, option3, data3, option4, data4,
-        optend);
-end;
-
-function curl_formadd(
-        var httppost, last_post : PCurlHttpPost;
-        option1 : TCurlFormOption; data1 : PAnsiChar;
-        option2 : TCurlFormOption; data2 : PAnsiChar;
-        option3 : TCurlFormOption; data3 : PAnsiChar;
-        option4 : TCurlFormOption; data4 : PAnsiChar;
-        option5 : TCurlFormOption; data5 : PAnsiChar;
-        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
-begin
-  Result := curl_formadd_initial(httppost, last_post,
-        option1, data1, option2, data2, option3, data3, option4, data4,
-        option5, data5, optend);
-end;
-
-function curl_formadd(
-        var httppost, last_post : PCurlHttpPost;
-        option1 : TCurlFormOption; data1 : PAnsiChar;
-        option2 : TCurlFormOption; data2 : PAnsiChar;
-        option3 : TCurlFormOption; data3 : PAnsiChar;
-        option4 : TCurlFormOption; data4 : PAnsiChar;
-        option5 : TCurlFormOption; data5 : PAnsiChar;
-        option6 : TCurlFormOption; data6 : PAnsiChar;
-        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
-begin
-  Result := curl_formadd_initial(httppost, last_post,
-        option1, data1, option2, data2, option3, data3, option4, data4,
-        option5, data5, option6, data6, optend);
-end;
-
-function curl_formadd(
-        var httppost, last_post : PCurlHttpPost;
-        option1 : TCurlFormOption; data1 : PAnsiChar;
-        option2 : TCurlFormOption; data2 : PAnsiChar;
-        option3 : TCurlFormOption; data3 : PAnsiChar;
-        option4 : TCurlFormOption; data4 : PAnsiChar;
-        option5 : TCurlFormOption; data5 : PAnsiChar;
-        option6 : TCurlFormOption; data6 : PAnsiChar;
-        option7 : TCurlFormOption; data7 : PAnsiChar;
-        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
-begin
-  Result := curl_formadd_initial(httppost, last_post,
-        option1, data1, option2, data2, option3, data3, option4, data4,
-        option5, data5, option6, data6, option7, data7, optend);
-end;
-
-
-function curl_formadd(
-        var httppost, last_post : PCurlHttpPost;
-        option1 : TCurlFormOption; data1 : PAnsiChar;
-        option2 : TCurlFormOption; data2 : PAnsiChar;
-        option3 : TCurlFormOption; data3 : PAnsiChar;
-        option4 : TCurlFormOption; data4 : PAnsiChar;
-        option5 : TCurlFormOption; data5 : PAnsiChar;
-        option6 : TCurlFormOption; data6 : PAnsiChar;
-        option7 : TCurlFormOption; data7 : PAnsiChar;
-        option8 : TCurlFormOption; data8 : PAnsiChar;
-        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
-begin
-  Result := curl_formadd_initial(httppost, last_post,
-        option1, data1, option2, data2, option3, data3, option4, data4,
-        option5, data5, option6, data6, option7, data7, option8, data8,
-        optend);
-end;
-
-function curl_formadd(
-        var httppost, last_post : PCurlHttpPost;
-        option1 : TCurlFormOption; data1 : PAnsiChar;
-        option2 : TCurlFormOption; data2 : PAnsiChar;
-        option3 : TCurlFormOption; data3 : PAnsiChar;
-        option4 : TCurlFormOption; data4 : PAnsiChar;
-        option5 : TCurlFormOption; data5 : PAnsiChar;
-        option6 : TCurlFormOption; data6 : PAnsiChar;
-        option7 : TCurlFormOption; data7 : PAnsiChar;
-        option8 : TCurlFormOption; data8 : PAnsiChar;
-        option9 : TCurlFormOption; data9 : PAnsiChar;
-        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
-begin
-  Result := curl_formadd_initial(httppost, last_post,
-        option1, data1, option2, data2, option3, data3, option4, data4,
-        option5, data5, option6, data6, option7, data7, option8, data8,
-        option9, data9, optend);
-end;
-
-function curl_formadd(
-        var httppost, last_post : PCurlHttpPost;
-        option1 : TCurlFormOption; data1 : PAnsiChar;
-        option2 : TCurlFormOption; data2 : PAnsiChar;
-        option3 : TCurlFormOption; data3 : PAnsiChar;
-        option4 : TCurlFormOption; data4 : PAnsiChar;
-        option5 : TCurlFormOption; data5 : PAnsiChar;
-        option6 : TCurlFormOption; data6 : PAnsiChar;
-        option7 : TCurlFormOption; data7 : PAnsiChar;
-        option8 : TCurlFormOption; data8 : PAnsiChar;
-        option9 : TCurlFormOption; data9 : PAnsiChar;
-        option10 : TCurlFormOption; data10 : PAnsiChar;
-        optend : TCurlFormOption) : TCurlFormCode;
-begin
-  Result := curl_formadd_initial(httppost, last_post,
-        option1, data1, option2, data2, option3, data3, option4, data4,
-        option5, data5, option6, data6, option7, data7, option8, data8,
-        option9, data9, option10, data10, optend);
-end;
-
 function curl_easy_setopt(
-        curl : TCurlHandle;
+        curl : HCurl;
         option : TCurlStringOption;
         data : PAnsiChar) : TCurlCode;
 begin
@@ -2699,7 +2579,7 @@ begin
 end;
 
 function curl_easy_setopt(
-        curl : TCurlHandle;
+        curl : HCurl;
         option : TCurlOption;
         data : pointer) : TCurlCode;
 begin
@@ -2707,7 +2587,7 @@ begin
 end;
 
 function curl_easy_setopt(
-        curl : TCurlHandle;
+        curl : HCurl;
         option : TCurlIntOption;
         data : NativeUInt) : TCurlCode;
 begin
@@ -2715,7 +2595,7 @@ begin
 end;
 
 function curl_easy_setopt(
-        curl : TCurlHandle;
+        curl : HCurl;
         option : TCurlSlistOption;
         data : PCurlSList) : TCurlCode;
 begin
@@ -2723,7 +2603,7 @@ begin
 end;
 
 function curl_easy_setopt(
-        curl : TCurlHandle;
+        curl : HCurl;
         option : TCurlPostOption;
         data : PCurlHttpPost) : TCurlCode;
 begin
@@ -2731,7 +2611,7 @@ begin
 end;
 
 function curl_easy_setopt(
-        curl : TCurlHandle;
+        curl : HCurl;
         option : TCurlIntOption;
         data : boolean) : TCurlCode;
 begin
@@ -2739,7 +2619,7 @@ begin
 end;
 
 function curl_easy_setopt(
-        curl : TCurlHandle;
+        curl : HCurl;
         option : TCurlStringOption;
         data : RawByteString) : TCurlCode;
 begin
@@ -2747,7 +2627,7 @@ begin
 end;
 
 function curl_easy_setopt(
-        curl : TCurlHandle;
+        curl : HCurl;
         option : TCurlOffOption;
         data : TCurlOff) : TCurlCode;
 begin
@@ -2755,7 +2635,7 @@ begin
 end;
 
 function curl_easy_setopt(
-        curl : TCurlHandle;
+        curl : HCurl;
         option : TCurlProxyTypeOption;
         data : TCurlProxyType) : TCurlCode;
 begin
@@ -2763,7 +2643,7 @@ begin
 end;
 
 function curl_easy_setopt(
-        curl : TCurlHandle;
+        curl : HCurl;
         option : TCurlUseSslOption;
         data : TCurlUseSsl) : TCurlCode;
 begin
@@ -2771,7 +2651,7 @@ begin
 end;
 
 function curl_easy_setopt(
-        curl : TCurlHandle;
+        curl : HCurl;
         option : TCurlFtpMethodOption;
         data : TCurlFtpMethod) : TCurlCode;
 begin
@@ -2779,7 +2659,7 @@ begin
 end;
 
 function curl_easy_setopt(
-        curl : TCurlHandle;
+        curl : HCurl;
         option : TCurlIpResolveOption;
         data : TCurlIpResolve) : TCurlCode;
 begin
@@ -2787,7 +2667,7 @@ begin
 end;
 
 function curl_easy_setopt(
-        curl : TCurlHandle;
+        curl : HCurl;
         option : TCurlRtspSeqOption;
         data : TCurlRtspSeq) : TCurlCode;
 begin
@@ -2795,7 +2675,7 @@ begin
 end;
 
 function curl_easy_setopt(
-        curl : TCurlHandle;
+        curl : HCurl;
         option : TCurlNetRcOption;
         data : TCurlNetrc) : TCurlCode;
 begin
@@ -2803,7 +2683,7 @@ begin
 end;
 
 function curl_easy_setopt(
-        curl : TCurlHandle;
+        curl : HCurl;
         option : TCurlSslVersionOption;
         data : TCurlSslVersion) : TCurlCode;
 begin
@@ -2811,7 +2691,7 @@ begin
 end;
 
 function curl_easy_getinfo(
-      curl : TCurlHandle;
+      curl : HCurl;
       info : TCurlStringInfo;
       var p : PAnsiChar) : TCurlCode;
 begin
@@ -2819,7 +2699,7 @@ begin
 end;
 
 function curl_easy_getinfo(
-      curl : TCurlHandle;
+      curl : HCurl;
       info : TCurlLongInfo;
       var p : longint) : TCurlCode;
 begin
@@ -2827,7 +2707,7 @@ begin
 end;
 
 function curl_easy_getinfo(
-      curl : TCurlHandle;
+      curl : HCurl;
       info : TCurlDoubleInfo;
       var p : double) : TCurlCode;
 begin
@@ -2835,7 +2715,7 @@ begin
 end;
 
 function curl_easy_getinfo(
-      curl : TCurlHandle;
+      curl : HCurl;
       info : TCurlSListInfo;
       var p : PCurlSList) : TCurlCode;
 begin
