@@ -13,10 +13,10 @@ const
   // AFAIK, ithappens.ru redirects to ithappens.me
   Url = 'http://ithappens.ru/';
 var
-  curl : TCurlHandle;
+  curl : HCurl;
   res : TCurlCode;
   code : longint;
-  ul, dl : double;
+  ul, dl : TCurlOff;
   effurl : PAnsiChar;
   engines : PCurlSList;
 begin
@@ -30,13 +30,13 @@ begin
     // Check for errors
     if (res = CURLE_OK) then begin
       curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, code);
-      curl_easy_getinfo(curl, CURLINFO_SIZE_UPLOAD, ul);
-      curl_easy_getinfo(curl, CURLINFO_SIZE_DOWNLOAD, dl);
+      curl_easy_getinfo(curl, CURLINFO_SIZE_UPLOAD_T, ul);
+      curl_easy_getinfo(curl, CURLINFO_SIZE_DOWNLOAD_T, dl);
       curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, effurl);
       curl_easy_getinfo(curl, CURLINFO_SSL_ENGINES, engines);
       Writeln(Format('HTTP response code: %d', [ code ] ));
-      Writeln(Format('Uploaded: %d', [ round(ul) ] ));
-      Writeln(Format('Downloaded: %d', [ round(dl) ] ));
+      Writeln(Format('Uploaded: %d', [ ul ] ));
+      Writeln(Format('Downloaded: %d', [ dl ] ));
       Writeln(Format('Effective URL: %s', [ effurl ] ));
       Writeln('SSL engines:');
       while engines <> nil do begin
