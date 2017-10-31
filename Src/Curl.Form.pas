@@ -343,12 +343,12 @@ begin
 //          CURLFORM_END);
   // CURLFORM_FILE is not Unicode-enabled, so we’ll do this thingy.
   stream := TFileStream.Create(aFileName, fmOpenRead + fmShareDenyWrite);
-  RaiseIf(curl_formadd(fStart, fEnd,
+  RaiseIf(curl_formadd_initial(fStart, fEnd,
           CURLFORM_COPYNAME, PAnsiChar(aFieldName),
           CURLFORM_NAMELENGTH, PAnsiChar(length(aFieldName)),
           CURLFORM_FILENAME, PAnsiChar(UTF8Encode(ExtractFileName(aFileName))),
           CURLFORM_STREAM, PAnsiChar(stream),
-          CURLFORM_CONTENTSLENGTH, PAnsiChar(stream.Size),
+          CURLFORM_CONTENTLEN, TCurlOff(stream.Size),
           CURLFORM_CONTENTTYPE, PAnsiChar(aContentType),
           CURLFORM_END));
   Store(stream, [csfAutoRewind, csfAutoDestroy]);
