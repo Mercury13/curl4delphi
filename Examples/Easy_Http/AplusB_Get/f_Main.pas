@@ -34,9 +34,6 @@ uses
 {$R *.dfm}
 
 procedure TfmMain.btAddClick(Sender: TObject);
-const
-  UserAgent : PAnsiChar =
-      'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:36.0) Gecko/20100101 Firefox/36.0';
 var
   curl : ICurl;
   stream : TRawByteStream;
@@ -44,7 +41,7 @@ begin
   curl := CurlGet;
   stream := TRawByteStream.Create;
 
-  curl.SetUserAgent(UserAgent);
+  curl.SetUserAgent(FirefoxUserAgent);
   curl.SetUrl(CurlGetBuilder(edUrl.Text)
                 .Param('a', edA.Text)
                 .Param('b', edB.Text));

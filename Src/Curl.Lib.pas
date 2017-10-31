@@ -18,6 +18,11 @@ const
         CurlBindingVersionPatch;
   CurlBindingVersionString = '7.56.1';
 
+  FirefoxUserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:53.0) Gecko/20100101 Firefox/53.0';
+  MozillaUserAgent = FirefoxUserAgent;
+  ChromeUserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36';
+  IeUserAgent = 'Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko';
+  EdgeUserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.79 Safari/537.36 Edge/14.14393';
 
 type
   // Primitive cUrl types
@@ -65,7 +70,7 @@ const
                                          //   and pass the given pointer as custom
                                          //   pointer
   CURL_HTTPPOST_LARGE       = 1 shl 7;   //  use size in 'contentlen',
-                                         //   added in 7.46.0 */
+                                         //   added in 7.46.0
 
   // The maximum receive buffer size configurable via CURLOPT_BUFFERSIZE.
   CURL_MAX_READ_SIZE = 524288;
@@ -423,7 +428,7 @@ type
                                    //   session will be queued
     CURLE_SSL_PINNEDPUBKEYNOTMATCH, // 90 - specified pinned public key did not
                                     //   match
-    CURLE_SSL_INVALIDCERTSTATUS,   // 91 - invalid certificate status */
+    CURLE_SSL_INVALIDCERTSTATUS,   // 91 - invalid certificate status
     CURLE_HTTP2_STREAM             // 92 - stream error in HTTP/2 framing layer
   );
 
@@ -537,7 +542,7 @@ const
 
 
   // - NO_REVOKE tells libcurl to disable certificate revocation checks for those
-  // SSL backends where such behavior is present. */
+  // SSL backends where such behavior is present.
   CURLSSLOPT_NO_REVOKE   = 1 shl 1;
 
 type
@@ -1052,7 +1057,7 @@ type
     CURLOPT_SSLVERSION = CURLOPTTYPE_LONG + 32,
 
     // What version to specifically try to use for proxy.
-    // See CURL_SSLVERSION defines below. */
+    // See CURL_SSLVERSION defines below.
     CURLOPT_PROXY_SSLVERSION = CURLOPTTYPE_LONG + 250
   );
 
@@ -1372,7 +1377,7 @@ type
     CURLOPT_PROXYHEADER = CURLOPTTYPE_OBJECTPOINT + 228,
 
     // Linked-list of host:port:connect-to-host:connect-to-port,
-    // overrides the URL's host:port (only for the network layer) */
+    // overrides the URL's host:port (only for the network layer)
     CURLOPT_CONNECT_TO = CURLOPTTYPE_OBJECTPOINT + 243
   );
 
@@ -1883,17 +1888,121 @@ type
 // adds one part that together construct a full post. Then use
 // CURLOPT_HTTPPOST to send it off to libcurl.
 //
-// Note for Delphi users: now it is the rawest varargs!
-// For const strings: write
-//    const sA : PAnsiChar = 'a';
-// For non-const strings: convert to AnsiString/RawByteString,
-//    then use PAnsiChar(someString)
+// Note for Delphi users: we’re limited to 10 arguments, just because
+//   I’m lazy to write more overloads :)
+//   If you REALLY know what to do and aren’t afraid of varargs,
+//   you can use curl_formadd_initial.
 //
-function curl_formadd(
+function curl_formadd_initial(
         var httppost, last_post : PCurlHttpPost) : TCurlFormCode;
-        varargs; cdecl; external 'libcurl.dll';
+        varargs; cdecl; external 'libcurl.dll' name 'curl_formadd';
 
-//
+function curl_formadd(
+        var httppost, last_post : PCurlHttpPost;
+        option1 : TCurlFormOption; data1 : PAnsiChar;
+        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
+        overload; inline;
+
+function curl_formadd(
+        var httppost, last_post : PCurlHttpPost;
+        option1 : TCurlFormOption; data1 : PAnsiChar;
+        option2 : TCurlFormOption; data2 : PAnsiChar;
+        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
+        overload;  inline;
+
+function curl_formadd(
+        var httppost, last_post : PCurlHttpPost;
+        option1 : TCurlFormOption; data1 : PAnsiChar;
+        option2 : TCurlFormOption; data2 : PAnsiChar;
+        option3 : TCurlFormOption; data3 : PAnsiChar;
+        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
+        overload; inline;
+
+function curl_formadd(
+        var httppost, last_post : PCurlHttpPost;
+        option1 : TCurlFormOption; data1 : PAnsiChar;
+        option2 : TCurlFormOption; data2 : PAnsiChar;
+        option3 : TCurlFormOption; data3 : PAnsiChar;
+        option4 : TCurlFormOption; data4 : PAnsiChar;
+        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
+        overload; inline;
+
+function curl_formadd(
+        var httppost, last_post : PCurlHttpPost;
+        option1 : TCurlFormOption; data1 : PAnsiChar;
+        option2 : TCurlFormOption; data2 : PAnsiChar;
+        option3 : TCurlFormOption; data3 : PAnsiChar;
+        option4 : TCurlFormOption; data4 : PAnsiChar;
+        option5 : TCurlFormOption; data5 : PAnsiChar;
+        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
+        overload; inline;
+
+function curl_formadd(
+        var httppost, last_post : PCurlHttpPost;
+        option1 : TCurlFormOption; data1 : PAnsiChar;
+        option2 : TCurlFormOption; data2 : PAnsiChar;
+        option3 : TCurlFormOption; data3 : PAnsiChar;
+        option4 : TCurlFormOption; data4 : PAnsiChar;
+        option5 : TCurlFormOption; data5 : PAnsiChar;
+        option6 : TCurlFormOption; data6 : PAnsiChar;
+        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
+        overload; inline;
+
+function curl_formadd(
+        var httppost, last_post : PCurlHttpPost;
+        option1 : TCurlFormOption; data1 : PAnsiChar;
+        option2 : TCurlFormOption; data2 : PAnsiChar;
+        option3 : TCurlFormOption; data3 : PAnsiChar;
+        option4 : TCurlFormOption; data4 : PAnsiChar;
+        option5 : TCurlFormOption; data5 : PAnsiChar;
+        option6 : TCurlFormOption; data6 : PAnsiChar;
+        option7 : TCurlFormOption; data7 : PAnsiChar;
+        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
+        overload; inline;
+
+function curl_formadd(
+        var httppost, last_post : PCurlHttpPost;
+        option1 : TCurlFormOption; data1 : PAnsiChar;
+        option2 : TCurlFormOption; data2 : PAnsiChar;
+        option3 : TCurlFormOption; data3 : PAnsiChar;
+        option4 : TCurlFormOption; data4 : PAnsiChar;
+        option5 : TCurlFormOption; data5 : PAnsiChar;
+        option6 : TCurlFormOption; data6 : PAnsiChar;
+        option7 : TCurlFormOption; data7 : PAnsiChar;
+        option8 : TCurlFormOption; data8 : PAnsiChar;
+        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
+        overload; inline;
+
+function curl_formadd(
+        var httppost, last_post : PCurlHttpPost;
+        option1 : TCurlFormOption; data1 : PAnsiChar;
+        option2 : TCurlFormOption; data2 : PAnsiChar;
+        option3 : TCurlFormOption; data3 : PAnsiChar;
+        option4 : TCurlFormOption; data4 : PAnsiChar;
+        option5 : TCurlFormOption; data5 : PAnsiChar;
+        option6 : TCurlFormOption; data6 : PAnsiChar;
+        option7 : TCurlFormOption; data7 : PAnsiChar;
+        option8 : TCurlFormOption; data8 : PAnsiChar;
+        option9 : TCurlFormOption; data9 : PAnsiChar;
+        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
+        overload; inline;
+
+function curl_formadd(
+        var httppost, last_post : PCurlHttpPost;
+        option1 : TCurlFormOption; data1 : PAnsiChar;
+        option2 : TCurlFormOption; data2 : PAnsiChar;
+        option3 : TCurlFormOption; data3 : PAnsiChar;
+        option4 : TCurlFormOption; data4 : PAnsiChar;
+        option5 : TCurlFormOption; data5 : PAnsiChar;
+        option6 : TCurlFormOption; data6 : PAnsiChar;
+        option7 : TCurlFormOption; data7 : PAnsiChar;
+        option8 : TCurlFormOption; data8 : PAnsiChar;
+        option9 : TCurlFormOption; data9 : PAnsiChar;
+        option10 : TCurlFormOption; data10 : PAnsiChar;
+        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
+        overload; inline;
+
+
 // callback function for curl_formget()
 // The void *arg pointer will be the one passed as second argument to
 //   curl_formget().
@@ -2617,6 +2726,151 @@ function curl_easy_send(
 //#define curl_multi_setopt(handle,opt,param) curl_multi_setopt(handle,opt,param)
 
 implementation
+
+function curl_formadd(
+        var httppost, last_post : PCurlHttpPost;
+        option1 : TCurlFormOption; data1 : PAnsiChar;
+        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
+begin
+  Result := curl_formadd_initial(httppost, last_post, option1, data1, optend);
+end;
+
+function curl_formadd(
+        var httppost, last_post : PCurlHttpPost;
+        option1 : TCurlFormOption; data1 : PAnsiChar;
+        option2 : TCurlFormOption; data2 : PAnsiChar;
+        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
+begin
+  Result := curl_formadd_initial(httppost, last_post,
+            option1, data1, option2, data2, optend);
+end;
+
+function curl_formadd(
+        var httppost, last_post : PCurlHttpPost;
+        option1 : TCurlFormOption; data1 : PAnsiChar;
+        option2 : TCurlFormOption; data2 : PAnsiChar;
+        option3 : TCurlFormOption; data3 : PAnsiChar;
+        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
+begin
+  Result := curl_formadd_initial(httppost, last_post,
+            option1, data1, option2, data2, option3, data3, optend);
+end;
+
+function curl_formadd(
+        var httppost, last_post : PCurlHttpPost;
+        option1 : TCurlFormOption; data1 : PAnsiChar;
+        option2 : TCurlFormOption; data2 : PAnsiChar;
+        option3 : TCurlFormOption; data3 : PAnsiChar;
+        option4 : TCurlFormOption; data4 : PAnsiChar;
+        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
+begin
+  Result := curl_formadd_initial(httppost, last_post,
+        option1, data1, option2, data2, option3, data3, option4, data4,
+        optend);
+end;
+
+function curl_formadd(
+        var httppost, last_post : PCurlHttpPost;
+        option1 : TCurlFormOption; data1 : PAnsiChar;
+        option2 : TCurlFormOption; data2 : PAnsiChar;
+        option3 : TCurlFormOption; data3 : PAnsiChar;
+        option4 : TCurlFormOption; data4 : PAnsiChar;
+        option5 : TCurlFormOption; data5 : PAnsiChar;
+        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
+begin
+  Result := curl_formadd_initial(httppost, last_post,
+        option1, data1, option2, data2, option3, data3, option4, data4,
+        option5, data5, optend);
+end;
+
+function curl_formadd(
+        var httppost, last_post : PCurlHttpPost;
+        option1 : TCurlFormOption; data1 : PAnsiChar;
+        option2 : TCurlFormOption; data2 : PAnsiChar;
+        option3 : TCurlFormOption; data3 : PAnsiChar;
+        option4 : TCurlFormOption; data4 : PAnsiChar;
+        option5 : TCurlFormOption; data5 : PAnsiChar;
+        option6 : TCurlFormOption; data6 : PAnsiChar;
+        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
+begin
+  Result := curl_formadd_initial(httppost, last_post,
+        option1, data1, option2, data2, option3, data3, option4, data4,
+        option5, data5, option6, data6, optend);
+end;
+
+function curl_formadd(
+        var httppost, last_post : PCurlHttpPost;
+        option1 : TCurlFormOption; data1 : PAnsiChar;
+        option2 : TCurlFormOption; data2 : PAnsiChar;
+        option3 : TCurlFormOption; data3 : PAnsiChar;
+        option4 : TCurlFormOption; data4 : PAnsiChar;
+        option5 : TCurlFormOption; data5 : PAnsiChar;
+        option6 : TCurlFormOption; data6 : PAnsiChar;
+        option7 : TCurlFormOption; data7 : PAnsiChar;
+        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
+begin
+  Result := curl_formadd_initial(httppost, last_post,
+        option1, data1, option2, data2, option3, data3, option4, data4,
+        option5, data5, option6, data6, option7, data7, optend);
+end;
+
+
+function curl_formadd(
+        var httppost, last_post : PCurlHttpPost;
+        option1 : TCurlFormOption; data1 : PAnsiChar;
+        option2 : TCurlFormOption; data2 : PAnsiChar;
+        option3 : TCurlFormOption; data3 : PAnsiChar;
+        option4 : TCurlFormOption; data4 : PAnsiChar;
+        option5 : TCurlFormOption; data5 : PAnsiChar;
+        option6 : TCurlFormOption; data6 : PAnsiChar;
+        option7 : TCurlFormOption; data7 : PAnsiChar;
+        option8 : TCurlFormOption; data8 : PAnsiChar;
+        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
+begin
+  Result := curl_formadd_initial(httppost, last_post,
+        option1, data1, option2, data2, option3, data3, option4, data4,
+        option5, data5, option6, data6, option7, data7, option8, data8,
+        optend);
+end;
+
+function curl_formadd(
+        var httppost, last_post : PCurlHttpPost;
+        option1 : TCurlFormOption; data1 : PAnsiChar;
+        option2 : TCurlFormOption; data2 : PAnsiChar;
+        option3 : TCurlFormOption; data3 : PAnsiChar;
+        option4 : TCurlFormOption; data4 : PAnsiChar;
+        option5 : TCurlFormOption; data5 : PAnsiChar;
+        option6 : TCurlFormOption; data6 : PAnsiChar;
+        option7 : TCurlFormOption; data7 : PAnsiChar;
+        option8 : TCurlFormOption; data8 : PAnsiChar;
+        option9 : TCurlFormOption; data9 : PAnsiChar;
+        optend : TCurlFormOption = CURLFORM_END) : TCurlFormCode;
+begin
+  Result := curl_formadd_initial(httppost, last_post,
+        option1, data1, option2, data2, option3, data3, option4, data4,
+        option5, data5, option6, data6, option7, data7, option8, data8,
+        option9, data9, optend);
+end;
+
+function curl_formadd(
+        var httppost, last_post : PCurlHttpPost;
+        option1 : TCurlFormOption; data1 : PAnsiChar;
+        option2 : TCurlFormOption; data2 : PAnsiChar;
+        option3 : TCurlFormOption; data3 : PAnsiChar;
+        option4 : TCurlFormOption; data4 : PAnsiChar;
+        option5 : TCurlFormOption; data5 : PAnsiChar;
+        option6 : TCurlFormOption; data6 : PAnsiChar;
+        option7 : TCurlFormOption; data7 : PAnsiChar;
+        option8 : TCurlFormOption; data8 : PAnsiChar;
+        option9 : TCurlFormOption; data9 : PAnsiChar;
+        option10 : TCurlFormOption; data10 : PAnsiChar;
+        optend : TCurlFormOption) : TCurlFormCode;
+begin
+  Result := curl_formadd_initial(httppost, last_post,
+        option1, data1, option2, data2, option3, data3, option4, data4,
+        option5, data5, option6, data6, option7, data7, option8, data8,
+        option9, data9, option10, data10, optend);
+end;
 
 function curl_easy_setopt(
         curl : HCurl;

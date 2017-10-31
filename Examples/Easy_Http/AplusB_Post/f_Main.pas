@@ -35,9 +35,6 @@ uses
 {$R *.dfm}
 
 procedure TfmMain.btAddClick(Sender: TObject);
-const
-  UserAgent : PAnsiChar =
-      'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:36.0) Gecko/20100101 Firefox/36.0';
 var
   curl : ICurl;
   form : ICurlForm;
@@ -50,7 +47,7 @@ begin
   curl.SetUrl(edUrl.Text);
   curl.SetOpt(CURLOPT_POST, true);
   // I tested it on my free hosting — it has a bot protection.
-  curl.SetUserAgent(UserAgent);
+  curl.SetUserAgent(FirefoxUserAgent);
 
   // Complex version (requires additional headers)
   form.Add(CurlGetField

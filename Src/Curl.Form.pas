@@ -15,14 +15,14 @@ type
 
     function ContentRaw(const x : RawByteString) : ICurlField;
     function Content(const x : string) : ICurlField;  overload;
-    function Content(length : integer; const data) : ICurlField;  overload;
+    function Content(length : NativeUInt; const data) : ICurlField;  overload;
 
     ///  Sets content from a RawByteString.
     ///  @warning  This RawByteString should live until Perform ends.
     function PtrContent(const x : RawByteString) : ICurlField;  overload;
     ///  Sets content from a memory buffer.
     ///  @warning  This buffer should live until Perform ends.
-    function PtrContent(length : integer; const data) : ICurlField;  overload;
+    function PtrContent(length : NativeUInt; const data) : ICurlField;  overload;
 
     // Unused right now: FORM_FILECONTENT is not Unicode-aware
     //function FileContent(const x : string) : ICurlField;
@@ -43,7 +43,7 @@ type
             var aData : RawByteString) : ICurlField;  overload;
     function FileBuffer(
             const aFname : RawByteString;
-            length : integer; const data) : ICurlField;  overload;
+            length : NativeUInt; const data) : ICurlField;  overload;
     ///  @warning
     ///  When you assign FileStream, you SHOULD use Delphi streams for all
     ///     other reading operations of ICurl concerned!
@@ -417,7 +417,7 @@ end;
 const
   ZeroField : PAnsiChar = #0;
 
-function ToPtr(length : integer; const data) : PAnsiChar;
+function ToPtr(length : NativeUInt; const data) : PAnsiChar;
 begin
   if length = 0
     then Result := ZeroField
@@ -445,10 +445,10 @@ type
 
     function ContentRaw(const x : RawByteString) : ICurlField;  overload;
     function Content(const x : string) : ICurlField;  overload;
-    function Content(length : integer; const data) : ICurlField;  overload;
+    function Content(length : NativeUInt; const data) : ICurlField;  overload;
 
     function PtrContent(const x : RawByteString) : ICurlField;  overload;
-    function PtrContent(length : integer; const data) : ICurlField;  overload;
+    function PtrContent(length : NativeUInt; const data) : ICurlField;  overload;
 
     //function FileContent(const x : string) : ICurlField;
 
@@ -462,7 +462,7 @@ type
             var aData : RawByteString) : ICurlField;  overload;
     function FileBuffer(
             const aFname : RawByteString;
-            length : integer; const data) : ICurlField;  overload;
+            length : NativeUInt; const data) : ICurlField;  overload;
     function FileStream(x : TStream; aFlags : TCurlStreamFlags) : ICurlField;
 
     function CustomHeaders(x : ICurlCustomSList) : ICurlField;
@@ -538,7 +538,7 @@ begin
   Result := ContentRaw(UTF8Encode(x));
 end;
 
-function TCurlField.Content(length : integer; const data) : ICurlField;
+function TCurlField.Content(length : NativeUInt; const data) : ICurlField;
 begin
   Add(CURLFORM_CONTENTSLENGTH, PAnsiChar(length));
   Add(CURLFORM_COPYCONTENTS, ToPtr(length, data));
@@ -552,7 +552,7 @@ begin
   Result := Self;
 end;
 
-function TCurlField.PtrContent(length : integer; const data) : ICurlField;
+function TCurlField.PtrContent(length : NativeUInt; const data) : ICurlField;
 begin
   Add(CURLFORM_CONTENTSLENGTH, PAnsiChar(length));
   Add(CURLFORM_PTRCONTENTS, ToPtr(length, data));
@@ -609,7 +609,7 @@ end;
 
 function TCurlField.FileBuffer(
         const aFname : RawByteString;
-        length : integer; const data) : ICurlField;
+        length : NativeUInt; const data) : ICurlField;
 begin
   Store(aFname);
   Add(CURLFORM_BUFFER, PAnsiChar(aFname));
