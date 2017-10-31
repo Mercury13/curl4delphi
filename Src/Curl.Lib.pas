@@ -796,11 +796,6 @@ type
     CURLOPT_FTP_RESPONSE_TIMEOUT = CURLOPTTYPE_LONG + 112,
     CURLOPT_SERVER_RESPONSE_TIMEOUT = CURLOPT_FTP_RESPONSE_TIMEOUT,
 
-    // Set this option to one of the CURL_IPRESOLVE_* defines (see below) to
-    // tell libcurl to resolve names to those IP versions only. This only has
-    // affect on systems with support for more than one, i.e IPv4 _and_ IPv6.
-    CURLOPT_IPRESOLVE = CURLOPTTYPE_LONG + 113,
-
     // Set this option to limit the size of a file that will be downloaded from
     // an HTTP or FTP server.
     //
@@ -908,7 +903,8 @@ type
     CURLOPT_FTP_USE_PRET = CURLOPTTYPE_LONG + 188,
 
     // RTSP request method (OPTIONS, SETUP, PLAY, etc...)
-    CURLOPT_RTSP_REQUEST = CURLOPTTYPE_LONG + 189,
+    // Identified as RTSP request
+    //CURLOPT_RTSP_REQUEST = CURLOPTTYPE_LONG + 189,
 
     // Manually initialize the client RTSP CSeq for this handle
     CURLOPT_RTSP_CLIENT_CSEQ = CURLOPTTYPE_LONG + 193,
@@ -1032,6 +1028,18 @@ type
     // Select "file method" to use when doing FTP, see the curl_ftpmethod
     // above.
     CURLOPT_FTP_FILEMETHOD = CURLOPTTYPE_LONG + 138
+  );
+
+  TCurlIpResolveOption = (
+    // Set this option to one of the CURL_IPRESOLVE_* defines (see below) to
+    // tell libcurl to resolve names to those IP versions only. This only has
+    // affect on systems with support for more than one, i.e IPv4 _and_ IPv6.
+    CURLOPT_IPRESOLVE = CURLOPTTYPE_LONG + 113
+  );
+
+  TCurlRtspSeqOption = (
+    // RTSP request method (OPTIONS, SETUP, PLAY, etc...)
+    CURLOPT_RTSP_REQUEST = CURLOPTTYPE_LONG + 189
   );
 
   TCurlOffOption = (
@@ -1590,7 +1598,8 @@ type
                             // for us!
     CURL_HTTP_VERSION_1_0,  // please use HTTP 1.0 in the request
     CURL_HTTP_VERSION_1_1,  // please use HTTP 1.1 in the request
-    CURL_HTTP_VERSION_2_0  // please use HTTP 2.0 in the request
+    CURL_HTTP_VERSION_2_0,  // please use HTTP 2.0 in the request
+    CURL_HTTP_VERSION_2 = CURL_HTTP_VERSION_2_0
   );
 
   // Public API enums for RTSP requests
@@ -2393,8 +2402,18 @@ function curl_easy_setopt(
 
 function curl_easy_setopt(
         curl : TCurlHandle;
+        option : TCurlIpResolveOption;
+        data : TCurlIpResolve) : TCurlCode;  overload;  inline;
+
+function curl_easy_setopt(
+        curl : TCurlHandle;
         option : TCurlFtpMethodOption;
         data : TCurlFtpMethod) : TCurlCode;  overload;  inline;
+
+function curl_easy_setopt(
+        curl : TCurlHandle;
+        option : TCurlRtspSeqOption;
+        data : TCurlRtspSeq) : TCurlCode;  overload; inline;
 
 function curl_easy_perform(curl : TCurlHandle) : TCurlCode;
           cdecl;  external 'libcurl.dll';
@@ -2732,6 +2751,22 @@ function curl_easy_setopt(
         curl : TCurlHandle;
         option : TCurlFtpMethodOption;
         data : TCurlFtpMethod) : TCurlCode;
+begin
+  Result := curl_easy_setopt_initial(curl, option, NativeUInt(data));
+end;
+
+function curl_easy_setopt(
+        curl : TCurlHandle;
+        option : TCurlIpResolveOption;
+        data : TCurlIpResolve) : TCurlCode;
+begin
+  Result := curl_easy_setopt_initial(curl, option, NativeUInt(data));
+end;
+
+function curl_easy_setopt(
+        curl : TCurlHandle;
+        option : TCurlRtspSeqOption;
+        data : TCurlRtspSeq) : TCurlCode;
 begin
   Result := curl_easy_setopt_initial(curl, option, NativeUInt(data));
 end;
