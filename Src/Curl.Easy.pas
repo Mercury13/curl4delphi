@@ -404,7 +404,9 @@ end;
 
 function TEasyCurlImpl.GetInfo(aInfo : TCurlDoubleInfoDeprecated) : double;
 begin
+  {$WARN SYMBOL_DEPRECATED OFF}
   RaiseIf(curl_easy_getinfo(fHandle, aInfo, Result));
+  {$WARN SYMBOL_DEPRECATED DEFAULT}
 end;
 
 function TEasyCurlImpl.GetInfo(aInfo : TCurlPtrInfo) : pointer;
