@@ -1,11 +1,11 @@
-unit Curl.Lib;
+ï»¿unit Curl.Lib;
 
 interface
 
 uses
   Winapi.Winsock2;
 
-// In C enum’s are int’s, so let’s set enum size to 4.
+// In C enumâ€™s are intâ€™s, so letâ€™s set enum size to 4.
 {$MINENUMSIZE 4}
 
 const
@@ -1428,7 +1428,7 @@ type
 
     // 35 = OBSOLETE
 
-    // Pass a FILE * as parameter. Tell libcurl to use this stream instead
+    //Â Pass a FILE * as parameter. Tell libcurl to use this stream instead
     // of stderr when showing the progress meter and displaying
     // CURLOPT_VERBOSE data.
     CURLOPT_STDERR = CURLOPTTYPE_OBJECTPOINT + 37,
@@ -1690,6 +1690,12 @@ type
   HCurlMime = ^TCurlMimeInner;
   HCurlMimePart = ^TCurlMimePartInner;
 
+
+// Note for Delphi users:
+// These options are new, and are not wrapped right now.
+// Delphi does not compile them into EXE when they are unusedÂ â†’
+//   no need to guard with compiler directives.
+
 // NAME curl_mime_init()
 //
 // DESCRIPTION
@@ -1888,9 +1894,9 @@ type
 // adds one part that together construct a full post. Then use
 // CURLOPT_HTTPPOST to send it off to libcurl.
 //
-// Note for Delphi users: we’re limited to 10 arguments, just because
-//   I’m lazy to write more overloads :)
-//   If you REALLY know what to do and aren’t afraid of varargs,
+// Note for Delphi users: weâ€™re limited to 10 arguments, just because
+//   Iâ€™m lazy to write more overloads :)
+//   If you REALLY know what to do and arenâ€™t afraid of varargs,
 //   you can use curl_formadd_initial.
 //
 function curl_formadd_initial(
