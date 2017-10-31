@@ -18,7 +18,7 @@ const
 var
   curl : ICurl;
   code : integer;
-  ul, dl : double;
+  ul, dl : TCurlOff;
   effurl : PAnsiChar;
   engines : PCurlSList;
 begin
@@ -32,13 +32,13 @@ begin
 
     // Check for some info
     code := curl.GetResponseCode;
-    ul := curl.GetInfo(CURLINFO_SIZE_UPLOAD);
-    dl := curl.GetInfo(CURLINFO_SIZE_DOWNLOAD);
+    ul := curl.GetInfo(CURLINFO_SIZE_UPLOAD_T);
+    dl := curl.GetInfo(CURLINFO_SIZE_DOWNLOAD_T);
     effurl := curl.GetInfo(CURLINFO_EFFECTIVE_URL);
     engines := curl.GetInfo(CURLINFO_SSL_ENGINES);
     Writeln(Format('HTTP response code: %d', [ code ] ));
-    Writeln(Format('Uploaded: %d', [ round(ul) ] ));
-    Writeln(Format('Downloaded: %d', [ round(dl) ] ));
+    Writeln(Format('Uploaded: %d', [ ul ] ));
+    Writeln(Format('Downloaded: %d', [ dl ] ));
     Writeln(Format('Effective URL: %s', [ effurl ] ));
     Writeln('SSL engines:');
     while engines <> nil do begin
