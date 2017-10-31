@@ -181,7 +181,7 @@ var
   str : RawByteString;
 begin
   SetLength(str, pngStream.Size);
-  Move(pngStream.Memory^, PChar(str)^, pngStream.Size);
+  Move(pngStream.Memory^, PAnsiChar(str)^, pngStream.Size);
   // cURL
   curl := CurlGet;
   curl.SetRecvStream(stream, [csfAutoRewind]);
