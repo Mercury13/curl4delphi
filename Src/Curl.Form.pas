@@ -267,7 +267,7 @@ const
   OptionNames : array [TCurlFormCode] of string = (
       '',                               // CURL_FORMADD_OK,
       'Not enough memory',              // CURL_FORMADD_MEMORY,
-      'An option os mentioned twice',   // CURL_FORMADD_OPTION_TWICE,
+      'An option is mentioned twice',   // CURL_FORMADD_OPTION_TWICE,
       'Nil as an option',               // CURL_FORMADD_NULL,
       'Unknown option',                 // CURL_FORMADD_UNKNOWN_OPTION,
       'Incomplete option set',          // CURL_FORMADD_INCOMPLETE,
@@ -314,12 +314,22 @@ begin
 end;
 
 function TCurlForm.Add(aField : ICurlCustomField) : ICurlForm;
+var
+  LargeLen : TCurlOff;
 begin
   if aField.DoesStore
     then Store(aField);
-  RaiseIf(curl_formadd(fStart, fEnd,
-          CURLFORM_ARRAY, PAnsiChar(aField.Build),
-          CURLFORM_END));
+  LargeLen := aField.LargeLength;
+  if LargeLen = NoLargeLength then begin
+    RaiseIf(curl_formadd(fStart, fEnd,
+            CURLFORM_ARRAY, PAnsiChar(aField.Build),
+            CURLFORM_END));
+  end else begin
+    RaiseIf(curl_formadd_initial(fStart, fEnd,
+            CURLFORM_ARRAY, PAnsiChar(aField.Build),
+            CURLFORM_CONTENTLEN, LargeLen,
+            CURLFORM_END));
+  end;
   if aField.DoesUseStream
     then fDoesUseStream := true;
 
@@ -429,9 +439,9 @@ type
   private
     fData : array of TCurlForms;
     fSize : integer;
-
     fStrings : TList<RawByteString>;
     fIsLocked : boolean;
+    fLargeLength : TCurlOff;
 
     procedure Store(x : RawByteString);  overload;
     procedure Add(aOption : TCurlFormOption; aValue : PAnsiChar);
@@ -471,12 +481,14 @@ type
     function DoesStore : boolean;
 
     function Build : PCurlForms;
+    function LargeLength : TCurlOff;
   end;
 
 constructor TCurlField.Create;
 begin
   inherited;
   fStrings := TList<RawByteString>.Create;
+  fLargeLength := NoLargeLength;
   fSize := 0;
   Reserve(10);
 end;
@@ -583,7 +595,8 @@ begin
 
   Add(CURLFORM_FILENAME, PAnsiChar(utf));
   Add(CURLFORM_STREAM, PAnsiChar(stream));
-  Add(CURLFORM_CONTENTSLENGTH, PAnsiChar(stream.Size));
+
+  fLargeLength := Stream.Size;
 
   Result := Self;
 end;
@@ -658,6 +671,12 @@ function TCurlField.DoesStore : boolean;
 begin
   Result := (fStreams <> nil) or (fStorage <> nil);
 end;
+
+function TCurlField.LargeLength : TCurlOff;
+begin
+  Result := fLargeLength;
+end;
+
 
 ///// Misc. functions //////////////////////////////////////////////////////////
 

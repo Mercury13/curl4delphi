@@ -5,6 +5,9 @@ interface
 uses
   Curl.Lib, System.Classes, System.SysUtils;
 
+const
+  NoLargeLength = High(TCurlOff);
+
 type
   ICurlCustomSList = interface
     ['{C30EFFEA-DE64-4970-9578-2A1FD2366DBB}']
@@ -62,6 +65,9 @@ type
 
     ///  Finally builds a PCurlHttpPost.
     function Build : PCurlForms;
+
+    ///  Large length that’s impossible to build via array
+    function LargeLength : TCurlOff;
   end;
 
   ICurlCustomForm = interface (IRewindable)
