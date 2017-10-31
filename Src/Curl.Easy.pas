@@ -6,7 +6,9 @@ uses
   // System
   System.Classes, System.SysUtils,
   // cUrl
-  Curl.Lib, Curl.Interfaces;
+  Curl.Lib, Curl.Interfaces,
+  // Windows
+  Winapi.Winsock2;
 
 const
   NiceUserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:53.0) Gecko/20100101 Firefox/53.0';
@@ -141,6 +143,10 @@ type
     function GetInfo(aInfo : TCurlStringInfo) : PAnsiChar;  overload;
     function GetInfo(aInfo : TCurlDoubleInfo) : double;  overload;
     function GetInfo(aInfo : TCurlSListInfo) : PCurlSList;  overload;
+    function GetInfo(aInfo : TCurlDoubleInfoDeprecated) : double;  overload;  deprecated 'Use TCurlOffInfo version';
+    function GetInfo(aInfo : TCurlOffInfo) : TCurlOff;  overload;
+    function GetInfo(aInfo : TCurlPtrInfo) : pointer;  overload;
+    function GetInfo(aInfo : TCurlSocketInfo) : TSocket;  overload;
 
     ///  Returns response code. Equivalent to GetInfo(CURLINFO_RESPONSE_CODE).
     function GetResponseCode : longint;
@@ -244,6 +250,10 @@ type
     function GetInfo(aInfo : TCurlStringInfo) : PAnsiChar;  overload;
     function GetInfo(aInfo : TCurlDoubleInfo) : double;  overload;
     function GetInfo(aInfo : TCurlSListInfo) : PCurlSList;  overload;
+    function GetInfo(aInfo : TCurlDoubleInfoDeprecated) : double;  overload;
+    function GetInfo(aInfo : TCurlOffInfo) : TCurlOff;  overload;
+    function GetInfo(aInfo : TCurlPtrInfo) : pointer;  overload;
+    function GetInfo(aInfo : TCurlSocketInfo) : TSocket;  overload;
 
     function GetResponseCode : longint;
 
@@ -388,6 +398,26 @@ begin
 end;
 
 function TEasyCurlImpl.GetInfo(aInfo : TCurlSListInfo) : PCurlSList;
+begin
+  RaiseIf(curl_easy_getinfo(fHandle, aInfo, Result));
+end;
+
+function TEasyCurlImpl.GetInfo(aInfo : TCurlDoubleInfoDeprecated) : double;
+begin
+  RaiseIf(curl_easy_getinfo(fHandle, aInfo, Result));
+end;
+
+function TEasyCurlImpl.GetInfo(aInfo : TCurlPtrInfo) : pointer;
+begin
+  RaiseIf(curl_easy_getinfo(fHandle, aInfo, Result));
+end;
+
+function TEasyCurlImpl.GetInfo(aInfo : TCurlOffInfo) : TCurlOff;
+begin
+  RaiseIf(curl_easy_getinfo(fHandle, aInfo, Result));
+end;
+
+function TEasyCurlImpl.GetInfo(aInfo : TCurlSocketInfo) : TSocket;
 begin
   RaiseIf(curl_easy_getinfo(fHandle, aInfo, Result));
 end;

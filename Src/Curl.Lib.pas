@@ -21,7 +21,6 @@ const
 
 type
   // Primitive cUrl types
-  TCurlSocket = NativeUInt;
   TUnixTime   = NativeUInt;
   TCurlOff    = int64;
 
@@ -51,7 +50,7 @@ type
 
 const
   // cUrl constants
-  CURL_SOCKET_BAD = High(TCurlSocket);
+  CURL_SOCKET_BAD = High(TSocket);
 
   CURL_HTTPPOST_FILENAME    = 1 shl 0;   // specified content is a file name
   CURL_HTTPPOST_READFILE    = 1 shl 1;   // specified content is a file name
@@ -248,7 +247,7 @@ type
 
   EvCurlSockopt = function(
           ClientP : pointer;
-          Curlfd : TCurlSocket;
+          Curlfd : TSocket;
           Purpose : TCurlSockType) : TCurlSockOpt;  cdecl;
 
   TCurlSockAddr = record
@@ -260,11 +259,11 @@ type
   EvCurlOpenSocket = function(
           ClientP : integer;
           Purpose : TCurlSockType;
-          var Address : TCurlSockAddr) : TCurlSocket;  cdecl;
+          var Address : TCurlSockAddr) : TSocket;  cdecl;
 
   EvCurlCloseSocket = function (
           ClientP : integer;
-          Item : TCurlSocket) : integer;  cdecl;
+          Item : TSocket) : integer;  cdecl;
 
   EvCurlIoctl = function (
           Handle : HCurl;
@@ -2107,6 +2106,9 @@ const
   CURLINFO_LONG     = $200000;
   CURLINFO_DOUBLE   = $300000;
   CURLINFO_SLIST    = $400000;
+  CURLINFO_PTR      = CURLINFO_SLIST;
+  CURLINFO_SOCKET   = $500000;
+  CURLINFO_OFF_T    = $600000;
   CURLINFO_MASK     = $0fffff;
   CURLINFO_TYPEMASK = $f00000;
 
@@ -2130,7 +2132,10 @@ type
     CURLINFO_RTSP_CSEQ_RECV   = CURLINFO_LONG   + 39,
     CURLINFO_PRIMARY_PORT     = CURLINFO_LONG   + 40,
     CURLINFO_LOCAL_PORT       = CURLINFO_LONG   + 42,
-    CURLINFO_HTTP_CODE = CURLINFO_RESPONSE_CODE
+    CURLINFO_HTTP_CODE = CURLINFO_RESPONSE_CODE,
+    CURLINFO_HTTP_VERSION     = CURLINFO_LONG   + 46,
+    CURLINFO_PROXY_SSL_VERIFYRESULT = CURLINFO_LONG + 47,
+    CURLINFO_PROTOCOL         = CURLINFO_LONG   + 48
   );
 
   TCurlDoubleInfo = (
@@ -2138,15 +2143,18 @@ type
     CURLINFO_NAMELOOKUP_TIME  = CURLINFO_DOUBLE + 4,
     CURLINFO_CONNECT_TIME     = CURLINFO_DOUBLE + 5,
     CURLINFO_PRETRANSFER_TIME = CURLINFO_DOUBLE + 6,
+    CURLINFO_STARTTRANSFER_TIME = CURLINFO_DOUBLE + 17,
+    CURLINFO_REDIRECT_TIME    = CURLINFO_DOUBLE + 19,
+    CURLINFO_APPCONNECT_TIME  = CURLINFO_DOUBLE + 33
+  );
+
+  TCurlDoubleInfoDeprecated = (
     CURLINFO_SIZE_UPLOAD      = CURLINFO_DOUBLE + 7,
     CURLINFO_SIZE_DOWNLOAD    = CURLINFO_DOUBLE + 8,
     CURLINFO_SPEED_DOWNLOAD   = CURLINFO_DOUBLE + 9,
     CURLINFO_SPEED_UPLOAD     = CURLINFO_DOUBLE + 10,
     CURLINFO_CONTENT_LENGTH_DOWNLOAD   = CURLINFO_DOUBLE + 15,
-    CURLINFO_CONTENT_LENGTH_UPLOAD     = CURLINFO_DOUBLE + 16,
-    CURLINFO_STARTTRANSFER_TIME = CURLINFO_DOUBLE + 17,
-    CURLINFO_REDIRECT_TIME    = CURLINFO_DOUBLE + 19,
-    CURLINFO_APPCONNECT_TIME  = CURLINFO_DOUBLE + 33
+    CURLINFO_CONTENT_LENGTH_UPLOAD     = CURLINFO_DOUBLE + 16
   );
 
   TCurlStringInfo = (
@@ -2157,16 +2165,32 @@ type
     CURLINFO_REDIRECT_URL     = CURLINFO_STRING + 31,
     CURLINFO_PRIMARY_IP       = CURLINFO_STRING + 32,
     CURLINFO_RTSP_SESSION_ID  = CURLINFO_STRING + 36,
-    CURLINFO_LOCAL_IP         = CURLINFO_STRING + 41
+    CURLINFO_LOCAL_IP         = CURLINFO_STRING + 41,
+    CURLINFO_SCHEME           = CURLINFO_STRING + 49
   );
 
   TCurlSListInfo = (
     CURLINFO_SSL_ENGINES      = CURLINFO_SLIST  + 27,
     CURLINFO_COOKIELIST       = CURLINFO_SLIST  + 28,
-    CURLINFO_CERTINFO         = CURLINFO_SLIST  + 34,
     CURLINFO_TLS_SESSION      = CURLINFO_SLIST  + 43
-    // Fill in new entries below here!
-    //CURLINFO_LASTONE          = 43
+  );
+
+  TCurlPtrInfo = (
+    CURLINFO_CERTINFO         = CURLINFO_SLIST  + 34,
+    CURLINFO_TLS_SSL_PTR      = CURLINFO_PTR    + 45
+  );
+
+  TCurlSocketInfo = (
+    CURLINFO_ACTIVESOCKET     = CURLINFO_SOCKET + 44
+  );
+
+  TCurlOffInfo = (
+    CURLINFO_SIZE_UPLOAD_T    = CURLINFO_OFF_T  + 7,
+    CURLINFO_SIZE_DOWNLOAD_T  = CURLINFO_OFF_T  + 8,
+    CURLINFO_SPEED_DOWNLOAD_T = CURLINFO_OFF_T  + 9,
+    CURLINFO_SPEED_UPLOAD_T   = CURLINFO_OFF_T  + 10,
+    CURLINFO_CONTENT_LENGTH_DOWNLOAD_T = CURLINFO_OFF_T  + 15,
+    CURLINFO_CONTENT_LENGTH_UPLOAD_T   = CURLINFO_OFF_T  + 16
   );
 
 
@@ -2249,8 +2273,7 @@ function curl_share_init : TCurlSh;
 
 function curl_share_setopt(
           share : TCurlSh;
-          option : TCurlShOption;
-          data : pointer) : TCurlShCode;
+          option : TCurlShOption) : TCurlShCode;  varargs;
           cdecl;  external 'libcurl.dll';
 
 function curl_share_cleanup(share : TCurlSh) : TCurlShCode;
@@ -2503,8 +2526,28 @@ function curl_easy_getinfo(
 
 function curl_easy_getinfo(
       curl : HCurl;
+      info : TCurlDoubleInfoDeprecated;
+      var p : double) : TCurlCode;  overload;  inline;  deprecated 'Use version for TCurlOffInfo';
+
+function curl_easy_getinfo(
+      curl : HCurl;
       info : TCurlSListInfo;
       var p : PCurlSList) : TCurlCode;  overload;  inline;
+
+function curl_easy_getinfo(
+      curl : HCurl;
+      info : TCurlOffInfo;
+      var p : TCurlOff) : TCurlCode;  overload;  inline;
+
+function curl_easy_getinfo(
+      curl : HCurl;
+      info : TCurlSocketInfo;
+      var p : TSocket) : TCurlCode;  overload;  inline;
+
+function curl_easy_getinfo(
+      curl : HCurl;
+      info : TCurlPtrInfo;
+      var p : pointer) : TCurlCode;  overload;  inline;
 
 
 // NAME curl_easy_duphandle()
@@ -2719,6 +2762,38 @@ function curl_easy_getinfo(
       curl : HCurl;
       info : TCurlSListInfo;
       var p : PCurlSList) : TCurlCode;
+begin
+  Result := curl_easy_getinfo_initial(curl, info, @p);
+end;
+
+function curl_easy_getinfo(
+      curl : HCurl;
+      info : TCurlDoubleInfoDeprecated;
+      var p : double) : TCurlCode;
+begin
+  Result := curl_easy_getinfo_initial(curl, info, @p);
+end;
+
+function curl_easy_getinfo(
+      curl : HCurl;
+      info : TCurlOffInfo;
+      var p : TCurlOff) : TCurlCode;
+begin
+  Result := curl_easy_getinfo_initial(curl, info, @p);
+end;
+
+function curl_easy_getinfo(
+      curl : HCurl;
+      info : TCurlSocketInfo;
+      var p : TSocket) : TCurlCode;
+begin
+  Result := curl_easy_getinfo_initial(curl, info, @p);
+end;
+
+function curl_easy_getinfo(
+      curl : HCurl;
+      info : TCurlPtrInfo;
+      var p : pointer) : TCurlCode;
 begin
   Result := curl_easy_getinfo_initial(curl, info, @p);
 end;
