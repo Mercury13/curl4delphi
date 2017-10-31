@@ -541,7 +541,7 @@ end;
 function TCurlField.Content(length : integer; const data) : ICurlField;
 begin
   Add(CURLFORM_CONTENTSLENGTH, PAnsiChar(length));
-  Add(CURLFORM_COPYCONTENTS, PAnsiChar(@data));
+  Add(CURLFORM_COPYCONTENTS, ToPtr(length, data));
   Result := Self;
 end;
 
