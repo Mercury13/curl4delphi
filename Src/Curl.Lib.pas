@@ -1884,6 +1884,10 @@ type
 // CURLOPT_HTTPPOST to send it off to libcurl.
 //
 // Note for Delphi users: now it is the rawest varargs!
+// For const strings: write
+//    const sA : PAnsiChar = 'a';
+// For non-const strings: convert to AnsiString/RawByteString,
+//    then use PAnsiChar(someString)
 //
 function curl_formadd(
         var httppost, last_post : PCurlHttpPost) : TCurlFormCode;

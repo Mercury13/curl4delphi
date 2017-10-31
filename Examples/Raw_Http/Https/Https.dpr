@@ -9,7 +9,7 @@ uses
   Curl.Lib in '..\..\..\Src\Curl.Lib.pas';
 
 var
-  curl : TCurlHandle;
+  curl : HCurl;
   res : TCurlCode;
   code : longint;
 begin
@@ -28,6 +28,7 @@ begin
     // Check for errors
     if (res = CURLE_OK) then begin
       curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, code);
+      Writeln;
       Writeln(Format('HTTP response code: %d', [ code ] ));
     end else begin
       Writeln(Format('curl_easy_perform() failed: %s',

@@ -29,7 +29,7 @@ var
 implementation
 
 uses
-  Curl.Lib, Curl.RawByteStream, Curl.Interfaces, Curl.Slist;
+  Curl.Lib, Curl.RawByteStream;
 
 {$R *.dfm}
 
@@ -43,21 +43,26 @@ end;
 
 
 procedure TfmMain.btAddClick(Sender: TObject);
+const
+  sA : PAnsiChar = 'a';
+  sB : PAnsiChar = 'b';
 var
-  curl : TCurlHandle;
+  curl : HCurl;
   post, last : PCurlHttpPost;
+  headers, headersEnd : PCurlSList;
   code : TCurlCode;
   stream : TRawByteStream;
-  list : ICurlSList;
 begin
   post := nil;
   last := nil;
   curl := curl_easy_init;
   stream := TRawByteStream.Create;
+
   // For simplicity, I’ll use a wrapper for SList.
-  list := CurlGetSlist
-          .AddRaw('Alpha: Bravo')
-          .AddRaw('Charlie: Delta');
+  headers := nil;
+  curl_slist_append(headers, 'Alpha: Bravo');
+  curl_slist_append(headers, 'Charlie: Delta');
+
   try
     curl_easy_setopt(curl, CURLOPT_URL, UTF8Encode(edUrl.Text));
     curl_easy_setopt(curl, CURLOPT_POST, true);
@@ -66,13 +71,13 @@ begin
         'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:36.0) Gecko/20100101 Firefox/36.0');
 
     curl_formadd(post, last,
-            CURLFORM_COPYNAME, 'a',
+            CURLFORM_COPYNAME, sA,
             CURLFORM_COPYCONTENTS, PAnsiChar(UTF8Encode(edA.Text)),
-            CURLFORM_CONTENTHEADER, PAnsiChar(list.RawValue),
+            CURLFORM_CONTENTHEADER, headers,
             CURLFORM_END);
 
     curl_formadd(post, last,
-            CURLFORM_COPYNAME, 'b',
+            CURLFORM_COPYNAME, sB,
             CURLFORM_COPYCONTENTS, PAnsiChar(UTF8Encode(edB.Text)),
             CURLFORM_END);
 
