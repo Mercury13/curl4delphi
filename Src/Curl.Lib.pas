@@ -654,9 +654,8 @@ type
     // send TYPE parameter?
     CURLOPT_CRLF = CURLOPTTYPE_LONG + 27,
 
-    // What version to specifically try to use.
-    // See CURL_SSLVERSION defines below.
-    CURLOPT_SSLVERSION = CURLOPTTYPE_LONG + 32,
+    // Identified as SslVersion
+    //CURLOPT_SSLVERSION = CURLOPTTYPE_LONG + 32,
 
     // What kind of HTTP time condition to use, see defines
     CURLOPT_TIMECONDITION = CURLOPTTYPE_LONG + 33,
@@ -991,9 +990,8 @@ type
     // the provided hostname.
     CURLOPT_PROXY_SSL_VERIFYHOST = CURLOPTTYPE_LONG + 249,
 
-    // What version to specifically try to use for proxy.
-    // See CURL_SSLVERSION defines below. */
-    CURLOPT_PROXY_SSLVERSION = CURLOPTTYPE_LONG + 250,
+    // Identified as SslVersion
+    //CURLOPT_PROXY_SSLVERSION = CURLOPTTYPE_LONG + 250,
 
     // Enable/disable specific SSL features with a bitmask for proxy, see
     // CURLSSLOPT_*
@@ -1045,6 +1043,16 @@ type
       // Specify whether to read the user+password from the .netrc or the URL.
     // This must be one of the CURL_NETRC_* enums below.
     CURLOPT_NETRC = CURLOPTTYPE_LONG + 51
+  );
+
+  TCurlSslVersionOption = (
+    // What version to specifically try to use.
+    // See CURL_SSLVERSION defines below.
+    CURLOPT_SSLVERSION = CURLOPTTYPE_LONG + 32,
+
+    // What version to specifically try to use for proxy.
+    // See CURL_SSLVERSION defines below. */
+    CURLOPT_PROXY_SSLVERSION = CURLOPTTYPE_LONG + 250
   );
 
   TCurlOffOption = (
@@ -2425,6 +2433,11 @@ function curl_easy_setopt(
         option : TCurlNetRcOption;
         data : TCurlNetrc) : TCurlCode;  overload; inline;
 
+function curl_easy_setopt(
+        curl : TCurlHandle;
+        option : TCurlSslVersionOption;
+        data : TCurlSslVersion) : TCurlCode;  overload; inline;
+
 function curl_easy_perform(curl : TCurlHandle) : TCurlCode;
           cdecl;  external 'libcurl.dll';
 
@@ -2785,6 +2798,14 @@ function curl_easy_setopt(
         curl : TCurlHandle;
         option : TCurlNetRcOption;
         data : TCurlNetrc) : TCurlCode;
+begin
+  Result := curl_easy_setopt_initial(curl, option, NativeUInt(data));
+end;
+
+function curl_easy_setopt(
+        curl : TCurlHandle;
+        option : TCurlSslVersionOption;
+        data : TCurlSslVersion) : TCurlCode;
 begin
   Result := curl_easy_setopt_initial(curl, option, NativeUInt(data));
 end;

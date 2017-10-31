@@ -37,6 +37,7 @@ type
     procedure SetOpt(aOption : TCurlIpResolveOption; aData : TCurlIpResolve);  overload;
     procedure SetOpt(aOption : TCurlRtspSeqOption; aData : TCurlRtspSeq);  overload;
     procedure SetOpt(aOption : TCurlNetRcOption; aData : TCurlNetrc);  overload;
+    procedure SetOpt(aOption : TCurlSslVersionOption; aData : TCurlSslVersion);  overload;
     procedure SetOpt(aOption : TCurlSlistOption; aData : PCurlSList);  overload;
               deprecated 'Use SetXXX instead: SetCustomHeaders, SetResolveList, etc.';
     procedure SetOpt(aOption : TCurlPostOption; aData : PCurlHttpPost);  overload;
@@ -57,9 +58,6 @@ type
     procedure SetUserAgent(aData : PAnsiChar);      overload;
     procedure SetUserAgent(aData : RawByteString);  overload;
     procedure SetUserAgent(aData : UnicodeString);  overload;
-
-    ///  Sets an SSL version
-    procedure SetSslVersion(aData : TCurlSslVersion);
 
     ///  Set verify option
     procedure SetSslVerifyHost(aData : TCurlVerifyHost);
@@ -200,6 +198,7 @@ type
     procedure SetOpt(aOption : TCurlIpResolveOption; aData : TCurlIpResolve);  overload;
     procedure SetOpt(aOption : TCurlRtspSeqOption; aData : TCurlRtspSeq);  overload;
     procedure SetOpt(aOption : TCurlNetRcOption; aData : TCurlNetrc);  overload;
+    procedure SetOpt(aOption : TCurlSslVersionOption; aData : TCurlSslVersion);  overload;
 
     procedure SetUrl(aData : PAnsiChar);      overload;   inline;
     procedure SetUrl(aData : RawByteString);  overload;   inline;
@@ -213,8 +212,6 @@ type
     procedure SetUserAgent(aData : PAnsiChar);      overload;
     procedure SetUserAgent(aData : RawByteString);  overload;
     procedure SetUserAgent(aData : UnicodeString);  overload;
-
-    procedure SetSslVersion(aData : TCurlSslVersion);  inline;
 
     procedure SetSslVerifyHost(aData : TCurlVerifyHost);
     procedure SetSslVerifyPeer(aData : boolean);
@@ -470,6 +467,10 @@ begin
   RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
 end;
 
+procedure TEasyCurlImpl.SetOpt(aOption : TCurlSslVersionOption; aData : TCurlSslVersion);
+begin
+  RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
+end;
 
 function TEasyCurlImpl.Clone : ICurl;
 begin
@@ -509,11 +510,6 @@ end;
 procedure TEasyCurlImpl.SetCaFile(aData : UnicodeString);
 begin
   SetOpt(CURLOPT_CAINFO, aData);
-end;
-
-procedure TEasyCurlImpl.SetSslVersion(aData : TCurlSslVersion);
-begin
-  SetOpt(CURLOPT_SSLVERSION, ord(aData));
 end;
 
 procedure TEasyCurlImpl.SetUserAgent(aData : PAnsiChar);
