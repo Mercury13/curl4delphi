@@ -28,6 +28,7 @@ type
   // Primitive cUrl types
   TUnixTime   = NativeUInt;
   TCurlOff    = int64;
+  TCurlSocket = TSocket;
 
   TCurlInner = record end;
   HCurl = ^TCurlInner;
@@ -55,7 +56,7 @@ type
 
 const
   // cUrl constants
-  CURL_SOCKET_BAD = High(TSocket);
+  CURL_SOCKET_BAD = High(TCurlSocket);
 
   CURL_HTTPPOST_FILENAME    = 1 shl 0;   // specified content is a file name
   CURL_HTTPPOST_READFILE    = 1 shl 1;   // specified content is a file name
@@ -252,7 +253,7 @@ type
 
   EvCurlSockopt = function(
           ClientP : pointer;
-          Curlfd : TSocket;
+          Curlfd : TCurlSocket;
           Purpose : TCurlSockType) : TCurlSockOpt;  cdecl;
 
   TCurlSockAddr = record
@@ -264,11 +265,11 @@ type
   EvCurlOpenSocket = function(
           ClientP : integer;
           Purpose : TCurlSockType;
-          var Address : TCurlSockAddr) : TSocket;  cdecl;
+          var Address : TCurlSockAddr) : TCurlSocket;  cdecl;
 
   EvCurlCloseSocket = function (
           ClientP : integer;
-          Item : TSocket) : integer;  cdecl;
+          Item : TCurlSocket) : integer;  cdecl;
 
   EvCurlIoctl = function (
           Handle : HCurl;
@@ -2661,7 +2662,7 @@ function curl_easy_getinfo(
 function curl_easy_getinfo(
       curl : HCurl;
       info : TCurlSocketInfo;
-      var p : TSocket) : TCurlCode;  overload;  inline;
+      var p : TCurlSocket) : TCurlCode;  overload;  inline;
 
 function curl_easy_getinfo(
       curl : HCurl;
@@ -3049,7 +3050,7 @@ end;
 function curl_easy_getinfo(
       curl : HCurl;
       info : TCurlSocketInfo;
-      var p : TSocket) : TCurlCode;
+      var p : TCurlSocket) : TCurlCode;
 begin
   Result := curl_easy_getinfo_initial(curl, info, @p);
 end;

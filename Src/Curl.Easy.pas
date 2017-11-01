@@ -6,9 +6,7 @@ uses
   // System
   System.Classes, System.SysUtils,
   // cUrl
-  Curl.Lib, Curl.Interfaces,
-  // Windows
-  Winapi.Winsock2;
+  Curl.Lib, Curl.Interfaces;
 
 type
   TCurlVerifyHost = (
@@ -143,7 +141,7 @@ type
     function GetInfo(aInfo : TCurlDoubleInfoDeprecated) : double;  overload;  deprecated 'Use TCurlOffInfo version';
     function GetInfo(aInfo : TCurlOffInfo) : TCurlOff;  overload;
     function GetInfo(aInfo : TCurlPtrInfo) : pointer;  overload;
-    function GetInfo(aInfo : TCurlSocketInfo) : TSocket;  overload;
+    function GetInfo(aInfo : TCurlSocketInfo) : TCurlSocket;  overload;
 
     ///  Returns response code. Equivalent to GetInfo(CURLINFO_RESPONSE_CODE).
     function GetResponseCode : longint;
@@ -248,7 +246,7 @@ type
     function GetInfo(aInfo : TCurlDoubleInfoDeprecated) : double;  overload;
     function GetInfo(aInfo : TCurlOffInfo) : TCurlOff;  overload;
     function GetInfo(aInfo : TCurlPtrInfo) : pointer;  overload;
-    function GetInfo(aInfo : TCurlSocketInfo) : TSocket;  overload;
+    function GetInfo(aInfo : TCurlSocketInfo) : TCurlSocket;  overload;
 
     function GetResponseCode : longint;
 
@@ -414,7 +412,7 @@ begin
   RaiseIf(curl_easy_getinfo(fHandle, aInfo, Result));
 end;
 
-function TEasyCurlImpl.GetInfo(aInfo : TCurlSocketInfo) : TSocket;
+function TEasyCurlImpl.GetInfo(aInfo : TCurlSocketInfo) : TCurlSocket;
 begin
   RaiseIf(curl_easy_getinfo(fHandle, aInfo, Result));
 end;
