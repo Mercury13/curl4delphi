@@ -2733,6 +2733,8 @@ function curl_easy_send(
 //#define curl_share_setopt(share,opt,param) curl_share_setopt(share,opt,param)
 //#define curl_multi_setopt(handle,opt,param) curl_multi_setopt(handle,opt,param)
 
+// Utility function that gets proxy server from Internet Explorer
+//
 function ProxyFromIe : string;
 
 implementation
