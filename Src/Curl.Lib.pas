@@ -2754,6 +2754,7 @@ var
 begin
   strs := nil;
   reg  := TRegistry.Create;
+  Result := '';
   try
     reg.RootKey := HKEY_CURRENT_USER;
     reg.OpenKeyReadOnly('\Software\Microsoft\Windows\CurrentVersion\Internet Settings');
@@ -2772,6 +2773,7 @@ begin
                   then continue;
             end;
 
+            // If pEqual = 0, take entire string
             Result := Copy(s, pEqual + 1, Length(s));
             break;
         end;
