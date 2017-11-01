@@ -24,11 +24,9 @@ var
 begin
   try
     curl := CurlGet;
-    curl.SetUrl(Url);
-    curl.SetFollowLocation(true);
-
-    // Perform the request
-    curl.Perform;
+    curl.SetUrl(Url)
+        .SetFollowLocation(true)
+        .Perform;
 
     // Check for some info
     code := curl.GetResponseCode;

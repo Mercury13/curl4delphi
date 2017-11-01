@@ -23,105 +23,105 @@ type
 
     ///  Sets a cURL option.
     ///  SetXXX functions are simply wrappers for SetOpt.
-    procedure SetOpt(aOption : TCurlOffOption; aData : TCurlOff);  overload;
-    procedure SetOpt(aOption : TCurlOption; aData : pointer);  overload;
-    procedure SetOpt(aOption : TCurlIntOption; aData : NativeUInt);  overload;
-    procedure SetOpt(aOption : TCurlIntOption; aData : boolean);  overload;
-    procedure SetOpt(aOption : TCurlStringOption; aData : PAnsiChar);  overload;
-    procedure SetOpt(aOption : TCurlStringOption; aData : RawByteString);  overload;
-    procedure SetOpt(aOption : TCurlStringOption; aData : UnicodeString);  overload;
-    procedure SetOpt(aOption : TCurlProxyTypeOption; aData : TCurlProxyType);  overload;
-    procedure SetOpt(aOption : TCurlUseSslOption; aData : TCurlUseSsl);  overload;
-    procedure SetOpt(aOption : TCurlFtpMethodOption; aData : TCurlFtpMethod);  overload;
-    procedure SetOpt(aOption : TCurlIpResolveOption; aData : TCurlIpResolve);  overload;
-    procedure SetOpt(aOption : TCurlRtspSeqOption; aData : TCurlRtspSeq);  overload;
-    procedure SetOpt(aOption : TCurlNetRcOption; aData : TCurlNetrc);  overload;
-    procedure SetOpt(aOption : TCurlSslVersionOption; aData : TCurlSslVersion);  overload;
-    procedure SetOpt(aOption : TCurlSlistOption; aData : PCurlSList);  overload;
+    function SetOpt(aOption : TCurlOffOption; aData : TCurlOff) : ICurl;                overload;
+    function SetOpt(aOption : TCurlOption; aData : pointer) : ICurl;                    overload;
+    function SetOpt(aOption : TCurlIntOption; aData : NativeUInt) : ICurl;              overload;
+    function SetOpt(aOption : TCurlIntOption; aData : boolean) : ICurl;                 overload;
+    function SetOpt(aOption : TCurlStringOption; aData : PAnsiChar) : ICurl;            overload;
+    function SetOpt(aOption : TCurlStringOption; aData : RawByteString) : ICurl;        overload;
+    function SetOpt(aOption : TCurlStringOption; aData : UnicodeString) : ICurl;        overload;
+    function SetOpt(aOption : TCurlProxyTypeOption; aData : TCurlProxyType) : ICurl;    overload;
+    function SetOpt(aOption : TCurlUseSslOption; aData : TCurlUseSsl) : ICurl;          overload;
+    function SetOpt(aOption : TCurlFtpMethodOption; aData : TCurlFtpMethod) : ICurl;    overload;
+    function SetOpt(aOption : TCurlIpResolveOption; aData : TCurlIpResolve) : ICurl;    overload;
+    function SetOpt(aOption : TCurlRtspSeqOption; aData : TCurlRtspSeq) : ICurl;        overload;
+    function SetOpt(aOption : TCurlNetRcOption; aData : TCurlNetrc) : ICurl;            overload;
+    function SetOpt(aOption : TCurlSslVersionOption; aData : TCurlSslVersion) : ICurl;  overload;
+    function SetOpt(aOption : TCurlSlistOption; aData : PCurlSList) : ICurl;            overload;
               deprecated 'Use SetXXX instead: SetCustomHeaders, SetResolveList, etc.';
-    procedure SetOpt(aOption : TCurlPostOption; aData : PCurlHttpPost);  overload;
+    function SetOpt(aOption : TCurlPostOption; aData : PCurlHttpPost) : ICurl;          overload;
               deprecated 'Use SetForm or property Form instead.';
 
     ///  Sets a URL. Equivalent to SetOpt(CURLOPT_URL, aData).
-    procedure SetUrl(aData : PAnsiChar);  overload;
-    procedure SetUrl(aData : RawByteString);  overload;
-    procedure SetUrl(aData : UnicodeString);  overload;
-    procedure SetUrl(aData : ICurlStringBuilder);  overload;
+    function SetUrl(aData : PAnsiChar) : ICurl;           overload;
+    function SetUrl(aData : RawByteString) : ICurl;       overload;
+    function SetUrl(aData : UnicodeString) : ICurl;       overload;
+    function SetUrl(aData : ICurlStringBuilder) : ICurl;  overload;
 
     ///  Sets a CA file for SSL
-    procedure SetCaFile(aData : PAnsiChar);      overload;
-    procedure SetCaFile(aData : RawByteString);  overload;
-    procedure SetCaFile(aData : UnicodeString);  overload;
+    function SetCaFile(aData : PAnsiChar) : ICurl;      overload;
+    function SetCaFile(aData : RawByteString) : ICurl;  overload;
+    function SetCaFile(aData : UnicodeString) : ICurl;  overload;
 
     ///  Sets a user-agent
-    procedure SetUserAgent(aData : PAnsiChar);      overload;
-    procedure SetUserAgent(aData : RawByteString);  overload;
-    procedure SetUserAgent(aData : UnicodeString);  overload;
+    function SetUserAgent(aData : PAnsiChar) : ICurl;      overload;
+    function SetUserAgent(aData : RawByteString) : ICurl;  overload;
+    function SetUserAgent(aData : UnicodeString) : ICurl;  overload;
 
     ///  Set verify option
-    procedure SetSslVerifyHost(aData : TCurlVerifyHost);
-    procedure SetSslVerifyPeer(aData : boolean);
+    function SetSslVerifyHost(aData : TCurlVerifyHost) : ICurl;
+    function SetSslVerifyPeer(aData : boolean) : ICurl;
 
     ///  Sets a receiver stream. Equivalent to twin SetOpt,
     ///  WRITEFUNCTION and WRITEDATA.
     ///  Does not destroy the stream, you should dispose of it manually!
     ///  If aData = nil: removes all custom receivers.
-    procedure SetRecvStream(aData : TStream; aFlags : TCurlStreamFlags);
+    function SetRecvStream(aData : TStream; aFlags : TCurlStreamFlags) : ICurl;
 
     ///  Sets a sender stream. Equivalent to twin SetOpt,
     ///  READFUNCTION and READDATA.
     ///  Does not destroy the stream, you should dispose of it manually!
     ///  If aData = nil: removes all custom senders.
-    procedure SetSendStream(aData : TStream; aFlags : TCurlStreamFlags);
+    function SetSendStream(aData : TStream; aFlags : TCurlStreamFlags) : ICurl;
 
     ///  Sets a receiver stream. Equivalent to twin SetOpt,
     ///  HEADERFUNCTION and HEADERDATA.
     ///  Does not destroy the stream, you should dispose of it manually!
     ///  If aData = nil: removes all custom receivers.
-    procedure SetHeaderStream(aData : TStream; aFlags : TCurlStreamFlags);
+    function SetHeaderStream(aData : TStream; aFlags : TCurlStreamFlags) : ICurl;
 
     ///  Sets whether cURL will follow redirections.
-    procedure SetFollowLocation(aData : boolean);
+    function SetFollowLocation(aData : boolean) : ICurl;
 
     ///  Gets/sets form data
-    procedure SetForm(aForm : ICurlCustomForm);
-    function GetForm : ICurlCustomForm;
+    function SetForm(aForm : ICurlCustomForm) : ICurl;
+    function Form : ICurlCustomForm;
 
     ///  For all these options the object stores a reference to an ICurlCustomSList
     ///  for itself.
 
     ///  This points to a linked list of headers. This
     ///  list is also used for RTSP.
-    procedure SetCustomHeaders(v : ICurlCustomSList);
+    function SetCustomHeaders(v : ICurlCustomSList) : ICurl;
     ///  send linked-list of post-transfer QUOTE commands
-    procedure SetPostQuote(v : ICurlCustomSList);
+    function SetPostQuote(v : ICurlCustomSList) : ICurl;
     ///  Provide a pointer to a curl_slist with variables to pass to the telnet
     ///  negotiations. The variables should be in the format <option=value>.
     ///  libcurl supports the options 'TTYPE', 'XDISPLOC' and 'NEW_ENV'.
     ///  See the TELNET standard for details.
-    procedure SetTelnetOptions(v : ICurlCustomSList);
+    function SetTelnetOptions(v : ICurlCustomSList) : ICurl;
     ///  send linked-list of pre-transfer QUOTE commands
-    procedure SetQuote(v : ICurlCustomSList);
+    function SetQuote(v : ICurlCustomSList) : ICurl;
     ///  Set aliases for HTTP 200 in the HTTP Response header
-    procedure SetPreQuote(v : ICurlCustomSList);
+    function SetPreQuote(v : ICurlCustomSList) : ICurl;
     ///  Set aliases for HTTP 200 in the HTTP Response header
-    procedure SetHttp200Aliases(v : ICurlCustomSList);
+    function SetHttp200Aliases(v : ICurlCustomSList) : ICurl;
     ///  set the SMTP mail receiver(s)
-    procedure SetMailRcpt(v : ICurlCustomSList);
+    function SetMailRcpt(v : ICurlCustomSList) : ICurl;
     ///  send linked-list of name:port:address sets
-    procedure SetResolveList(v : ICurlCustomSList);
+    function SetResolveList(v : ICurlCustomSList) : ICurl;
     ///  This points to a linked list of headers used for proxy requests only,
     ///  struct curl_slist kind
-    procedure SetProxyHeader(v : ICurlCustomSList);
+    function SetProxyHeader(v : ICurlCustomSList) : ICurl;
     /// Linked-list of host:port:connect-to-host:connect-to-port,
     /// overrides the URL's host:port (only for the network layer) */
-    procedure SetConnectTo(v : ICurlCustomSlist);
+    function SetConnectTo(v : ICurlCustomSlist) : ICurl;
 
-    procedure SetProxyFromIe;
+    function SetProxyFromIe : ICurl;
 
     ///  Performs the action.
     ///  Actually does RaiseIf(PerformNe).
-    procedure Perform;
+    function Perform : ICurl;
 
     ///  Performs the action w/o throwing an error.
     ///  The user should process error codes for himself.
@@ -132,7 +132,7 @@ type
     ///  Sometimes you’d like to process some errors in place w/o bulky
     ///  try/except. Then you run PerformNe, manually process some errors,
     ///  and do RaiseIf for everything else.
-    procedure RaiseIf(aCode : TCurlCode);
+    function RaiseIf(aCode : TCurlCode) : ICurl;
 
     ///  Returns some information.
     ///  GetXXX functions are wrappers for GetInfo.
@@ -158,8 +158,6 @@ type
     ///        disappears. For large objects assigned via SetOpt the programmer
     ///        should bother about destruction for himself.
     function Clone : ICurl;
-
-    property Form : ICurlCustomForm read GetForm write SetForm;
   end;
 
   TEasyCurlImpl = class (TInterfacedObject, ICurl)
@@ -172,10 +170,10 @@ type
     // We won’t save a few bytes of memory; repeatable code is more important.
     fRecvStream, fSendStream, fHeaderStream : TCurlAutoStream;
 
-    procedure SetSList(
+    function SetSList(
             aOpt : TCurlSlistOption;
             var aOldValue : ICurlCustomSList;
-            aNewValue : ICurlCustomSList);
+            aNewValue : ICurlCustomSList) : ICurl;
 
     procedure RewindStreams;
   public
@@ -184,63 +182,63 @@ type
     destructor Destroy;  override;
     function GetHandle : HCurl;
 
-    procedure RaiseIf(aCode : TCurlCode);  inline;
+    function RaiseIf(aCode : TCurlCode) : ICurl;  inline;
 
-    procedure SetOpt(aOption : TCurlOffOption; aData : TCurlOff);  overload;
-    procedure SetOpt(aOption : TCurlOption; aData : pointer);  overload;
-    procedure SetOpt(aOption : TCurlIntOption; aData : NativeUInt);  overload;
-    procedure SetOpt(aOption : TCurlIntOption; aData : boolean);  overload;
-    procedure SetOpt(aOption : TCurlStringOption; aData : PAnsiChar);  overload;
-    procedure SetOpt(aOption : TCurlStringOption; aData : RawByteString);  overload;
-    procedure SetOpt(aOption : TCurlStringOption; aData : UnicodeString);  overload;
-    procedure SetOpt(aOption : TCurlSlistOption; aData : PCurlSList);  overload;
-    procedure SetOpt(aOption : TCurlPostOption; aData : PCurlHttpPost);  overload;
-    procedure SetOpt(aOption : TCurlProxyTypeOption; aData : TCurlProxyType);  overload;
-    procedure SetOpt(aOption : TCurlUseSslOption; aData : TCurlUseSsl);  overload;
-    procedure SetOpt(aOption : TCurlFtpMethodOption; aData : TCurlFtpMethod);  overload;
-    procedure SetOpt(aOption : TCurlIpResolveOption; aData : TCurlIpResolve);  overload;
-    procedure SetOpt(aOption : TCurlRtspSeqOption; aData : TCurlRtspSeq);  overload;
-    procedure SetOpt(aOption : TCurlNetRcOption; aData : TCurlNetrc);  overload;
-    procedure SetOpt(aOption : TCurlSslVersionOption; aData : TCurlSslVersion);  overload;
+    function SetOpt(aOption : TCurlOffOption; aData : TCurlOff) : ICurl;  overload;
+    function SetOpt(aOption : TCurlOption; aData : pointer) : ICurl;  overload;
+    function SetOpt(aOption : TCurlIntOption; aData : NativeUInt) : ICurl;  overload;
+    function SetOpt(aOption : TCurlIntOption; aData : boolean) : ICurl;  overload;
+    function SetOpt(aOption : TCurlStringOption; aData : PAnsiChar) : ICurl;  overload;
+    function SetOpt(aOption : TCurlStringOption; aData : RawByteString) : ICurl;  overload;
+    function SetOpt(aOption : TCurlStringOption; aData : UnicodeString) : ICurl;  overload;
+    function SetOpt(aOption : TCurlSlistOption; aData : PCurlSList) : ICurl;  overload;
+    function SetOpt(aOption : TCurlPostOption; aData : PCurlHttpPost) : ICurl;  overload;
+    function SetOpt(aOption : TCurlProxyTypeOption; aData : TCurlProxyType) : ICurl;  overload;
+    function SetOpt(aOption : TCurlUseSslOption; aData : TCurlUseSsl) : ICurl;  overload;
+    function SetOpt(aOption : TCurlFtpMethodOption; aData : TCurlFtpMethod) : ICurl;  overload;
+    function SetOpt(aOption : TCurlIpResolveOption; aData : TCurlIpResolve) : ICurl;  overload;
+    function SetOpt(aOption : TCurlRtspSeqOption; aData : TCurlRtspSeq) : ICurl;  overload;
+    function SetOpt(aOption : TCurlNetRcOption; aData : TCurlNetrc) : ICurl;  overload;
+    function SetOpt(aOption : TCurlSslVersionOption; aData : TCurlSslVersion) : ICurl;  overload;
 
-    procedure SetUrl(aData : PAnsiChar);      overload;   inline;
-    procedure SetUrl(aData : RawByteString);  overload;   inline;
-    procedure SetUrl(aData : UnicodeString);  overload;   inline;
-    procedure SetUrl(aData : ICurlStringBuilder);  overload;  inline;
+    function SetUrl(aData : PAnsiChar) : ICurl;      overload;   inline;
+    function SetUrl(aData : RawByteString) : ICurl;  overload;   inline;
+    function SetUrl(aData : UnicodeString) : ICurl;  overload;   inline;
+    function SetUrl(aData : ICurlStringBuilder) : ICurl;  overload;  inline;
 
-    procedure SetCaFile(aData : PAnsiChar);      overload;   inline;
-    procedure SetCaFile(aData : RawByteString);  overload;   inline;
-    procedure SetCaFile(aData : UnicodeString);  overload;   inline;
+    function SetCaFile(aData : PAnsiChar) : ICurl;      overload;   inline;
+    function SetCaFile(aData : RawByteString) : ICurl;  overload;   inline;
+    function SetCaFile(aData : UnicodeString) : ICurl;  overload;   inline;
 
-    procedure SetUserAgent(aData : PAnsiChar);      overload;
-    procedure SetUserAgent(aData : RawByteString);  overload;
-    procedure SetUserAgent(aData : UnicodeString);  overload;
+    function SetUserAgent(aData : PAnsiChar) : ICurl;      overload;
+    function SetUserAgent(aData : RawByteString) : ICurl;  overload;
+    function SetUserAgent(aData : UnicodeString) : ICurl;  overload;
 
-    procedure SetSslVerifyHost(aData : TCurlVerifyHost);
-    procedure SetSslVerifyPeer(aData : boolean);
+    function SetSslVerifyHost(aData : TCurlVerifyHost) : ICurl;
+    function SetSslVerifyPeer(aData : boolean) : ICurl;
 
-    procedure SetRecvStream(aData : TStream; aFlags : TCurlStreamFlags);
-    procedure SetSendStream(aData : TStream; aFlags : TCurlStreamFlags);
-    procedure SetHeaderStream(aData : TStream; aFlags : TCurlStreamFlags);
+    function SetRecvStream(aData : TStream; aFlags : TCurlStreamFlags) : ICurl;
+    function SetSendStream(aData : TStream; aFlags : TCurlStreamFlags) : ICurl;
+    function SetHeaderStream(aData : TStream; aFlags : TCurlStreamFlags) : ICurl;
 
-    procedure SetFollowLocation(aData : boolean);
+    function SetFollowLocation(aData : boolean) : ICurl;
 
-    procedure SetForm(aForm : ICurlCustomForm);
-    function GetForm : ICurlCustomForm;
+    function SetForm(aForm : ICurlCustomForm) : ICurl;
+    function Form : ICurlCustomForm;
 
-    procedure SetCustomHeaders(v : ICurlCustomSList);
-    procedure SetPostQuote(v : ICurlCustomSList);
-    procedure SetTelnetOptions(v : ICurlCustomSList);
-    procedure SetQuote(v : ICurlCustomSList);
-    procedure SetPreQuote(v : ICurlCustomSList);
-    procedure SetHttp200Aliases(v : ICurlCustomSList);
-    procedure SetMailRcpt(v : ICurlCustomSList);
-    procedure SetResolveList(v : ICurlCustomSList);
-    procedure SetProxyHeader(v : ICurlCustomSList);
-    procedure SetConnectTo(v : ICurlCustomSlist);
-    procedure SetProxyFromIe;
+    function SetCustomHeaders(v : ICurlCustomSList) : ICurl;
+    function SetPostQuote(v : ICurlCustomSList) : ICurl;
+    function SetTelnetOptions(v : ICurlCustomSList) : ICurl;
+    function SetQuote(v : ICurlCustomSList) : ICurl;
+    function SetPreQuote(v : ICurlCustomSList) : ICurl;
+    function SetHttp200Aliases(v : ICurlCustomSList) : ICurl;
+    function SetMailRcpt(v : ICurlCustomSList) : ICurl;
+    function SetResolveList(v : ICurlCustomSList) : ICurl;
+    function SetProxyHeader(v : ICurlCustomSList) : ICurl;
+    function SetConnectTo(v : ICurlCustomSlist) : ICurl;
+    function SetProxyFromIe : ICurl;
 
-    procedure Perform;
+    function Perform : ICurl;
     function PerformNe : TCurlCode;
 
     function GetInfo(aInfo : TCurlLongInfo) : longint;  overload;
@@ -257,8 +255,6 @@ type
     ///  This is implementation of ICurl.Clone. If you dislike
     ///  reference-counting, use TEasyCurlImpl.Create(someCurl).
     function Clone : ICurl;
-
-    property Form : ICurlCustomForm read GetForm write SetForm;
 
     procedure CloseStreams;
   end;
@@ -356,10 +352,11 @@ begin
   inherited;
 end;
 
-procedure TEasyCurlImpl.RaiseIf(aCode : TCurlCode);
+function TEasyCurlImpl.RaiseIf(aCode : TCurlCode) : ICurl;
 begin
   if aCode <> CURLE_OK then
     raise ECurlError.Create(Self, aCode);
+  Result := Self;
 end;
 
 
@@ -368,9 +365,10 @@ begin
   Result := fHandle;
 end;
 
-procedure TEasyCurlImpl.Perform;
+function TEasyCurlImpl.Perform : ICurl;
 begin
   RaiseIf(PerformNe);
+  Result := Self;
 end;
 
 function TEasyCurlImpl.PerformNe : TCurlCode;
@@ -421,84 +419,84 @@ begin
   RaiseIf(curl_easy_getinfo(fHandle, aInfo, Result));
 end;
 
-procedure TEasyCurlImpl.SetOpt(aOption : TCurlOffOption; aData : TCurlOff);
+function TEasyCurlImpl.SetOpt(aOption : TCurlOffOption; aData : TCurlOff) : ICurl;
 begin
-  RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
+  Result := RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
 end;
 
-procedure TEasyCurlImpl.SetOpt(aOption : TCurlStringOption; aData : PAnsiChar);
+function TEasyCurlImpl.SetOpt(aOption : TCurlStringOption; aData : PAnsiChar) : ICurl;
 begin
-  RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
+  Result := RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
 end;
 
-procedure TEasyCurlImpl.SetOpt(aOption : TCurlOption; aData : pointer);
+function TEasyCurlImpl.SetOpt(aOption : TCurlOption; aData : pointer) : ICurl;
 begin
-  RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
+  Result := RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
 end;
 
-procedure TEasyCurlImpl.SetOpt(aOption : TCurlIntOption; aData : NativeUInt);
+function TEasyCurlImpl.SetOpt(aOption : TCurlIntOption; aData : NativeUInt) : ICurl;
 begin
-  RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
+  Result := RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
 end;
 
-procedure TEasyCurlImpl.SetOpt(aOption : TCurlIntOption; aData : boolean);
+function TEasyCurlImpl.SetOpt(aOption : TCurlIntOption; aData : boolean) : ICurl;
 begin
-  RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
+  Result := RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
 end;
 
-procedure TEasyCurlImpl.SetOpt(aOption : TCurlStringOption; aData : RawByteString);
+function TEasyCurlImpl.SetOpt(aOption : TCurlStringOption; aData : RawByteString) : ICurl;
 begin
-  RaiseIf(curl_easy_setopt(fHandle, aOption, PAnsiChar(aData)));
+  Result := RaiseIf(curl_easy_setopt(fHandle, aOption, PAnsiChar(aData)));
 end;
 
-procedure TEasyCurlImpl.SetOpt(aOption : TCurlStringOption; aData : UnicodeString);
+function TEasyCurlImpl.SetOpt(aOption : TCurlStringOption; aData : UnicodeString) : ICurl;
 begin
-  RaiseIf(curl_easy_setopt(fHandle, aOption, PAnsiChar(UTF8Encode(aData))));
+  Result := RaiseIf(curl_easy_setopt(fHandle, aOption, PAnsiChar(UTF8Encode(aData))));
 end;
 
-procedure TEasyCurlImpl.SetOpt(aOption : TCurlSlistOption; aData : PCurlSList);
+function TEasyCurlImpl.SetOpt(aOption : TCurlSlistOption; aData : PCurlSList) : ICurl;
 begin
-  RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
+  Result := RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
 end;
 
-procedure TEasyCurlImpl.SetOpt(aOption : TCurlPostOption; aData : PCurlHttpPost);
+function TEasyCurlImpl.SetOpt(aOption : TCurlPostOption; aData : PCurlHttpPost) : ICurl;
 begin
-  RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
+  Result := RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
 end;
 
-procedure TEasyCurlImpl.SetOpt(aOption : TCurlProxyTypeOption; aData : TCurlProxyType);
+function TEasyCurlImpl.SetOpt(aOption : TCurlProxyTypeOption; aData : TCurlProxyType) : ICurl;
 begin
-  RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
+  Result := RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
 end;
 
-procedure TEasyCurlImpl.SetOpt(aOption : TCurlUseSslOption; aData : TCurlUseSsl);
+function TEasyCurlImpl.SetOpt(aOption : TCurlUseSslOption; aData : TCurlUseSsl) : ICurl;
 begin
-  RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
+  Result := RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
 end;
 
-procedure TEasyCurlImpl.SetOpt(aOption : TCurlFtpMethodOption; aData : TCurlFtpMethod);
+function TEasyCurlImpl.SetOpt(aOption : TCurlFtpMethodOption; aData : TCurlFtpMethod) : ICurl;
 begin
-  RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
+  Result := RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
 end;
 
-procedure TEasyCurlImpl.SetOpt(aOption : TCurlIpResolveOption; aData : TCurlIpResolve);
+function TEasyCurlImpl.SetOpt(aOption : TCurlIpResolveOption; aData : TCurlIpResolve) : ICurl;
 begin
-  RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
+  Result := RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
 end;
 
-procedure TEasyCurlImpl.SetOpt(aOption : TCurlRtspSeqOption; aData : TCurlRtspSeq);
+function TEasyCurlImpl.SetOpt(aOption : TCurlRtspSeqOption; aData : TCurlRtspSeq) : ICurl;
 begin
-  RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
+  Result := RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
 end;
 
-procedure TEasyCurlImpl.SetOpt(aOption : TCurlNetRcOption; aData : TCurlNetrc);
+function TEasyCurlImpl.SetOpt(aOption : TCurlNetRcOption; aData : TCurlNetrc) : ICurl;
 begin
-  RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
+  Result := RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
 end;
 
-procedure TEasyCurlImpl.SetOpt(aOption : TCurlSslVersionOption; aData : TCurlSslVersion);
+function TEasyCurlImpl.SetOpt(aOption : TCurlSslVersionOption; aData : TCurlSslVersion) : ICurl;
 begin
-  RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
+  Result := RaiseIf(curl_easy_setopt(fHandle, aOption, aData));
 end;
 
 function TEasyCurlImpl.Clone : ICurl;
@@ -506,67 +504,68 @@ begin
   Result := TEasyCurlImpl.Create(Self);
 end;
 
-procedure TEasyCurlImpl.SetUrl(aData : PAnsiChar);
+function TEasyCurlImpl.SetUrl(aData : PAnsiChar) : ICurl;
 begin
-  SetOpt(CURLOPT_URL, aData);
+  Result := SetOpt(CURLOPT_URL, aData);
 end;
 
-procedure TEasyCurlImpl.SetUrl(aData : RawByteString);
+function TEasyCurlImpl.SetUrl(aData : RawByteString) : ICurl;
 begin
-  SetOpt(CURLOPT_URL, aData);
+  Result := SetOpt(CURLOPT_URL, aData);
 end;
 
-procedure TEasyCurlImpl.SetUrl(aData : UnicodeString);
+function TEasyCurlImpl.SetUrl(aData : UnicodeString) : ICurl;
 begin
-  SetOpt(CURLOPT_URL, aData);
+  Result := SetOpt(CURLOPT_URL, aData);
 end;
 
-procedure TEasyCurlImpl.SetUrl(aData : ICurlStringBuilder);
+function TEasyCurlImpl.SetUrl(aData : ICurlStringBuilder) : ICurl;
 begin
-  SetUrl(aData.Build);
+  Result := SetUrl(aData.Build);
 end;
 
-procedure TEasyCurlImpl.SetCaFile(aData : PAnsiChar);
+function TEasyCurlImpl.SetCaFile(aData : PAnsiChar) : ICurl;
 begin
-  SetOpt(CURLOPT_CAINFO, aData);
+  Result := SetOpt(CURLOPT_CAINFO, aData);
 end;
 
-procedure TEasyCurlImpl.SetCaFile(aData : RawByteString);
+function TEasyCurlImpl.SetCaFile(aData : RawByteString) : ICurl;
 begin
-  SetOpt(CURLOPT_CAINFO, aData);
+  Result := SetOpt(CURLOPT_CAINFO, aData);
 end;
 
-procedure TEasyCurlImpl.SetCaFile(aData : UnicodeString);
+function TEasyCurlImpl.SetCaFile(aData : UnicodeString) : ICurl;
 begin
-  SetOpt(CURLOPT_CAINFO, aData);
+  Result := SetOpt(CURLOPT_CAINFO, aData);
 end;
 
-procedure TEasyCurlImpl.SetUserAgent(aData : PAnsiChar);
+function TEasyCurlImpl.SetUserAgent(aData : PAnsiChar) : ICurl;
 begin
-  SetOpt(CURLOPT_USERAGENT, aData);
+  Result := SetOpt(CURLOPT_USERAGENT, aData);
 end;
 
-procedure TEasyCurlImpl.SetUserAgent(aData : RawByteString);
+function TEasyCurlImpl.SetUserAgent(aData : RawByteString) : ICurl;
 begin
-  SetOpt(CURLOPT_USERAGENT, PAnsiChar(aData));
+  Result := SetOpt(CURLOPT_USERAGENT, PAnsiChar(aData));
 end;
 
-procedure TEasyCurlImpl.SetUserAgent(aData : UnicodeString);
+function TEasyCurlImpl.SetUserAgent(aData : UnicodeString) : ICurl;
 begin
-  SetOpt(CURLOPT_USERAGENT, PAnsiChar(UTF8Encode(aData)));
+  Result := SetOpt(CURLOPT_USERAGENT, PAnsiChar(UTF8Encode(aData)));
 end;
 
-procedure TEasyCurlImpl.SetRecvStream(aData : TStream; aFlags : TCurlStreamFlags);
+function TEasyCurlImpl.SetRecvStream(aData : TStream; aFlags : TCurlStreamFlags) : ICurl;
 begin
   fRecvStream.Assign(aData, aFlags);
   SetOpt(CURLOPT_WRITEDATA, aData);
   if aData = nil
     then SetOpt(CURLOPT_WRITEFUNCTION, nil)
     else SetOpt(CURLOPT_WRITEFUNCTION, @CurlStreamWrite);
+  Result := Self;
 end;
 
 
-procedure TEasyCurlImpl.SetSendStream(aData : TStream; aFlags : TCurlStreamFlags);
+function TEasyCurlImpl.SetSendStream(aData : TStream; aFlags : TCurlStreamFlags) : ICurl;
 begin
   // Form and sender stream exclude each other
   fForm := nil;
@@ -575,15 +574,17 @@ begin
   if aData = nil
     then SetOpt(CURLOPT_READFUNCTION, nil)
     else SetOpt(CURLOPT_READFUNCTION, @CurlStreamRead);
+  Result := Self;
 end;
 
-procedure TEasyCurlImpl.SetHeaderStream(aData : TStream; aFlags : TCurlStreamFlags);
+function TEasyCurlImpl.SetHeaderStream(aData : TStream; aFlags : TCurlStreamFlags) : ICurl;
 begin
   fHeaderStream.Assign(aData, aFlags);
   SetOpt(CURLOPT_HEADERDATA, aData);
   if aData = nil
     then SetOpt(CURLOPT_HEADERFUNCTION, nil)
     else SetOpt(CURLOPT_HEADERFUNCTION, @CurlStreamWrite);
+  Result := Self;
 end;
 
 function TEasyCurlImpl.GetResponseCode : longint;
@@ -591,10 +592,10 @@ begin
   Result := GetInfo(CURLINFO_RESPONSE_CODE);
 end;
 
-procedure TEasyCurlImpl.SetSList(
+function TEasyCurlImpl.SetSList(
         aOpt : TCurlSlistOption;
         var aOldValue : ICurlCustomSList;
-        aNewValue : ICurlCustomSList);
+        aNewValue : ICurlCustomSList) : ICurl;
 var
   rawVal : PCurlSList;
 begin
@@ -608,77 +609,77 @@ begin
     then aOldValue := nil
     else aOldValue := aNewValue;
 
-  SetOpt(aOpt, rawVal);
+  Result := SetOpt(aOpt, rawVal);
 end;
 
-procedure TEasyCurlImpl.SetCustomHeaders(v : ICurlCustomSList);
+function TEasyCurlImpl.SetCustomHeaders(v : ICurlCustomSList) : ICurl;
 begin
-  SetSList(CURLOPT_HTTPHEADER, fCustomHeaders, v);
+  Result := SetSList(CURLOPT_HTTPHEADER, fCustomHeaders, v);
 end;
 
-procedure TEasyCurlImpl.SetPostQuote(v : ICurlCustomSList);
+function TEasyCurlImpl.SetPostQuote(v : ICurlCustomSList) : ICurl;
 begin
-  SetSList(CURLOPT_POSTQUOTE, fPostQuote, v);
+  Result := SetSList(CURLOPT_POSTQUOTE, fPostQuote, v);
 end;
 
-procedure TEasyCurlImpl.SetTelnetOptions(v : ICurlCustomSList);
+function TEasyCurlImpl.SetTelnetOptions(v : ICurlCustomSList) : ICurl;
 begin
-  SetSList(CURLOPT_TELNETOPTIONS, fTelnetOptions, v);
+  Result := SetSList(CURLOPT_TELNETOPTIONS, fTelnetOptions, v);
 end;
 
-procedure TEasyCurlImpl.SetQuote(v : ICurlCustomSList);
+function TEasyCurlImpl.SetQuote(v : ICurlCustomSList) : ICurl;
 begin
-  SetSList(CURLOPT_PREQUOTE, fQuote, v);
+  Result := SetSList(CURLOPT_PREQUOTE, fQuote, v);
 end;
 
-procedure TEasyCurlImpl.SetPreQuote(v : ICurlCustomSList);
+function TEasyCurlImpl.SetPreQuote(v : ICurlCustomSList) : ICurl;
 begin
-  SetSList(CURLOPT_PREQUOTE, fPreQuote, v);
+  Result := SetSList(CURLOPT_PREQUOTE, fPreQuote, v);
 end;
 
-procedure TEasyCurlImpl.SetHttp200Aliases(v : ICurlCustomSList);
+function TEasyCurlImpl.SetHttp200Aliases(v : ICurlCustomSList) : ICurl;
 begin
-  SetSList(CURLOPT_HTTP200ALIASES, fHttp200Aliases, v);
+  Result := SetSList(CURLOPT_HTTP200ALIASES, fHttp200Aliases, v);
 end;
 
-procedure TEasyCurlImpl.SetMailRcpt(v : ICurlCustomSList);
+function TEasyCurlImpl.SetMailRcpt(v : ICurlCustomSList) : ICurl;
 begin
-  SetSList(CURLOPT_MAIL_RCPT, fMailRcpt, v);
+  Result := SetSList(CURLOPT_MAIL_RCPT, fMailRcpt, v);
 end;
 
-procedure TEasyCurlImpl.SetResolveList(v : ICurlCustomSList);
+function TEasyCurlImpl.SetResolveList(v : ICurlCustomSList) : ICurl;
 begin
-  SetSList(CURLOPT_RESOLVE, fResolveList, v);
+  Result := SetSList(CURLOPT_RESOLVE, fResolveList, v);
 end;
 
-procedure TEasyCurlImpl.SetProxyHeader(v : ICurlCustomSList);
+function TEasyCurlImpl.SetProxyHeader(v : ICurlCustomSList) : ICurl;
 begin
-  SetSList(CURLOPT_PROXYHEADER, fProxyHeader, v);
+  Result := SetSList(CURLOPT_PROXYHEADER, fProxyHeader, v);
 end;
 
-procedure TEasyCurlImpl.SetConnectTo(v : ICurlCustomSList);
+function TEasyCurlImpl.SetConnectTo(v : ICurlCustomSList) : ICurl;
 begin
-  SetSList(CURLOPT_CONNECT_TO, fConnectTo, v);
+  Result := SetSList(CURLOPT_CONNECT_TO, fConnectTo, v);
 end;
 
-procedure TEasyCurlImpl.SetFollowLocation(aData : boolean);
+function TEasyCurlImpl.SetFollowLocation(aData : boolean) : ICurl;
 begin
-  SetOpt(CURLOPT_FOLLOWLOCATION, aData);
+  Result := SetOpt(CURLOPT_FOLLOWLOCATION, aData);
 end;
 
 
-procedure TEasyCurlImpl.SetSslVerifyHost(aData : TCurlVerifyHost);
+function TEasyCurlImpl.SetSslVerifyHost(aData : TCurlVerifyHost) : ICurl;
 begin
-  SetOpt(CURLOPT_SSL_VERIFYHOST, ord(aData));
+  Result := SetOpt(CURLOPT_SSL_VERIFYHOST, ord(aData));
 end;
 
 
-procedure TEasyCurlImpl.SetSslVerifyPeer(aData : boolean);
+function TEasyCurlImpl.SetSslVerifyPeer(aData : boolean) : ICurl;
 begin
-  SetOpt(CURLOPT_SSL_VERIFYPEER, aData);
+  Result := SetOpt(CURLOPT_SSL_VERIFYPEER, aData);
 end;
 
-procedure TEasyCurlImpl.SetForm(aForm : ICurlCustomForm);
+function TEasyCurlImpl.SetForm(aForm : ICurlCustomForm) : ICurl;
 begin
   // Form and sender stream exclude each other
   fSendStream.Destroy;
@@ -690,9 +691,10 @@ begin
     SetOpt(CURLOPT_READFUNCTION, nil);
   end;
   fForm := aForm;
+  Result := Self;
 end;
 
-function TEasyCurlImpl.GetForm : ICurlCustomForm;
+function TEasyCurlImpl.Form : ICurlCustomForm;
 begin
   Result := fForm;
 end;
@@ -715,7 +717,7 @@ begin
   fHeaderStream.Destroy;
 end;
 
-procedure TEasyCurlImpl.SetProxyFromIe;
+function TEasyCurlImpl.SetProxyFromIe : ICurl;
 var
   reg : TRegistry;
   us : UnicodeString;
@@ -753,6 +755,7 @@ begin
     reg.Free;
     strs.Free;
   end;
+  Result := Self;
 end;
 
 
