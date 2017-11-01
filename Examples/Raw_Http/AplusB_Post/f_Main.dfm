@@ -5,7 +5,7 @@ object fmMain: TfmMain
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'POST form demo'
-  ClientHeight = 169
+  ClientHeight = 165
   ClientWidth = 306
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -79,7 +79,7 @@ object fmMain: TfmMain
     Left = 12
     Top = 66
     Width = 282
-    Height = 95
+    Height = 91
     TabOrder = 3
   end
 end

@@ -51,6 +51,8 @@ var
   headers, headersEnd : PCurlSList;
   code : TCurlCode;
   stream : TRawByteStream;
+  effurl : PAnsiChar;
+  respcode : LongInt;
 begin
   post := nil;
   last := nil;
@@ -72,7 +74,7 @@ begin
     curl_formadd_initial(post, last,
             CURLFORM_COPYNAME, sA,
             CURLFORM_COPYCONTENTS, PAnsiChar(UTF8Encode(edA.Text)),
-            CURLFORM_CONTENTHEADER, PAnsiChar(headers),
+            CURLFORM_CONTENTHEADER, headers,
             CURLFORM_END);
 
     // formadd is more type-safe
@@ -85,9 +87,14 @@ begin
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, stream);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, @StreamWrite);
     code := curl_easy_perform(curl);
-    if code = CURLE_OK
-      then memoResponse.Text := string(stream.Data)
-      else memoResponse.Text := string(curl_easy_strerror(code));
+    if code = CURLE_OK then begin
+      curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, effurl);
+      curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, respcode);
+      memoResponse.Text := string(stream.Data) + #13#10#13#10'URL: ' + effurl
+          + #10#10'Response code: ' + IntToStr(respcode);
+    end else begin
+      memoResponse.Text := string(curl_easy_strerror(code));
+    end;
 
   finally
     stream.Free;
