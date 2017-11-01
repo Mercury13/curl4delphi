@@ -72,3 +72,7 @@ Please copy `php_curl` directory to a PHP-capable web server.
 ### EasyHttp\AplusB_Get
 
 Using ICurlGetBuilder to build a GET URL. Please copy `php_curl` directory to a PHP-capable web server.
+
+License
+=======
+MIT for library, public domain for examples.
