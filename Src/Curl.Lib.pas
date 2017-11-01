@@ -2647,7 +2647,8 @@ function curl_easy_getinfo(
 function curl_easy_getinfo(
       curl : HCurl;
       info : TCurlDoubleInfoDeprecated;
-      var p : double) : TCurlCode;  overload;  inline;  deprecated 'Use version for TCurlOffInfo';
+      var p : double) : TCurlCode;  overload;  inline;
+      deprecated 'Use TCurlOffInfo version';
 
 function curl_easy_getinfo(
       curl : HCurl;

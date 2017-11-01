@@ -138,10 +138,11 @@ type
     function GetInfo(aInfo : TCurlStringInfo) : PAnsiChar;  overload;
     function GetInfo(aInfo : TCurlDoubleInfo) : double;  overload;
     function GetInfo(aInfo : TCurlSListInfo) : PCurlSList;  overload;
-    function GetInfo(aInfo : TCurlDoubleInfoDeprecated) : double;  overload;  deprecated 'Use TCurlOffInfo version';
     function GetInfo(aInfo : TCurlOffInfo) : TCurlOff;  overload;
     function GetInfo(aInfo : TCurlPtrInfo) : pointer;  overload;
     function GetInfo(aInfo : TCurlSocketInfo) : TCurlSocket;  overload;
+    function GetInfo(aInfo : TCurlDoubleInfoDeprecated) : double;  overload;
+          deprecated 'Use TCurlOffInfo version';
 
     ///  Returns response code. Equivalent to GetInfo(CURLINFO_RESPONSE_CODE).
     function GetResponseCode : longint;
