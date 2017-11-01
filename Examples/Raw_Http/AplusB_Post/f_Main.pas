@@ -69,6 +69,9 @@ begin
     curl_easy_setopt(curl, CURLOPT_POST, true);
     // Some free hostings may require a browser-like user-agent.
     curl_easy_setopt(curl, CURLOPT_USERAGENT, FirefoxUserAgent);
+    // Set proxy from IE
+    curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
+    curl_easy_setopt(curl, CURLOPT_PROXY, ProxyFromIe);
 
     // Show issues of vararg initial
     curl_formadd_initial(post, last,

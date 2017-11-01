@@ -2733,7 +2733,56 @@ function curl_easy_send(
 //#define curl_share_setopt(share,opt,param) curl_share_setopt(share,opt,param)
 //#define curl_multi_setopt(handle,opt,param) curl_multi_setopt(handle,opt,param)
 
+function ProxyFromIe : string;
+
 implementation
+
+uses
+  // System
+  System.Classes, System.SysUtils,
+  // Win
+  System.Win.Registry, Winapi.Windows;
+
+
+function ProxyFromIe : string;
+var
+  reg : TRegistry;
+  us : UnicodeString;
+  strs : TStringList;
+  i, pEqual : integer;
+  s : string;
+begin
+  strs := nil;
+  reg  := TRegistry.Create;
+  try
+    reg.RootKey := HKEY_CURRENT_USER;
+    reg.OpenKeyReadOnly('\Software\Microsoft\Windows\CurrentVersion\Internet Settings');
+    if reg.ReadInteger('ProxyEnable') <> 0 then begin
+        us := reg.ReadString('ProxyServer');
+        strs := TStringList.Create;
+        strs.Delimiter := ';';
+        strs.StrictDelimiter := true;
+        strs.DelimitedText := us;
+
+        for i := 0 to strs.Count - 1 do begin
+            s := strs[i];
+            pEqual := Pos('=', s);
+            if pEqual > 0 then begin
+                if Trim(Copy(s, 0, pEqual)) <> 'http'
+                  then continue;
+            end;
+
+            Result := Copy(s, pEqual + 1, Length(s));
+            break;
+        end;
+    end;
+    reg.CloseKey;
+  finally
+    reg.Free;
+    strs.Free;
+  end;
+end;
+
 
 function curl_formadd(
         var httppost, last_post : PCurlHttpPost;

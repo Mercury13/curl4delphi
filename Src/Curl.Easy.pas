@@ -287,9 +287,6 @@ function CurlGet : ICurl;
 
 implementation
 
-uses
-  System.Win.Registry, Winapi.Windows;
-
 ///// Errors and error localization ////////////////////////////////////////////
 
 class function CurlDefaultLocalize.ErrorMsg(
@@ -717,44 +714,9 @@ begin
 end;
 
 function TEasyCurlImpl.SetProxyFromIe : ICurl;
-var
-  reg : TRegistry;
-  us : UnicodeString;
-  strs : TStringList;
-  i, pEqual : integer;
-  s : string;
 begin
-  strs := nil;
-  reg  := TRegistry.Create;
-  try
-    reg.RootKey := HKEY_CURRENT_USER;
-    reg.OpenKeyReadOnly('\Software\Microsoft\Windows\CurrentVersion\Internet Settings');
-    if reg.ReadInteger('ProxyEnable') <> 0 then begin
-        us := reg.ReadString('ProxyServer');
-        strs := TStringList.Create;
-        strs.Delimiter := ';';
-        strs.StrictDelimiter := true;
-        strs.DelimitedText := us;
-
-        for i := 0 to strs.Count - 1 do begin
-            s := strs[i];
-            pEqual := Pos('=', s);
-            if pEqual > 0 then begin
-                if Trim(Copy(s, 0, pEqual)) <> 'http'
-                  then continue;
-            end;
-
-            SetOpt(CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
-            SetOpt(CURLOPT_PROXY, Copy(s, pEqual + 1, Length(s)));
-            break;
-        end;
-    end;
-    reg.CloseKey;
-  finally
-    reg.Free;
-    strs.Free;
-  end;
-  Result := Self;
+  SetOpt(CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
+  Result := SetOpt(CURLOPT_PROXY, ProxyFromIe);
 end;
 
 
