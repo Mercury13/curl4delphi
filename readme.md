@@ -20,10 +20,10 @@ var
 
 curl := CurlGet;
 curl.SetUrl('http://example.com')
-	.SetProxyFromIe
-	.SetUserAgent(ChromeUserAgent)
-	.SwitchRecvToString
-	.Perform;
+    .SetProxyFromIe
+    .SetUserAgent(ChromeUserAgent)
+    .SwitchRecvToString
+    .Perform;
 Writeln(curl.ResponseBody);
 ```
 
