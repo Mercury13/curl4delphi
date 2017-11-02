@@ -23,21 +23,20 @@ var
   rbs : TRawByteStream;
 begin
   try
-    curl := CurlGet;
-    curl.setUrl(Url);
-    curl.SetFollowLocation(true);
-
     fs := TFileStream.Create('index.html', fmCreate);
-    curl.SetRecvStream(fs, [csfAutoDestroy]);
 
-    // Perform the request
-    curl.Perform;
+    curl := CurlGet;
+    curl.setUrl(Url)
+        .SetFollowLocation(true)
+        .SetRecvStream(fs, [csfAutoDestroy])
+        // Perform the request
+        .Perform;
 
     // Perform once again, to RawByteStream.
     // And write the first 1000
     rbs := TRawByteStream.Create;
-    curl.SetRecvStream(rbs, [csfAutoDestroy]);
-    curl.Perform;
+    curl.SetRecvStream(rbs, [csfAutoDestroy])
+        .Perform;
     Writeln(Copy(rbs.Data, 1, 1000));
 
     // Check for some info

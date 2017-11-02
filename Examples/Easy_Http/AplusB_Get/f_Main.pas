@@ -41,12 +41,12 @@ begin
   curl := CurlGet;
   stream := TRawByteStream.Create;
 
-  curl.SetUserAgent(FirefoxUserAgent);
-  curl.SetUrl(CurlGetBuilder(edUrl.Text)
+  curl.SetUserAgent(FirefoxUserAgent)
+      .SetUrl(CurlGetBuilder(edUrl.Text)
                 .Param('a', edA.Text)
-                .Param('b', edB.Text));
-  curl.SetRecvStream(stream, [csfAutoDestroy]);
-  curl.Perform;
+                .Param('b', edB.Text))
+      .SetRecvStream(stream, [csfAutoDestroy])
+      .Perform;
   memoResponse.Text := string(stream.Data)
           + #13#10#13#10'URL: ' +
           string(curl.GetInfo(CURLINFO_EFFECTIVE_URL));

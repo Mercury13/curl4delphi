@@ -102,11 +102,10 @@ begin
   if not GetFile(fname, ftype) then Exit;
 
   curl1 := CurlGet;
-  curl1.SetRecvStream(stream, [csfAutoRewind]);
-  curl1.SetUrl(edUrl.Text);
-  curl1.SetOpt(CURLOPT_POST, true);
-
-  curl1.Form := CurlGetForm.AddFile('photo', fname, ftype);
+  curl1.SetRecvStream(stream, [csfAutoRewind])
+       .SetUrl(edUrl.Text)
+       .SetOpt(CURLOPT_POST, true)
+       .SetForm(CurlGetForm.AddFile('photo', fname, ftype));
 
   curl2 := curl1.Clone;
   curl2.Perform;
@@ -123,13 +122,11 @@ begin
   if not GetFile(fname, ftype) then Exit;
 
   curl := CurlGet;
-  curl.SetRecvStream(stream, [csfAutoRewind]);
-  curl.SetUrl(edUrl.Text);
-  curl.SetOpt(CURLOPT_POST, true);
-
-  curl.Form := CurlGetForm.AddFile('photo', fname, ftype);
-
-  curl.Perform;
+  curl.SetRecvStream(stream, [csfAutoRewind])
+      .SetUrl(edUrl.Text)
+      .SetOpt(CURLOPT_POST, true)
+      .SetForm(CurlGetForm.AddFile('photo', fname, ftype))
+      .Perform;
   memoResponse.Text := UTF8ToString(stream.Data);
 end;
 
@@ -143,17 +140,16 @@ begin
   if not GetFile(fname, ftype) then Exit;
 
   curl := CurlGet;
-  curl.SetRecvStream(stream, [csfAutoRewind]);
-  curl.SetUrl(edUrl.Text);
-  curl.SetOpt(CURLOPT_POST, true);
-
-  curl.Form := CurlGetForm.Add(
+  curl.SetRecvStream(stream, [csfAutoRewind])
+      .SetUrl(edUrl.Text)
+      .SetOpt(CURLOPT_POST, true)
+      .SetForm(CurlGetForm.Add(
                   CurlGetField
                       .Name('photo')
                       .UploadFile(fname)
-                      .ContentType(ftype));
+                      .ContentType(ftype)))
+      .Perform;
 
-  curl.Perform;
   memoResponse.Text := UTF8ToString(stream.Data);
 end;
 
@@ -163,15 +159,13 @@ var
 begin
   // cURL
   curl := CurlGet;
-  curl.SetRecvStream(stream, [csfAutoRewind]);
-  curl.SetUrl(edUrl.Text);
-  curl.SetOpt(CURLOPT_POST, true);
-
-  curl.Form := CurlGetForm.AddFileBuffer(
+  curl.SetRecvStream(stream, [csfAutoRewind])
+      .SetUrl(edUrl.Text)
+      .SetOpt(CURLOPT_POST, true)
+      .SetForm(CurlGetForm.AddFileBuffer(
                     'photo', 'synth_buffer2.png', 'image/png',
-                    pngStream.Size, pngStream.Memory^);
-
-  curl.Perform;
+                    pngStream.Size, pngStream.Memory^))
+      .Perform;
   memoResponse.Text := UTF8ToString(stream.Data);
 end;
 
@@ -184,14 +178,12 @@ begin
   Move(pngStream.Memory^, PAnsiChar(str)^, pngStream.Size);
   // cURL
   curl := CurlGet;
-  curl.SetRecvStream(stream, [csfAutoRewind]);
-  curl.SetUrl(edUrl.Text);
-  curl.SetOpt(CURLOPT_POST, true);
-
-  curl.Form := CurlGetForm.AddFileBuffer(
-                    'photo', 'synth_buffer3.png', 'image/png', str);
-
-  curl.Perform;
+  curl.SetRecvStream(stream, [csfAutoRewind])
+      .SetUrl(edUrl.Text)
+      .SetOpt(CURLOPT_POST, true)
+      .SetForm(CurlGetForm.AddFileBuffer(
+                    'photo', 'synth_buffer3.png', 'image/png', str))
+      .Perform;
   memoResponse.Text := UTF8ToString(stream.Data);
 end;
 
@@ -201,18 +193,16 @@ var
 begin
   // cURL
   curl := CurlGet;
-  curl.SetRecvStream(stream, [csfAutoRewind]);
-  curl.SetUrl(edUrl.Text);
-  curl.SetOpt(CURLOPT_POST, true);
-
-  curl.Form := CurlGetForm.Add(
+  curl.SetRecvStream(stream, [csfAutoRewind])
+      .SetUrl(edUrl.Text)
+      .SetOpt(CURLOPT_POST, true)
+      .SetForm(CurlGetForm.Add(
                   CurlGetField
                       .Name('photo')
                       .FileBuffer(
                           'synth_buffer.png', pngStream.Size, pngStream.Memory^)
-                      .ContentType('image/png'));
-
-  curl.Perform;
+                      .ContentType('image/png')))
+      .Perform;
   memoResponse.Text := UTF8ToString(stream.Data);
 end;
 
@@ -225,18 +215,16 @@ begin
 
   // cURL
   curl := CurlGet;
-  curl.SetRecvStream(stream, [csfAutoRewind]);
-  curl.SetUrl(edUrl.Text);
-  curl.SetOpt(CURLOPT_POST, true);
-
-  curl.Form := CurlGetForm.Add(
+  curl.SetRecvStream(stream, [csfAutoRewind])
+      .SetUrl(edUrl.Text)
+      .SetOpt(CURLOPT_POST, true)
+      .SetForm( CurlGetForm.Add(
                   CurlGetField
                       .Name('photo')
                       .FileStream(pngStream, [csfAutoRewind])
                       .ContentType('image/png')
-                      .FileName('synth_stream.png'));
-
-  curl.Perform;
+                      .FileName('synth_stream.png')))
+      .Perform;
   memoResponse.Text := UTF8ToString(stream.Data);
 end;
 

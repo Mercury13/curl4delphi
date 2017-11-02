@@ -15,16 +15,16 @@ var
 begin
   try
     curl := CurlGet;
-    curl.SetUrl('https://ukr.net');
-    curl.SetFollowLocation(true);
-    curl.SetCaFile('cacert.pem');
-    // Unicode is also supported!
-    //curl.SetCaFile('α×β.pem');
-
-    // Perform the request, res will get the return code
-    curl.Perform;
+    curl.SetUrl('https://ukr.net')
+        .SetFollowLocation(true)
+        .SetCaFile('cacert.pem')
+        // Unicode is also supported!
+        //.SetCaFile('α×β.pem')
+        // Perform the request, res will get the return code
+        .Perform;
 
     // Check for errors
+    Writeln;
     Writeln(Format('HTTP response code: %d', [ curl.GetResponseCode ] ));
   except
     on e : Exception do
