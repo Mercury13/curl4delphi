@@ -36,18 +36,16 @@ uses
 procedure TfmMain.btAddClick(Sender: TObject);
 var
   curl : ICurl;
-  stream : TRawByteStream;
 begin
   curl := CurlGet;
-  stream := TRawByteStream.Create;
 
   curl.SetUserAgent(FirefoxUserAgent)
       .SetUrl(CurlGetBuilder(edUrl.Text)
                 .Param('a', edA.Text)
                 .Param('b', edB.Text))
-      .SetRecvStream(stream, [csfAutoDestroy])
+      .SwitchRecvToString
       .Perform;
-  memoResponse.Text := string(stream.Data)
+  memoResponse.Text := string(curl.ResponseBody)
           + #13#10#13#10'URL: ' +
           string(curl.GetInfo(CURLINFO_EFFECTIVE_URL));
 end;

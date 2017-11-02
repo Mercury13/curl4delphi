@@ -125,8 +125,8 @@ end;
 
 procedure TMyThread.SelectFileIfOk;
 begin
-  if curl.GetResponseCode <> HTTP_OK
-    then raise Exception.CreateFmt('HTTP error #%d.', [curl.GetResponseCode]);
+  if curl.ResponseCode <> HTTP_OK
+    then raise Exception.CreateFmt('HTTP error #%d.', [curl.ResponseCode]);
   Synchronize(SelectFileSync);
 end;
 
@@ -227,9 +227,9 @@ procedure TMyThread.Execute;
 begin
   try
     curl.Perform;
-    if curl.GetResponseCode = HTTP_OK
+    if curl.ResponseCode = HTTP_OK
       then fmMain.AsyncStop(true)
-      else fmMain.SetError(Format('HTTP error %d.', [curl.GetResponseCode]));
+      else fmMain.SetError(Format('HTTP error %d.', [curl.ResponseCode]));
   except
     on e : ECurlError do
       if e.Code = CURLE_ABORTED_BY_CALLBACK

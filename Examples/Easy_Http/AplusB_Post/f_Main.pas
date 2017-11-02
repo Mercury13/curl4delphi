@@ -38,7 +38,6 @@ procedure TfmMain.btAddClick(Sender: TObject);
 var
   curl : ICurl;
   form : ICurlForm;
-  stream : TRawByteStream;
 begin
   // Form
   form := CurlGetForm;
@@ -52,18 +51,15 @@ begin
       // Simple version (just add a field)
       .Add('b', edB.Text);
 
-  // Stream
-  stream := TRawByteStream.Create;
-
   curl := CurlGet;
   curl.SetUrl(edUrl.Text)
       .SetOpt(CURLOPT_POST, true)
       // I tested it on my free hosting — it has a bot protection.
       .SetUserAgent(FirefoxUserAgent)
       .SetForm(form)
-      .SetRecvStream(stream, [csfAutoDestroy])
+      .SwitchRecvToString
       .Perform;
-  memoResponse.Text := string(stream.Data);
+  memoResponse.Text := string(curl.ResponseBody);
 end;
 
 end.

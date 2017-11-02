@@ -32,7 +32,6 @@ type
     procedure btSynthMemory3Click(Sender: TObject);
   private
     { Private declarations }
-    stream : TRawByteStream;
     pngStream : TMemoryStream;
     function GetFile(
           out rFname : string; out rFtype : RawByteString) : boolean;
@@ -55,7 +54,6 @@ procedure TfmMain.FormCreate(Sender: TObject);
 var
   png : TPngImage;
 begin
-  stream := TRawByteStream.Create;
   // Synthetic image — stream
   png := TPngImage.CreateBlank(COLOR_RGB, 8, 123, 456);
   try
@@ -69,7 +67,6 @@ end;
 procedure TfmMain.FormDestroy(Sender: TObject);
 begin
   pngStream.Free;
-  stream.Free;
 end;
 
 function TfmMain.GetFile(
@@ -102,14 +99,14 @@ begin
   if not GetFile(fname, ftype) then Exit;
 
   curl1 := CurlGet;
-  curl1.SetRecvStream(stream, [csfAutoRewind])
+  curl1.SwitchRecvToString
        .SetUrl(edUrl.Text)
        .SetOpt(CURLOPT_POST, true)
        .SetForm(CurlGetForm.AddFile('photo', fname, ftype));
 
   curl2 := curl1.Clone;
   curl2.Perform;
-  memoResponse.Text := UTF8ToString(stream.Data);
+  memoResponse.Text := UTF8ToString(curl2.ResponseBody);
 end;
 
 procedure TfmMain.btEasyClick(Sender: TObject);
@@ -122,12 +119,12 @@ begin
   if not GetFile(fname, ftype) then Exit;
 
   curl := CurlGet;
-  curl.SetRecvStream(stream, [csfAutoRewind])
+  curl.SwitchRecvToString
       .SetUrl(edUrl.Text)
       .SetOpt(CURLOPT_POST, true)
       .SetForm(CurlGetForm.AddFile('photo', fname, ftype))
       .Perform;
-  memoResponse.Text := UTF8ToString(stream.Data);
+  memoResponse.Text := UTF8ToString(curl.ResponseBody);
 end;
 
 procedure TfmMain.btHardClick(Sender: TObject);
@@ -140,7 +137,7 @@ begin
   if not GetFile(fname, ftype) then Exit;
 
   curl := CurlGet;
-  curl.SetRecvStream(stream, [csfAutoRewind])
+  curl.SwitchRecvToString
       .SetUrl(edUrl.Text)
       .SetOpt(CURLOPT_POST, true)
       .SetForm(CurlGetForm.Add(
@@ -150,7 +147,7 @@ begin
                       .ContentType(ftype)))
       .Perform;
 
-  memoResponse.Text := UTF8ToString(stream.Data);
+  memoResponse.Text := UTF8ToString(curl.ResponseBody);
 end;
 
 procedure TfmMain.btSynthMemory2Click(Sender: TObject);
@@ -159,14 +156,14 @@ var
 begin
   // cURL
   curl := CurlGet;
-  curl.SetRecvStream(stream, [csfAutoRewind])
+  curl.SwitchRecvToString
       .SetUrl(edUrl.Text)
       .SetOpt(CURLOPT_POST, true)
       .SetForm(CurlGetForm.AddFileBuffer(
                     'photo', 'synth_buffer2.png', 'image/png',
                     pngStream.Size, pngStream.Memory^))
       .Perform;
-  memoResponse.Text := UTF8ToString(stream.Data);
+  memoResponse.Text := UTF8ToString(curl.ResponseBody);
 end;
 
 procedure TfmMain.btSynthMemory3Click(Sender: TObject);
@@ -178,13 +175,13 @@ begin
   Move(pngStream.Memory^, PAnsiChar(str)^, pngStream.Size);
   // cURL
   curl := CurlGet;
-  curl.SetRecvStream(stream, [csfAutoRewind])
+  curl.SwitchRecvToString
       .SetUrl(edUrl.Text)
       .SetOpt(CURLOPT_POST, true)
       .SetForm(CurlGetForm.AddFileBuffer(
                     'photo', 'synth_buffer3.png', 'image/png', str))
       .Perform;
-  memoResponse.Text := UTF8ToString(stream.Data);
+  memoResponse.Text := UTF8ToString(curl.ResponseBody);
 end;
 
 procedure TfmMain.btSynthMemoryClick(Sender: TObject);
@@ -193,7 +190,7 @@ var
 begin
   // cURL
   curl := CurlGet;
-  curl.SetRecvStream(stream, [csfAutoRewind])
+  curl.SwitchRecvToString
       .SetUrl(edUrl.Text)
       .SetOpt(CURLOPT_POST, true)
       .SetForm(CurlGetForm.Add(
@@ -203,7 +200,7 @@ begin
                           'synth_buffer.png', pngStream.Size, pngStream.Memory^)
                       .ContentType('image/png')))
       .Perform;
-  memoResponse.Text := UTF8ToString(stream.Data);
+  memoResponse.Text := UTF8ToString(curl.ResponseBody);
 end;
 
 procedure TfmMain.btSynthStreamClick(Sender: TObject);
@@ -215,7 +212,7 @@ begin
 
   // cURL
   curl := CurlGet;
-  curl.SetRecvStream(stream, [csfAutoRewind])
+  curl.SwitchRecvToString
       .SetUrl(edUrl.Text)
       .SetOpt(CURLOPT_POST, true)
       .SetForm( CurlGetForm.Add(
@@ -225,7 +222,7 @@ begin
                       .ContentType('image/png')
                       .FileName('synth_stream.png')))
       .Perform;
-  memoResponse.Text := UTF8ToString(stream.Data);
+  memoResponse.Text := UTF8ToString(curl.ResponseBody);
 end;
 
 end.
