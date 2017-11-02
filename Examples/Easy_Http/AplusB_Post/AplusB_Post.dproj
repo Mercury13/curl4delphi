@@ -90,7 +90,6 @@
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
         <DCCReference Include="..\..\..\Src\Curl.Lib.pas"/>
-        <DCCReference Include="..\..\..\Src\Curl.RawByteStream.pas"/>
         <DCCReference Include="..\..\..\Src\Curl.Easy.pas"/>
         <DCCReference Include="..\..\..\Src\Curl.Form.pas"/>
         <DCCReference Include="f_Main.pas">

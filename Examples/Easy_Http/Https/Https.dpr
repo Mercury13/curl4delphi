@@ -25,7 +25,7 @@ begin
 
     // Check for errors
     Writeln;
-    Writeln(Format('HTTP response code: %d', [ curl.GetResponseCode ] ));
+    Writeln(Format('HTTP response code: %d', [ curl.ResponseCode ] ));
   except
     on e : Exception do
       writeln('cURL failed: ', e.Message);

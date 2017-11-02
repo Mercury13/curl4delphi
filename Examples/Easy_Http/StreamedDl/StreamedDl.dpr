@@ -9,7 +9,6 @@ uses
   System.SysUtils,
   Curl.Easy in '..\..\..\Src\Curl.Easy.pas',
   Curl.Lib in '..\..\..\Src\Curl.Lib.pas',
-  Curl.RawByteStream in '..\..\..\Src\Curl.RawByteStream.pas',
   Curl.Interfaces in '..\..\..\Src\Curl.Interfaces.pas';
 
 const
@@ -40,7 +39,7 @@ begin
     Writeln(Copy(rbs.Data, 1, 1000));
 
     // Check for some info
-    code := curl.GetResponseCode;
+    code := curl.ResponseCode;
     Writeln(Format('HTTP response code: %d', [ code ] ));
   except
     on e : Exception do

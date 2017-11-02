@@ -94,7 +94,6 @@
             <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="..\..\..\Src\Curl.Lib.pas"/>
-        <DCCReference Include="..\..\..\Src\Curl.RawByteStream.pas"/>
         <DCCReference Include="..\..\..\Src\Curl.Slist.pas"/>
         <DCCReference Include="..\..\..\Src\Curl.Interfaces.pas"/>
         <BuildConfiguration Include="Release">

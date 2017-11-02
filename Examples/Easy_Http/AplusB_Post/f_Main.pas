@@ -29,7 +29,7 @@ var
 implementation
 
 uses
-  Curl.Interfaces, Curl.Easy, Curl.Form, Curl.Lib, Curl.RawByteStream,
+  Curl.Interfaces, Curl.Easy, Curl.Form, Curl.Lib,
   Curl.Slist;
 
 {$R *.dfm}

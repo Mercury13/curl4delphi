@@ -66,6 +66,9 @@ type
     ///  If aData = nil: removes all custom receivers.
     function SetRecvStream(aData : TStream; aFlags : TCurlStreamFlags) : ICurl;
 
+    ///  Switches receive stream to string
+    function SwitchRecvToString : ICurl;
+
     ///  Sets a sender stream. Equivalent to twin SetOpt,
     ///  READFUNCTION and READDATA.
     ///  Does not destroy the stream, you should dispose of it manually!
@@ -145,7 +148,10 @@ type
           deprecated 'Use TCurlOffInfo version';
 
     ///  Returns response code. Equivalent to GetInfo(CURLINFO_RESPONSE_CODE).
-    function GetResponseCode : longint;
+    function ResponseCode : longint;
+
+    ///  Returns response body (if switched to string)
+    function ResponseBody : RawByteString;
 
     ///  Makes an exact copy, e.g. for multithreading.
     ///  @warning  Receiver, sender and header streams will be shared,
@@ -217,6 +223,7 @@ type
     function SetSslVerifyPeer(aData : boolean) : ICurl;
 
     function SetRecvStream(aData : TStream; aFlags : TCurlStreamFlags) : ICurl;
+    function SwitchRecvToString : ICurl;
     function SetSendStream(aData : TStream; aFlags : TCurlStreamFlags) : ICurl;
     function SetHeaderStream(aData : TStream; aFlags : TCurlStreamFlags) : ICurl;
 
@@ -249,7 +256,8 @@ type
     function GetInfo(aInfo : TCurlPtrInfo) : pointer;  overload;
     function GetInfo(aInfo : TCurlSocketInfo) : TCurlSocket;  overload;
 
-    function GetResponseCode : longint;
+    function ResponseCode : longint;
+    function ResponseBody : RawByteString;
 
     ///  This is implementation of ICurl.Clone. If you dislike
     ///  reference-counting, use TEasyCurlImpl.Create(someCurl).
@@ -560,6 +568,10 @@ begin
   Result := Self;
 end;
 
+function TEasyCurlImpl.SwitchRecvToString : ICurl;
+begin
+  Result := SetRecvStream(TRawByteStream.Create, [csfAutoRewind, csfAutoDestroy]);
+end;
 
 function TEasyCurlImpl.SetSendStream(aData : TStream; aFlags : TCurlStreamFlags) : ICurl;
 begin
@@ -583,10 +595,19 @@ begin
   Result := Self;
 end;
 
-function TEasyCurlImpl.GetResponseCode : longint;
+function TEasyCurlImpl.ResponseCode : longint;
 begin
   Result := GetInfo(CURLINFO_RESPONSE_CODE);
 end;
+
+
+function TEasyCurlImpl.ResponseBody : RawByteString;
+begin
+  if (fRecvStream.Stream = nil ) or not (fRecvStream.Stream is TRawByteStream)
+    then raise Exception.Create('Cannot get response body, use SwitchRecvToString beforehand');
+  Result := (fRecvStream.Stream as TRawByteStream).Data;
+end;
+
 
 function TEasyCurlImpl.SetSList(
         aOpt : TCurlSlistOption;

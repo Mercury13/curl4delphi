@@ -29,7 +29,7 @@ begin
         .Perform;
 
     // Check for some info
-    code := curl.GetResponseCode;
+    code := curl.ResponseCode;
     ul := curl.GetInfo(CURLINFO_SIZE_UPLOAD_T);
     dl := curl.GetInfo(CURLINFO_SIZE_DOWNLOAD_T);
     effurl := curl.GetInfo(CURLINFO_EFFECTIVE_URL);

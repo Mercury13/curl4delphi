@@ -17,16 +17,17 @@ Quick start
 ```
 var
   curl : ICurl;
-  stream : TStream;
 
 curl := CurlGet;
-stream := TFileStream.Create('curl.out', fmCreate);
-curl.SetUrl('http://example.com');
-curl.SetRecvStream(stream, [csfAutoDestroy]);
-curl.Perform;
+curl.SetUrl('http://example.com')
+	.SetProxyFromIe
+	.SetUserAgent(ChromeUserAgent)
+	.SwitchRecvToString
+	.Perform;
+Writeln(curl.ResponseBody);
 ```
 
-[A bit more elaborate version of this example is `EasyHttp\StreamedDl`].
+[To use streams for receiving, check `EasyHttp\StreamedDl`].
 
 Examples
 ========

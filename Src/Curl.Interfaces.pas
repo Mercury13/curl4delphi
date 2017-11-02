@@ -95,7 +95,36 @@ function CurlStreamRead(
         Size, NItems : NativeUInt;
         OutStream : pointer) : NativeUInt;  cdecl;
 
+// Turn it on to ensure that the stream is properly destroyed.
+{.$DEFINE DESTRUCTION_TEST}
+
+type
+  TRawByteStream = class(TStream)
+  private
+    fData : RawByteString;
+    fPos : NativeInt;
+    procedure SetData(x : RawByteString);
+  protected
+    function GetSize: Int64; override;
+    procedure SetSize(const NewSize: Int64);  override;
+    function Remainder : NativeInt;
+  public
+    constructor Create;  overload;
+    constructor Create(aData : RawByteString);  overload;
+    {$IFDEF DESTRUCTION_TEST}
+    destructor Destroy;  override;
+    {$ENDIF}
+    function Read(var Buffer; Count: Longint): Longint; override;
+    function Write(const Buffer; Count: Longint): Longint; override;
+    function Seek(const Offset: Int64; Origin: TSeekOrigin): Int64; override;
+    property Data : RawByteString   read fData write SetData;
+    procedure Clear;
+  end;
+
 implementation
+
+uses
+  System.Math;
 
 procedure TCurlAutoStream.Init;
 begin
@@ -159,5 +188,99 @@ begin
   Result := TStream(OutStream).Read(Buffer, Size * NItems);
 end;
 
+
+///// RawByteString ////////////////////////////////////////////////////////////
+
+const
+  StringOrigin = 1;
+
+constructor TRawByteStream.Create;
+begin
+  inherited;
+  Clear;
+end;
+
+constructor TRawByteStream.Create(aData : RawByteString);
+begin
+  inherited Create;
+  Data := aData;
+end;
+
+{$IFDEF DESTRUCTION_TEST}
+destructor TRawByteStream.Destroy;
+begin
+  // Debug: test for destruction
+  inherited;
+end;
+{$ENDIF}
+
+procedure TRawByteStream.SetData(x : RawByteString);
+begin
+  fData := x;
+  fPos := 0;
+end;
+
+procedure TRawByteStream.Clear;
+begin
+  Data := '';
+end;
+
+procedure TRawByteStream.SetSize(const NewSize: Int64);
+begin
+  if (NewSize < 0) or (NewSize > High(NativeInt)) then
+    raise ERangeError.Create('[TRawByteStream.SetSize] Wrong size');
+  SetLength(fData, NewSize);
+  fPos := Max(fPos, Length(fData));
+end;
+
+function TRawByteStream.GetSize: Int64;
+begin
+  Result := Length(fData);
+end;
+
+
+function TRawByteStream.Remainder : NativeInt;
+begin
+  Result := Length(fData) - fPos;
+end;
+
+
+function TRawByteStream.Read(var Buffer; Count: Longint): Longint;
+begin
+  if Count < 0
+    then Exit(0);
+  Count := Min(Count, Remainder);
+  Move(fData[fPos + StringOrigin], Buffer, Count);
+  Inc(fPos, Count);
+  Result := Count;
+end;
+
+
+function TRawByteStream.Write(const Buffer; Count: Longint): Longint;
+var
+  NewSize : NativeInt;
+begin
+  if Count < 0
+    then Exit(0);
+  NewSize := fPos + Count;
+  if NewSize > Length(fData)
+    then SetLength(fData, NewSize);
+
+  Move(Buffer, fData[fPos + StringOrigin], Count);
+  Inc(fPos, Count);
+  Result := Count;
+end;
+
+
+function TRawByteStream.Seek(const Offset: Int64; Origin: TSeekOrigin): Int64;
+begin
+  case Origin of
+  soBeginning: fPos := Offset;
+  soCurrent:   Inc(fPos, Offset);
+  soEnd:       fPos := Length(fData) + Offset;
+  end;
+  fPos := EnsureRange(fPos, 0, Length(fData));
+  Result := fPos;
+end;
 
 end.

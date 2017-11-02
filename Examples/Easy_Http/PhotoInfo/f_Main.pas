@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Curl.RawByteStream;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Curl.Interfaces;
 
 type
   TfmMain = class(TForm)
@@ -46,7 +46,7 @@ var
 implementation
 
 uses
-  Curl.Interfaces, Curl.Easy, Curl.Form, Curl.Lib,
+  Curl.Easy, Curl.Form, Curl.Lib,
   Curl.Slist, Vcl.Imaging.PngImage;
 
 {$R *.dfm}
