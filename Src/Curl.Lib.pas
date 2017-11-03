@@ -24,6 +24,12 @@ const
   IeUserAgent = 'Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko';
   EdgeUserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.79 Safari/537.36 Edge/14.14393';
 
+{$IFDEF WIN64}
+  CurlDllName = 'libcurl-x64.dll';
+{$ELSE}
+  CurlDllName = 'libcurl.dll';
+{$ENDIF}
+
 type
   // Primitive cUrl types
   TUnixTime   = NativeUInt;
@@ -1681,8 +1687,8 @@ const
 
 // curl_strequal() and curl_strnequal() are subject for removal in a future
 //   libcurl, see lib/README.curlx for details
-function curl_strequal(s1, s2 : PAnsiChar) : integer;  cdecl;  external 'libcurl.dll';
-function curl_strnequal(s1, s2 : PAnsiChar; n : NativeUInt) : integer;  cdecl;  external 'libcurl.dll';
+function curl_strequal(s1, s2 : PAnsiChar) : integer;  cdecl;  external CurlDllName;
+function curl_strnequal(s1, s2 : PAnsiChar; n : NativeUInt) : integer;  cdecl;  external CurlDllName;
 
 // Mime/form handling support.
 type
@@ -1704,7 +1710,7 @@ type
 // Create a mime context and return its handle. The easy parameter is the
 // target handle.
 //
-function curl_mime_init(easy : HCurl) : HCurlMime;  cdecl;  external 'libcurl.dll';
+function curl_mime_init(easy : HCurl) : HCurlMime;  cdecl;  external CurlDllName;
 
 // NAME curl_mime_free()
 //
@@ -1713,7 +1719,7 @@ function curl_mime_init(easy : HCurl) : HCurlMime;  cdecl;  external 'libcurl.dl
 // release a mime handle and its substructures.
 //
 procedure curl_mime_free(mime : HCurlMime);
-      cdecl;  external 'libcurl.dll';
+      cdecl;  external CurlDllName;
 
 // NAME curl_mime_addpart()
 //
@@ -1723,7 +1729,7 @@ procedure curl_mime_free(mime : HCurlMime);
 // the created part.
 //
 function curl_mime_addpart(mime : HCurlMime) : HCurlMimePart;
-      cdecl;  external 'libcurl.dll';
+      cdecl;  external CurlDllName;
 
 // NAME curl_mime_name()
 //
@@ -1732,7 +1738,7 @@ function curl_mime_addpart(mime : HCurlMime) : HCurlMimePart;
 // Set mime/form part name.
 //
 function curl_mime_name(part : HCurlMimePart; name : PAnsiChar) : TCurlCode;
-      cdecl;  external 'libcurl.dll';
+      cdecl;  external CurlDllName;
 
 // NAME curl_mime_filename()
 //
@@ -1742,7 +1748,7 @@ function curl_mime_name(part : HCurlMimePart; name : PAnsiChar) : TCurlCode;
 //
 function curl_mime_filename(
       Part : HCurlMimePart; filename : PAnsiChar) : TCurlCode;
-      cdecl;  external 'libcurl.dll';
+      cdecl;  external CurlDllName;
 
 //
 // NAME curl_mime_type()
@@ -1752,7 +1758,7 @@ function curl_mime_filename(
 // Set mime part type.
 //
 function curl_mime_type(part : HCurlMime; mimetype : PAnsiChar) : TCurlCode;
-      cdecl;  external 'libcurl.dll';
+      cdecl;  external CurlDllName;
 
 // NAME curl_mime_encoder()
 //
@@ -1762,7 +1768,7 @@ function curl_mime_type(part : HCurlMime; mimetype : PAnsiChar) : TCurlCode;
 //
 function curl_mime_encoder(
       part : HCurlMimePart; encoding : PAnsiChar) : TCurlCode;
-      cdecl;  external 'libcurl.dll';
+      cdecl;  external CurlDllName;
 
 // NAME curl_mime_data()
 //
@@ -1772,7 +1778,7 @@ function curl_mime_encoder(
 //
 function curl_mime_data(
       part : HCurlMimePart; data : Pointer; datasize : NativeUint) : TCurlCode;
-      cdecl;  external 'libcurl.dll';
+      cdecl;  external CurlDllName;
 
 // NAME curl_mime_filedata()
 //
@@ -1782,7 +1788,7 @@ function curl_mime_data(
 //
 function curl_mime_filedata(
       part : HCurlMimePart; filename : PAnsiChar) : TCurlCode;
-      cdecl;  external 'libcurl.dll';
+      cdecl;  external CurlDllName;
 
 // NAME curl_mime_data_cb()
 //
@@ -1797,7 +1803,7 @@ function curl_mime_data_cb(
       seekfunc : EvCurlSeek;
       freefunc : EvCurlFree;
       arg : pointer) : TCurlCode;
-      cdecl;  external 'libcurl.dll';
+      cdecl;  external CurlDllName;
 
 // NAME curl_mime_subparts()
 //
@@ -1807,7 +1813,7 @@ function curl_mime_data_cb(
 //
 function curl_mime_subparts(
       part : HCurlMimePart; subparts : HCurlMime) : TCurlCode;
-      cdecl;  external 'libcurl.dll';
+      cdecl;  external CurlDllName;
 
 // NAME curl_mime_headers()
 //
@@ -1819,7 +1825,7 @@ function curl_mime_headers(
       part : HCurlMimePart;
       headers : PCurlSList;
       take_ownership : integer) : TCurlCode;
-      cdecl;  external 'libcurl.dll';
+      cdecl;  external CurlDllName;
 
 
 type
@@ -1902,7 +1908,7 @@ type
 //
 function curl_formadd_initial(
         var httppost, last_post : PCurlHttpPost) : TCurlFormCode;
-        varargs; cdecl; external 'libcurl.dll' name 'curl_formadd';
+        varargs; cdecl; external CurlDllName name 'curl_formadd';
 
 function curl_formadd(
         var httppost, last_post : PCurlHttpPost;
@@ -2034,7 +2040,7 @@ function curl_formget(
         form : PCurlHttpPost;
         arg : pointer;
         append : EvCurlFormGet) : integer;
-          cdecl;  external 'libcurl.dll';
+          cdecl;  external CurlDllName;
 
 // NAME curl_formfree()
 //
@@ -2042,7 +2048,7 @@ function curl_formget(
 //
 // Free a multipart formpost previously built with curl_formadd().
 procedure curl_formfree(form : PCurlHttpPost);
-          cdecl;  external 'libcurl.dll';
+          cdecl;  external CurlDllName;
 
 // NAME curl_getenv()
 //
@@ -2051,7 +2057,7 @@ procedure curl_formfree(form : PCurlHttpPost);
 // Returns a malloc()'ed string that MUST be curl_free()ed after usage is
 // complete. DEPRECATED - see lib/README.curlx
 function curl_getenv(variable : PAnsiChar) : PAnsiChar;
-          cdecl;  external 'libcurl.dll';
+          cdecl;  external CurlDllName;
 
 // NAME curl_version()
 //
@@ -2059,7 +2065,7 @@ function curl_getenv(variable : PAnsiChar) : PAnsiChar;
 //
 // Returns a static ascii string of the libcurl version.
 function curl_version : PAnsiChar;
-          cdecl;  external 'libcurl.dll';
+          cdecl;  external CurlDllName;
 
 // NAME curl_easy_escape()
 //
@@ -2072,13 +2078,13 @@ function curl_easy_escape(
         handle : HCurl;
         str : PAnsiChar;
         length : integer) : PAnsiChar;
-          cdecl;  external 'libcurl.dll';
+          cdecl;  external CurlDllName;
 
 // the previous version:
 function curl_escape(
         str : PAnsiChar;
         length : integer) : PAnsiChar;
-          cdecl;  external 'libcurl.dll';
+          cdecl;  external CurlDllName;
 
 
 // NAME curl_easy_unescape()
@@ -2096,13 +2102,13 @@ function curl_easy_unescape(
         str : PAnsiChar;
         length : integer;
         var outlength : integer) : PAnsiChar;
-          cdecl;  external 'libcurl.dll';
+          cdecl;  external CurlDllName;
 
 // the previous version
 function curl_unescape(
         str : PAnsiChar;
         length : integer) : PAnsiChar;
-          cdecl;  external 'libcurl.dll';
+          cdecl;  external CurlDllName;
 
 // NAME curl_free()
 //
@@ -2112,7 +2118,7 @@ function curl_unescape(
 // allocation. Added in libcurl 7.10
 //
 procedure curl_free(p : pointer);
-          cdecl;  external 'libcurl.dll';
+          cdecl;  external CurlDllName;
 
 // NAME curl_global_init()
 //
@@ -2124,7 +2130,7 @@ procedure curl_free(p : pointer);
 // This function is not thread-safe!
 //
 function curl_global_init(flags : longint) : TCurlCode;
-          cdecl;  external 'libcurl.dll';
+          cdecl;  external CurlDllName;
 
 // NAME curl_global_init_mem()
 //
@@ -2144,7 +2150,7 @@ function curl_global_init_mem(
         r : EvCurlRealloc;
         s : EvCurlStrDup;
         c : EvCurlCalloc) : TCurlCode;
-          cdecl;  external 'libcurl.dll';
+          cdecl;  external CurlDllName;
 
 // NAME curl_global_cleanup()
 //
@@ -2154,7 +2160,7 @@ function curl_global_init_mem(
 // that uses libcurl
 //
 procedure curl_global_cleanup;
-          cdecl;  external 'libcurl.dll';
+          cdecl;  external CurlDllName;
 
 // NAME curl_slist_append()
 //
@@ -2165,7 +2171,7 @@ procedure curl_global_cleanup;
 //
 function curl_slist_append(
       list : PCurlSList; data : PAnsiChar) : PCurlSList;
-          cdecl;  external 'libcurl.dll';
+          cdecl;  external CurlDllName;
 
 // NAME curl_slist_free_all()
 //
@@ -2174,7 +2180,7 @@ function curl_slist_append(
 // free a previously built curl_slist.
 //
 procedure curl_slist_free_all(list : PCurlSList);
-          cdecl;  external 'libcurl.dll';
+          cdecl;  external CurlDllName;
 
 // NAME curl_getdate()
 //
@@ -2187,7 +2193,7 @@ procedure curl_slist_free_all(list : PCurlSList);
 function curl_getdate(
         p : PAnsiChar;
         unused : TUnixTime = 0) : TUnixTime;
-          cdecl;  external 'libcurl.dll';
+          cdecl;  external CurlDllName;
 
 // info about the certificate chain, only for OpenSSL builds. Asked
 //   for with CURLOPT_CERTINFO / CURLINFO_CERTINFO
@@ -2389,15 +2395,15 @@ type
   );                      //   callback functions
 
 function curl_share_init : TCurlSh;
-          cdecl;  external 'libcurl.dll';
+          cdecl;  external CurlDllName;
 
 function curl_share_setopt(
           share : TCurlSh;
           option : TCurlShOption) : TCurlShCode;  varargs;
-          cdecl;  external 'libcurl.dll';
+          cdecl;  external CurlDllName;
 
 function curl_share_cleanup(share : TCurlSh) : TCurlShCode;
-          cdecl;  external 'libcurl.dll';
+          cdecl;  external CurlDllName;
 
 //****************************************************************************
 // Structures for querying information about the curl library at runtime.
@@ -2479,7 +2485,7 @@ const
 //
 function curl_version_info(
         x : TCurlVersion = CURLVERSION_NOW) : PCurlVersionInfo;
-          cdecl;  external 'libcurl.dll';
+          cdecl;  external CurlDllName;
 
 
 // NAME curl_easy_strerror()
@@ -2491,7 +2497,7 @@ function curl_version_info(
 // for printing meaningful error messages.
 //
 function curl_easy_strerror(code : TCurlCode) : PAnsiChar;
-          cdecl;  external 'libcurl.dll' name 'curl_easy_strerror';
+          cdecl;  external CurlDllName name 'curl_easy_strerror';
 
 // NAME curl_share_strerror()
 //
@@ -2502,7 +2508,7 @@ function curl_easy_strerror(code : TCurlCode) : PAnsiChar;
 // for printing meaningful error messages.
 //
 function curl_share_strerror(code : TCurlShCode) : PAnsiChar;
-          cdecl;  external 'libcurl.dll';
+          cdecl;  external CurlDllName;
 
 
 // NAME curl_easy_pause()
@@ -2513,7 +2519,7 @@ function curl_share_strerror(code : TCurlShCode) : PAnsiChar;
 // state by setting the bitmask, use the convenience defines below.
 //
 function curl_easy_pause(handle : HCurl; bitmask : integer) : TCurlCode;
-          cdecl;  external 'libcurl.dll';
+          cdecl;  external CurlDllName;
 
 const
   CURLPAUSE_RECV      = 1 shl 0;
@@ -2526,11 +2532,11 @@ const
 
 
 function curl_easy_init : HCurl;
-        cdecl;  external 'libcurl.dll';
+        cdecl;  external CurlDllName;
 
 function curl_easy_setopt_initial(
         curl : HCurl) : TCurlCode;  varargs;
-        cdecl;  external 'libcurl.dll'  name 'curl_easy_setopt';
+        cdecl;  external CurlDllName  name 'curl_easy_setopt';
 
 function curl_easy_setopt(
         curl : HCurl;
@@ -2608,10 +2614,10 @@ function curl_easy_setopt(
         data : TCurlSslVersion) : TCurlCode;  overload; inline;
 
 function curl_easy_perform(curl : HCurl) : TCurlCode;
-          cdecl;  external 'libcurl.dll';
+          cdecl;  external CurlDllName;
 
 procedure curl_easy_cleanup(curl : HCurl);
-          cdecl;  external 'libcurl.dll';
+          cdecl;  external CurlDllName;
 
 // NAME curl_easy_getinfo()
 //
@@ -2627,7 +2633,7 @@ procedure curl_easy_cleanup(curl : HCurl);
 
 function curl_easy_getinfo_initial(
       curl : HCurl) : TCurlCode;  varargs;
-          cdecl;  external 'libcurl.dll' name 'curl_easy_getinfo';
+          cdecl;  external CurlDllName name 'curl_easy_getinfo';
 
 function curl_easy_getinfo(
       curl : HCurl;
@@ -2684,7 +2690,7 @@ function curl_easy_getinfo(
 //
 function curl_easy_duphandle(
       curl : HCurl) : HCurl;
-          cdecl;  external 'libcurl.dll';
+          cdecl;  external CurlDllName;
 
 
           // NAME curl_easy_reset()
@@ -2698,7 +2704,7 @@ function curl_easy_duphandle(
 // cookies.
 //
 procedure curl_easy_reset(curl : HCurl);
-          cdecl;  external 'libcurl.dll';
+          cdecl;  external CurlDllName;
 
 
 // NAME curl_easy_recv()
@@ -2713,7 +2719,7 @@ function curl_easy_recv(
         var buffer;
         buflen : NativeUInt;
         out n : NativeUInt) : TCurlCode;
-          cdecl;  external 'libcurl.dll';
+          cdecl;  external CurlDllName;
 
 
 // NAME curl_easy_send()
@@ -2728,7 +2734,7 @@ function curl_easy_send(
         var buffer;
         buflen : NativeUint;
         out n : NativeUInt) : TCurlCode;
-          cdecl;  external 'libcurl.dll';
+          cdecl;  external CurlDllName;
 
 //#define curl_share_setopt(share,opt,param) curl_share_setopt(share,opt,param)
 //#define curl_multi_setopt(handle,opt,param) curl_multi_setopt(handle,opt,param)
