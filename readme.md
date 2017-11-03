@@ -3,7 +3,7 @@
 
 curl4delphi is a simple Delphi XE2+ binding for libcURL.
 
-© 2015 Mikhail Merkuryev
+© 2015–2017 Mikhail Merkuryev
 
 My initial version supports “easy” interface only.
 
