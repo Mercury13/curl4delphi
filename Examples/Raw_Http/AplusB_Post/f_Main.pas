@@ -48,7 +48,7 @@ const
 var
   curl : HCurl;
   post, last : PCurlHttpPost;
-  headers, headersEnd : PCurlSList;
+  headers : PCurlSList;
   code : TCurlCode;
   stream : TRawByteStream;
   effurl : PAnsiChar;
@@ -71,7 +71,7 @@ begin
     curl_easy_setopt(curl, CURLOPT_USERAGENT, FirefoxUserAgent);
     // Set proxy from IE
     curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
-    curl_easy_setopt(curl, CURLOPT_PROXY, ProxyFromIe);
+    curl_easy_setopt(curl, CURLOPT_PROXY, Utf8Encode(ProxyFromIe));
 
     // Show issues of vararg initial
     curl_formadd_initial(post, last,
@@ -93,7 +93,7 @@ begin
     if code = CURLE_OK then begin
       curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, effurl);
       curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, respcode);
-      memoResponse.Text := string(stream.Data) + #13#10#13#10'URL: ' + effurl
+      memoResponse.Text := string(stream.Data) + #13#10#13#10'URL: ' + string(effurl)
           + #10#10'Response code: ' + IntToStr(respcode);
     end else begin
       memoResponse.Text := string(curl_easy_strerror(code));

@@ -8,6 +8,14 @@ curl4delphi is a simple Delphi XE2+ binding for libcURL.
 My initial version supports “easy” interface only.
 
 
+Note from developer
+===================
+
+Version 0.3 “Tokyo” is out! It is much easier than 0.2.
+
+Check it now, though you can face some incompatibilities with older versions. But I think they are easy to overcome, nothing was changed radically.
+
+
 Quick start
 ===========
 
@@ -29,12 +37,17 @@ Writeln(curl.ResponseBody);
 
 [To use streams for receiving, check `EasyHttp\StreamedDl`].
 
+
 Examples
 ========
 
 ### Misc\Version
 
 Shows version
+
+### RawHttp\Readme
+
+Basic HTTP GET, same as written above.
 
 ### RawHttp\Simple, EasyHttp\Simple
 
@@ -73,6 +86,7 @@ Please copy `php_curl` directory to a PHP-capable web server.
 ### EasyHttp\AplusB_Get
 
 Using ICurlGetBuilder to build a GET URL. Please copy `php_curl` directory to a PHP-capable web server.
+
 
 License
 =======
